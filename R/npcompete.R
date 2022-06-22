@@ -10,6 +10,8 @@ library( pander )       # format tables for HTML
 library( DT )           # embed datasets in HTML docs
 
 source('R/hhi.R')
+source('R/cr4.R')
+source('R/kwoka-index.R')
 
 #Read the core data file(.csv)
 core.2019 <- read.csv( "Data/coreco.core2019pc.csv" )
@@ -41,9 +43,13 @@ core.data$TOTREV[ core.data$TOTREV < 0 ] <- 0
 dat.hhi <- hhi(core.data)
 dat.nhhi <- nhhi(core.data)
 
-dat.nhhi %>%
-  group_by( NTMAJ12 ) %>%
-  summarize( n=n(), min=min(nhhi), max=max(nhhi) ) %>%
-  pander()
+#dat.nhhi %>%
+#  group_by( NTMAJ12 ) %>%
+#  summarize( n=n(), min=min(nhhi), max=max(nhhi) ) %>%
+#  pander()
 
+dat.cr4 <- cr4(core.data)
+dat.cr2 <- cr2(core.data)
+
+dat.kindex <- kwoka_index(core.data)
 
