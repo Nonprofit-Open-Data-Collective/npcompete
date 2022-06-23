@@ -40,16 +40,17 @@ core.data$NTMAJ12 <- factor( core.data$NTMAJ12 )
 core.data$TOTREV3 <- core.data$TOTREV
 core.data$TOTREV[ core.data$TOTREV < 0 ] <- 0
 
-dat.hhi <- hhi(core.data)
-dat.nhhi <- nhhi(core.data)
+dat.hhi <- get_hhi(core.data,'MSA_NECH','NTMAJ12','TOTREV', 'CONT')
+dat.nhhi <- get_nhhi(core.data,'MSA_NECH','NTMAJ12','TOTREV', 'CONT')
 
 #dat.nhhi %>%
 #  group_by( NTMAJ12 ) %>%
 #  summarize( n=n(), min=min(nhhi), max=max(nhhi) ) %>%
 #  pander()
 
-dat.cr4 <- cr4(core.data)
-dat.cr2 <- cr2(core.data)
+dat.cr4 <- get_cr4(core.data,'MSA_NECH','NTMAJ12','TOTREV')
+dat.cr2 <- get_cr2(core.data,'MSA_NECH','NTMAJ12','TOTREV')
 
-dat.kindex <- kwoka_index(core.data)
+dat.kindex <- get_kwoka_index(core.data,'MSA_NECH','NTMAJ12','TOTREV')
+
 
