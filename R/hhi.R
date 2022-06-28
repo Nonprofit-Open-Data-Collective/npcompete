@@ -28,7 +28,7 @@
 #' core.data <- read.csv( "data/sample.csv" )
 #' core.data$TOTREV[ core.data$TOTREV < 0 ] <- 0
 #
-#  a<-get_hhi( df=dat,'MSA_NECH','NTMAJ12','TOTREV', 'CONT')
+#  a<-get_hhi( df=core.data,'MSA_NECH','NTMAJ12','TOTREV', 'CONT')
 #' head( a )
 #'
 #' @export

@@ -46,6 +46,7 @@ core.data$TOTREV[ core.data$TOTREV < 0 ] <- 0
 
 dat.hhi <- get_hhi(core.data,'MSA_NECH','NTMAJ12','TOTREV', 'CONT')
 dat.nhhi <- get_nhhi(core.data,'MSA_NECH','NTMAJ12','TOTREV', 'CONT')
+<<<<<<< HEAD:npcompete.R
 
 #dat.nhhi %>%
 #  group_by( NTMAJ12 ) %>%
@@ -55,6 +56,17 @@ dat.nhhi <- get_nhhi(core.data,'MSA_NECH','NTMAJ12','TOTREV', 'CONT')
 dat.cr4 <- get_cr4(core.data,'MSA_NECH','NTMAJ12','TOTREV')
 dat.cr2 <- get_cr2(core.data,'MSA_NECH','NTMAJ12','TOTREV')
 
+=======
+
+#dat.nhhi %>%
+#  group_by( NTMAJ12 ) %>%
+#  summarize( n=n(), min=min(nhhi), max=max(nhhi) ) %>%
+#  pander()
+
+dat.cr4 <- get_cr4(core.data,'MSA_NECH','NTMAJ12','TOTREV')
+dat.cr2 <- get_cr2(core.data,'MSA_NECH','NTMAJ12','TOTREV')
+
+>>>>>>> 4aecc5de62cbdd5e6ec4844a3ed93f017c5b2918:R/npcompete.R
 dat.kindex <- get_kwoka_index(core.data,'MSA_NECH','NTMAJ12','TOTREV')
 
 
