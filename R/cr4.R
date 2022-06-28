@@ -25,7 +25,7 @@
 #' core.data <- read.csv( "data/sample.csv" )
 #' core.data$TOTREV[ core.data$TOTREV < 0 ] <- 0
 #
-#  a<-get_cr4( df=dat,'MSA_NECH','NTMAJ12','TOTREV')
+#  a<-get_cr4( df=core.data,'MSA_NECH','NTMAJ12','TOTREV')
 #' head( a )
 #'
 #' @export
@@ -68,7 +68,7 @@ get_cr4 <- function(df, MSA_NECH, NTMAJ12,TOTREV){
 #' core.data <- read.csv( "data/sample.csv" )
 #' core.data$TOTREV[ core.data$TOTREV < 0 ] <- 0
 #
-#  a<-get_cr4( df=dat,'MSA_NECH','NTMAJ12','TOTREV')
+#  a<-get_cr4( df=core.data,'MSA_NECH','NTMAJ12','TOTREV')
 #' head( a )
 #'
 #' @export
