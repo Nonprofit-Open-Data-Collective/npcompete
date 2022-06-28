@@ -10,9 +10,15 @@ library( pander )       # format tables for HTML
 library( DT )           # embed datasets in HTML docs
 
 source('R/hhi.R')
+source('R/cr4.R')
+source('R/kwoka-index.R')
 
 #Read the core data file(.csv)
-core.2019 <- read.csv( "Data/coreco.core2019pc.csv" )
+core.2019 <- read.csv( "Test_Data/coreco.core2019pc.csv" )
+
+#generate a random df for upload purpose
+df.sample <- sample_n(core.2019,5000)
+write.csv(df.sample, 'data/sample.csv')
 
 #Convert all names to upper case
 names( core.2019 ) <- toupper( names( core.2019 ))
@@ -35,15 +41,20 @@ core.data$NTMAJ12[ core.data$NTMAJ12 == "UN" ] <- "Unknown"
 core.data$NTMAJ12 <- factor( core.data$NTMAJ12 )
 
 #Recode negative revenues as zero because they cause HHIs above 1:
-core.data$TOTREV3 <- core.data$TOTREV
+core.data$TOTREV2 <- core.data$TOTREV
 core.data$TOTREV[ core.data$TOTREV < 0 ] <- 0
 
-dat.hhi <- hhi(core.data)
-dat.nhhi <- nhhi(core.data)
+dat.hhi <- get_hhi(core.data,'MSA_NECH','NTMAJ12','TOTREV', 'CONT')
+dat.nhhi <- get_nhhi(core.data,'MSA_NECH','NTMAJ12','TOTREV', 'CONT')
 
-dat.nhhi %>%
-  group_by( NTMAJ12 ) %>%
-  summarize( n=n(), min=min(nhhi), max=max(nhhi) ) %>%
-  pander()
+#dat.nhhi %>%
+#  group_by( NTMAJ12 ) %>%
+#  summarize( n=n(), min=min(nhhi), max=max(nhhi) ) %>%
+#  pander()
+
+dat.cr4 <- get_cr4(core.data,'MSA_NECH','NTMAJ12','TOTREV')
+dat.cr2 <- get_cr2(core.data,'MSA_NECH','NTMAJ12','TOTREV')
+
+dat.kindex <- get_kwoka_index(core.data,'MSA_NECH','NTMAJ12','TOTREV')
 
 
