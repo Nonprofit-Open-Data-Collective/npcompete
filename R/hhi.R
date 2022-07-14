@@ -36,7 +36,7 @@
 #' @export
 get_hhi <- function( df, geo, subsector, x, x.name="x" ){
 
-  if( any( x < 0 ) ) warning("Negative values replaced with zero.")
+  if( any( x < 0 ) ) warning("Negative X values replaced with zero.")
     
   dat.hhi <-
     df %>%
