@@ -1,7 +1,0 @@
-diff a/.gitignore b/.gitignore	(rejected hunks)
-@@ -1,2 +1,2 @@
- .Rproj.user
--Data/
-\ No newline at end of file
-+*-npcompete.R
-\ No newline at end of file
