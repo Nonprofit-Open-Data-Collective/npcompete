@@ -26,8 +26,6 @@
 #'
 #' @examples
 #' data( core.dat )
-#' head( core.dat )
-#'
 #' hhi <- get_hhi( df=core.dat, 
 #'                  geo="MSA_NECH",
 #'                  subsector="NTMAJ12",
