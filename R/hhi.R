@@ -9,13 +9,13 @@
 #' Calculate the Herfindahl–Hirschman Index (HHI) and return a dataframe.
 #'
 #' @param df A dataframe containing the required fields for computing the metric(hhi) grouped by MSA_NECH and sub sector.
-#' @param MSA_NECH A character string indicating the column name for Metropolitan Statistical Area unique code.
-#' @param NTMAJ12 A character string indicating the column name for sub sectors.
-#' @param TOTREV A character string indicating the column name for total revenue.
-#' @param CONT A character string indicating the column name for the contribution.
+#' @param geo A character string indicating the column name for Metropolitan Statistical Area unique code or other geography.
+#' @param subsector A character string indicating the subsector variable to use.
+#' @param x A character string indicating the variable name of the resource to use for the HHI calculation (revenue, expenses, assets, etc.).
+#' @param x.name A character string indicating the label for the resource.
 #'
 #' @return A new dataframe with the Herfindahl–Hirschman Index (`hhi`),
-#'  grouped by MSA_NECH and NTMAJ12(12 sub sectors).
+#'  grouped by GEO and SEBSECTOR level combinations.
 #'
 #' @details The Herfindahl–Hirschman Index(HHI) is a measure of market concentration that is used to understand market competitiveness,
 #'  competitive behavior and performance in markets. The index could be calculated as the sum of the squared market share of each firm
@@ -25,27 +25,33 @@
 #'  be viewed as a nearly competition one.
 #'
 #' @examples
-#' core.data <- read.csv( "data/sample.csv" )
-#' core.data$TOTREV[ core.data$TOTREV < 0 ] <- 0
-#
-#  a<-get_hhi( df=core.data,'MSA_NECH','NTMAJ12','TOTREV', 'CONT')
-#' head( a )
+#' data( core.dat )
+#' head( core.dat )
+#'
+#' hhi <- get_hhi( df=core.dat, 
+#'                  geo="MSA_NECH",
+#'                  subsector="NTMAJ12",
+#'                  x="TOTREV", 
+#'                  x.name="revenue" )
+#' head( hhi )
 #'
 #' @export
-get_hhi <- function(df, MSA_NECH, NTMAJ12, TOTREV, CONT){
+get_hhi <- function( df, geo, subsector, x, x.name="x" ){
 
+  if( any( x < 0 ) ) warning("Negative values replaced with zero.")
+    
   dat.hhi <-
     df %>%
-    group_by( MSA_NECH, NTMAJ12 ) %>%
-    summarize( hhi= sum( (TOTREV / sum(TOTREV))^2 ),
-               n=n(),
-               revenue= sum(TOTREV),
-               contribution=sum(CONT) )
-
-
+    dplyr::mutate( geo=factor(geo),              # include empty levels 
+                   subsector=factor(subsector),
+                   x=bottomcode(x) ) %>%         # replace x < 0 with zero
+    dply::group_by( geo, subsector ) %>%
+    dply::summarize( n=dply::n(),
+                     hhi= sum( ( x / sum(x) )^2 ),
+                     !! x.name := sum(x) )         # use x.name for variable name 
+  
   dat.hhi$hhi[ dat.hhi$hhi > 1 ] <- 1
-  dat.hhi$revenue[ dat.hhi$revenue < 0 ] <- 0
-
+  
   return (dat.hhi)
 }
 
