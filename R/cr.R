@@ -12,7 +12,7 @@
 #' @param geo A character string indicating the column name for georaphical area unique code.
 #' @param subsector A character string indicating the column name for sub sectors.
 #' @param resource A character string indicating the column name for resource based on which cr is calculated. Example: Revenue, assets etc.
-#' @param number A numeric value that is used to calculate concentration ratio for top that number of firms. Example, 4 if concentration ratiofor top 4 firms.
+#' @param number A numeric value that is used to calculate concentration ratio for top that number of firms. Value ranges from 1-8. Example, 4 if concentration ratio for top 4 firms.
 #'
 #' @return A new dataframe with the Concentration Ratio of n(number) largest organizations ('cr'),
 #'  grouped by geographical level and sub sectors *Note: For the markets where total number of firms is less than n(umber),
@@ -49,6 +49,8 @@ get_cr <- function(df, geo, subsector, resource, number){
                      top1 = sum(nth(resource, 1)),
                      top2 = sum(nth(resource, 2)),
                      top3 = sum(nth(resource, 3)),
+                     top4 = sum(nth(resource, 4)),
+                     top5 = sum(nth(resource, 5)),
                      top6 = sum(nth(resource, 6)),
                      top7 = sum(nth(resource, 7)),
                      top8 = sum(nth(resource, 8)),
