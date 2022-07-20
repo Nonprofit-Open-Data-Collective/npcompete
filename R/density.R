@@ -199,8 +199,7 @@ get_density_big <- function(df, geo, subsector, fips, year, resource, greater.th
 #' @param resource A character string indicating the column name for resource based on which density is evaluated
 #' @param list.of.cols A vector containing list of column names that have the commercial metrics for the resource
 #'
-#' @return A new dataframe with the density of nonprofits per 10 and 1000 population, having resource greater than the given number
-#'  grouped by geographical level and sub sectors.
+#' @return A new dataframe with the commercial density of nonprofits summarized in the subsector and geo level.
 #'
 #' @details The density metric is the number of nonprofits per-capita in a market. In this function, it is measured
 #' as the number of organizations per 1000 population and per 10,000 population.

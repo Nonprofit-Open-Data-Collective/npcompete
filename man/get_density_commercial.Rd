@@ -18,8 +18,7 @@ get_density_commercial(df, geo, subsector, resource, list.of.cols)
 \item{list.of.cols}{A vector containing list of column names that have the commercial metrics for the resource}
 }
 \value{
-A new dataframe with the density of nonprofits per 10 and 1000 population, having resource greater than the given number
-grouped by geographical level and sub sectors.
+A new dataframe with the commercial density of nonprofits summarized in the subsector and geo level.
 }
 \description{
 Calculate the commercial nonprofit density  a resource  and return a dataframe.
