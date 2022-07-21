@@ -4,20 +4,20 @@
 \alias{get_kwoka_index}
 \title{Kwoka Index}
 \usage{
-get_kwoka_index(df, MSA_NECH, NTMAJ12, TOTREV)
+get_kwoka_index(df, geo, subsector, resource)
 }
 \arguments{
-\item{df}{A dataframe containing the required fields for computing the metric(kwoka index) grouped by MSA_NECH and sub sector.}
+\item{df}{A dataframe containing the required fields for computing the metric(kwoka index) grouped by geographical level and sub sector.}
 
-\item{MSA_NECH}{A character string indicating the column name for Metropolitan Statistical Area unique code.}
+\item{geo}{A character string indicating the column name for georaphical area unique code.}
 
-\item{NTMAJ12}{A character string indicating the column name for sub sectors.}
+\item{subsector}{A character string indicating the column name for sub sectors.}
 
-\item{TOTREV}{A character string indicating the column name for total revenue.}
+\item{resource}{A character string indicating the column name for resource based on which cr4 is calculated. Example: Revenue, assets etc.}
 }
 \value{
 A new dataframe with the Kwoka Index (\code{kindex}),
-grouped by MSA_NECH and NTMAJ12(12 sub sectors).
+grouped by geogrpahical level and sub sectors.
 }
 \description{
 Calculate the Kwoka Index (kindex) and return a dataframe.
@@ -27,7 +27,6 @@ The Kwoka Index(kindex) is a measure of market concentration that is used to und
 competitive behavior and performance in markets.
 }
 \examples{
-x1 <- floor(runif(5, min=10000, max=99999))
-head( a )
+head( dat.kindex )
 
 }
