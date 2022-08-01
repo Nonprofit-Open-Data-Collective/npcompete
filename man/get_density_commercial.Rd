@@ -28,6 +28,8 @@ The density metric is the number of nonprofits per-capita in a market. In this f
 as the number of organizations per 1000 population and per 10,000 population.
 }
 \examples{
+data(county_population)
+data(nonprofit_sample)
 dat.den.comm <- get_density_commercial( df=nonprofit_sample,'MSA_NECH','NTMAJ12', 'TOTREV', c('PROGREV', 'INVINC'))
 head( dat.den.comm )
 

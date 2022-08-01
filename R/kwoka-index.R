@@ -14,12 +14,13 @@
 #' @param resource A character string indicating the column name for resource based on which cr4 is calculated. Example: Revenue, assets etc.
 #'
 #' @return A new dataframe with the Kwoka Index (`kindex`),
-#'  grouped by geogrpahical level and sub sectors.
+#'  grouped by geographical level and sub sectors.
 #'
 #' @details The Kwoka Index(kindex) is a measure of market concentration that is used to understand market competitiveness,
 #'  competitive behavior and performance in markets.
 #'
 #' @examples
+#' data(nonprofit_sample)
 #  dat.kindex <-get_kwoka_index( df=nonprofit_sample,'MSA_NECH','NTMAJ12','TOTREV')
 #' head( dat.kindex )
 #'
@@ -46,7 +47,9 @@ get_kwoka_index <- function(df, geo, subsector, resource){
                       top2 = sum(nth(resource, 2)),
                       top3 = sum(nth(resource, 3)),
                       total = top1 + top2 + top3,
-                      Kindex = (((top1/total)^2 +(top2/total)^2+(top3/total)^2)))
+                      kindex = (((top1/total)^2 +(top2/total)^2+(top3/total)^2)))
 
+  dat.kwoka$kindex[dat.kwoka$n < 3] <- 1
+  
   return (dat.kwoka)
 }

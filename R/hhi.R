@@ -8,94 +8,107 @@
 #' @description
 #' Calculate the Herfindahl–Hirschman Index (HHI) and return a dataframe.
 #'
-#' @param df A dataframe containing the required fields for computing the metric(hhi) grouped by MSA_NECH and sub sector.
-#' @param geo A character string indicating the column name for Metropolitan Statistical Area unique code or other geography.
-#' @param subsector A character string indicating the subsector variable to use.
-#' @param x A character string indicating the variable name of the resource to use for the HHI calculation (revenue, expenses, assets, etc.).
-#' @param x.name A character string indicating the label for the resource.
+#' @param df A dataframe containing the required fields for computing the metric(hhi) grouped by geographical level and sub sector.
+#' @param geo A character string indicating the column name for geographical area unique code.
+#' @param subsector A character string indicating the column name for sub sectors.
+#' @param resource A character string indicating the column name for resource based on which HHI is calculated. Example: Revenue, assets etc.
+#' @param resource.name A character string indicating the column name for the new column generated with aggregated resource.
 #'
 #' @return A new dataframe with the Herfindahl–Hirschman Index (`hhi`),
-#'  grouped by GEO and SEBSECTOR level combinations.
+#'  grouped by geographical level and sub sectors.
 #'
 #' @details The Herfindahl–Hirschman Index(HHI) is a measure of market concentration that is used to understand market competitiveness,
 #'  competitive behavior and performance in markets. The index could be calculated as the sum of the squared market share of each firm
 #'  competing in a market (Thornton & Belski, 2010).In the nonprofit sector, market share is determined by the ratio of a nonprofit's
-#'  total revenue to the aggregate revenue for the organization’s market. The calculated values range from 1/N to 1, where N is the number
-#'  of organizations in a market. A market with an HHI of 1 is considered as a monopoly. In contrast, a market with an HHI close to 0 would
-#'  be viewed as a nearly competition one.
+#'  total revenue to the aggregate revenue for the organization’s market. The formula used here is \eqn{{\sigma \frac{resource}{Total resource}}^2}
+#'  The calculated values range from 1/N to 1, where N is the number of organizations in a market. A market with an HHI of 1 is considered as a monopoly.
+#'  In contrast, a market with an HHI close to 0 would be viewed as a nearly competition one.
 #'
 #' @examples
-#' data( core.dat )
-#' hhi <- get_hhi( df=core.dat, 
-#'                  geo="MSA_NECH",
-#'                  subsector="NTMAJ12",
-#'                  x="TOTREV", 
-#'                  x.name="revenue" )
-#' head( hhi )
+#' data(nonprofit_sample)
+#  dat.hhi <-get_hhi( df=nonprofit_sample,'MSA_NECH','NTMAJ12','TOTREV', 'Revenue')
+#' head( dat.hhi )
 #'
 #' @export
-get_hhi <- function( df, geo, subsector, x, x.name="x" ){
-
-  if( any( x < 0 ) ) warning("Negative X values replaced with zero.")
-    
+get_hhi <- function(df, geo, subsector, resource, resource.name='resource'){
+  
+  df <- df %>% rename(geo = {{geo}},
+                      subsector = {{subsector}},
+                      resource = {{resource}})
+  
+  if( any( df$resource < 0 ) ) warning("Negative values replaced with zero.")
   dat.hhi <-
     df %>%
-    dplyr::mutate( geo=factor(geo),              # include empty levels 
+    dplyr::mutate( geo=factor(geo),
                    subsector=factor(subsector),
-                   x=bottomcode(x) ) %>%         # replace x < 0 with zero
-    dply::group_by( geo, subsector ) %>%
-    dply::summarize( n=dply::n(),
-                     hhi= sum( ( x / sum(x) )^2 ),
-                     !! x.name := sum(x) )         # use x.name for variable name 
+                   resource = as.numeric(resource),
+                   resource=bottomcode(resource) ) %>%
+    dplyr::group_by( geo, subsector ) %>%
+    dplyr::summarize( hhi= sum( ( resource / sum(resource))^2 ),
+                      n=dplyr::n(),
+                      {{resource.name}} := sum(resource) )
   
-  dat.hhi$hhi[ dat.hhi$hhi > 1 ] <- 1
-  
+  dat.hhi$hhi[is.na(dat.hhi$hhi)] <- 0
   return (dat.hhi)
 }
-
 #' @title
 #' Normalized Herfindahl–Hirschman Index
 #'
 #' @description
 #' Calculate the normalized Herfindahl–Hirschman Index (HHI) and return a dataframe.
 #'
-#' @param df A dataframe containing the required fields for computing the metric(Total revenue) grouped by MSA_NECH and sub sector.,
-#' @param MSA_NECH A character string indicating the column name for Metropolitan Statistical Area unique code.
-#' @param NTMAJ12 A character string indicating the column name for sub sectors.
-#' @param TOTREV A character string indicating the column name for total revenue.
-#' @param CONT A character string indicating the column name for the contribution.
+#' @param df A dataframe containing the required fields for computing the metric(hhi) grouped by geographical level and sub sector.
+#' @param geo A character string indicating the column name for geographical area unique code.
+#' @param subsector A character string indicating the column name for sub sectors.
+#' @param resource A character string indicating the column name for resource based on which HHI is calculated. Example: Revenue, assets etc.
+#' @param normalizer A character string indicating the column name for the column used to normalize the HHI index.
+#' @param resource.name A character string indicating the column name for the new column generated with aggregated resource.
 #'
 #' @return A new dataframe with the normalized Herfindahl–Hirschman Index (`hhi`),
-#'  grouped by MSA_NECH and NTMAJ12(12 sub sectors).
+#'  grouped by geographical level and sub sectors.
 #'
 #' @details The Herfindahl–Hirschman Index(HHI) is a measure of market concentration that is used to understand market competitiveness,
 #'  competitive behavior and performance in markets. The index could be calculated as the sum of the squared market share of each firm
 #'  competing in a market (Thornton & Belski, 2010).In the nonprofit sector, market share is determined by the ratio of a nonprofit's
-#'  total revenue to the aggregate revenue for the organization’s market. The calculated values range from 1/N to 1, where N is the number
-#'  of organizations in a market. A market with an HHI of 1 is considered as a monopoly. In contrast, a market with an HHI close to 0 would
-#'  be viewed as a nearly competition one.
+#'  total revenue to the aggregate revenue for the organization’s market.The formula used here is \eqn{{\sigma \frac{resource}{Total resource}}^2 - \frac{\frac{1}{normalizer}}{1-\frac{1}{normalizer}}}
+#'  The calculated values range from 1/N to 1, where N is the number of organizations in a market. A market with an HHI of 1 is considered as
+#'  a monopoly. In contrast, a market with an HHI close to 0 would be viewed as a nearly competition one.
 #'
 #' @examples
-#' core.data <- read.csv( "data/sample.csv" )
-#' core.data$TOTREV[ core.data$TOTREV < 0 ] <- 0
-#'
-#  a<-get_nhhi( df=core.data,'MSA_NECH','NTMAJ12','TOTREV', 'CONT')
-#' head( a )
+#' data(nonprofit_sample)
+#  dat.nhhi <-get_nhhi( df=nonprofit_sample,'MSA_NECH','NTMAJ12','EIN', TOTREV', 'Revenue')
+#' head( dat.nhhi )
 #'
 #' @export
-get_nhhi <- function(df, MSA_NECH, NTMAJ12, TOTREV, CONT){
+get_nhhi <- function(df, geo, subsector, resource, normalizer, resource.name = 'resource'){
+  
+  df <- df %>% rename(geo = {{geo}},
+                      subsector = {{subsector}},
+                      resource = {{resource}},
+                      normalizer = {{normalizer}})
+  
+  
+  if( any( df$resource < 0 ) ) warning("Negative values replaced with zero.")
   dat.nhhi <-
     df %>%
-    group_by( MSA_NECH, NTMAJ12 ) %>%
-    summarize(
-      nhhi= sum((((TOTREV / sum(TOTREV))^2) -
-                   (1 / EIN)) / (1 -(1 / EIN))),
-      n=n(), revenue= sum(TOTREV))
-
-  dat.nhhi$nhhi[ dat.nhhi$nhhi > 1 ] <- 1
-
-  dat.nhhi$revenue[ dat.nhhi$revenue < 0 ] <- 0
-
+    dplyr::mutate( geo=factor(geo),
+                   subsector=factor(subsector),
+                   resource = as.numeric(resource),
+                   resource=bottomcode(resource),
+                   normalizer = as.numeric(normalizer)) %>%
+    dplyr::group_by( geo, subsector ) %>%
+    dplyr::summarize( nhhi= sum( ( resource / sum(resource) )^2 -
+                                   ((1 / normalizer) / (1- ( 1 / normalizer)) )),
+                      n=dplyr::n(),
+                      {{resource.name}} := sum(resource) )
+  
+  dat.nhhi$nhhi[is.na(dat.nhhi$nhhi)] <- 0
   return (dat.nhhi)
 }
 
+#' @keywords internal
+bottomcode <- function(x)
+{
+  x[ x < 0 ] <- 0
+  return(x)
+}

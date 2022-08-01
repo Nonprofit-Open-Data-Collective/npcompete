@@ -9,13 +9,13 @@ get_cr(df, geo, subsector, resource, number)
 \arguments{
 \item{df}{A dataframe containing the required fields for computing the metric(concentration ratio) grouped by geographical level and sub sector.}
 
-\item{geo}{A character string indicating the column name for georaphical area unique code.}
+\item{geo}{A character string indicating the column name for geographical area unique code.}
 
 \item{subsector}{A character string indicating the column name for sub sectors.}
 
 \item{resource}{A character string indicating the column name for resource based on which cr is calculated. Example: Revenue, assets etc.}
 
-\item{number}{A numeric value that is used to calculate concentration ratio for top that number of firms. Example, 4 if concentration ratiofor top 4 firms.}
+\item{number}{A numeric value that is used to calculate concentration ratio for top that number of firms. Value ranges from 1-8. Example, 4 if concentration ratio for top 4 firms.}
 }
 \value{
 A new dataframe with the Concentration Ratio of n(number) largest organizations ('cr'),
@@ -31,6 +31,7 @@ It is calculated using the summation of revenue of the largest n nonprofits divi
 revenue of all nonprofits in a market. The formula is \eqn{\frac{\sigma{revnue of top-n firms}}{Total resource of that subsector}}
 }
 \examples{
+data(nonprofit_sample)
 head( dat.cr )
 
 }
