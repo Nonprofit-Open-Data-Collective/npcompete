@@ -17,7 +17,7 @@ get_kwoka_index(df, geo, subsector, resource)
 }
 \value{
 A new dataframe with the Kwoka Index (\code{kindex}),
-grouped by geogrpahical level and sub sectors.
+grouped by geographical level and sub sectors.
 }
 \description{
 Calculate the Kwoka Index (kindex) and return a dataframe.
@@ -27,6 +27,7 @@ The Kwoka Index(kindex) is a measure of market concentration that is used to und
 competitive behavior and performance in markets.
 }
 \examples{
+data(nonprofit_sample)
 head( dat.kindex )
 
 }

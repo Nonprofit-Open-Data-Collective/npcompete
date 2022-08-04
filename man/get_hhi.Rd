@@ -4,10 +4,10 @@
 \alias{get_hhi}
 \title{Herfindahl–Hirschman Index}
 \usage{
-get_hhi(df, geo, subsector, resource, resource.name = "Resource")
+get_hhi(df, geo, subsector, resource, resource.name = "resource")
 }
 \arguments{
-\item{df}{A dataframe containing the required fields for computing the metric(hhi) grouped by gepgraphical level and sub sector.}
+\item{df}{A dataframe containing the required fields for computing the metric(hhi) grouped by geographical level and sub sector.}
 
 \item{geo}{A character string indicating the column name for geographical area unique code.}
 
@@ -33,6 +33,7 @@ The calculated values range from 1/N to 1, where N is the number of organization
 In contrast, a market with an HHI close to 0 would be viewed as a nearly competition one.
 }
 \examples{
+data(nonprofit_sample)
 head( dat.hhi )
 
 }

@@ -19,10 +19,10 @@ get_density_big(df, geo, subsector, fips, year, resource, greater.than)
 
 \item{resource}{A character string indicating the column name for resource based on which density is evaluated}
 
-\item{smaller.than}{A numeric value indicating that it is the lower limit of the resource for density evaluation. All organizations having resource value greater than that would be counted for evaluation.}
+\item{greater.than}{A numeric value indicating that it is the lower limit of the resource for density evaluation. All organizations having resource value greater than that would be counted for evaluation.}
 }
 \value{
-A new dataframe with the density of nonprofits per 10 and 1000 population, having resource greater than the given number
+A new dataframe with the density of nonprofits per 100000 population, having resource greater than the given number
 grouped by geographical level and sub sectors.
 }
 \description{
@@ -30,9 +30,11 @@ Calculate the nonprofit density metric having resource larger than a numeric val
 }
 \details{
 The density metric is the number of nonprofits per-capita in a market. In this function, it is measured
-as the number of organizations per 1000 population and per 10,000 population.
+as the number of organizations per 100,000 population.
 }
 \examples{
+data(county_population)
+data(nonprofit_sample)
 dat.den.2009 <- get_density_big( df=nonprofit_sample,'MSA_NECH','NTMAJ12','FIPS', 2009, 'TOTREV', 100000)
 head( dat.den.2009 )
 

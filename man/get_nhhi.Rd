@@ -35,6 +35,7 @@ The calculated values range from 1/N to 1, where N is the number of organization
 a monopoly. In contrast, a market with an HHI close to 0 would be viewed as a nearly competition one.
 }
 \examples{
+data(nonprofit_sample)
 head( dat.nhhi )
 
 }

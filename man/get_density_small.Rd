@@ -22,7 +22,7 @@ get_density_small(df, geo, subsector, fips, year, resource, smaller.than)
 \item{smaller.than}{A numeric value indicating that it is the upper limit of the resource for density evaluation. All organizations having resource value less than that would be counted for evaluation.}
 }
 \value{
-A new dataframe with the density of nonprofits per 10 and 1000 population, having resource smaller than the given number
+A new dataframe with the density of nonprofits per 100000 population, having resource smaller than the given number
 grouped by geographical level and sub sectors.
 }
 \description{
@@ -30,9 +30,11 @@ Calculate the nonprofit density metric having resource smaller than a numeric va
 }
 \details{
 The density metric is the number of nonprofits per-capita in a market. In this function, it is measured
-as the number of organizations per 1000 population and per 10,000 population.
+as the number of organizations per 100,000 population.
 }
 \examples{
+data(county_population)
+data(nonprofit_sample)
 dat.den.2009 <- get_density_small( df=nonprofit_sample,'MSA_NECH','NTMAJ12','FIPS', 2009, 'TOTREV', 100000)
 head( dat.den.2009 )
 

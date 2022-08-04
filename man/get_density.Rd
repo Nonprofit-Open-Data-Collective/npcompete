@@ -18,7 +18,7 @@ get_density(df, geo, subsector, fips, year)
 \item{year}{A numeric parameter indicating the year to be used for population estimate. Example: 1999}
 }
 \value{
-A new dataframe with the density of nonprofits per 10 and 1000 population,
+A new dataframe with the density of nonprofits per 100000 population,
 grouped by geographical level and sub sectors.
 }
 \description{
@@ -26,9 +26,11 @@ Calculate the nonprofit density metric and return a dataframe.
 }
 \details{
 The density metric is the number of nonprofits per-capita in a market. In this function, it is measured
-as the number of organizations per 1000 population and per 10,000 population.
+as the number of organizations per 100,000 population.
 }
 \examples{
+data(county_population)
+data(nonprofit_sample)
 head( dat.den.2009 )
 
 }
