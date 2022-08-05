@@ -2,12 +2,12 @@ The **np-compete.csv** dataset contains pre-generated competition metrics from a
 
 Data Dictionary: 
 
-* "geo"=
-* "subsector"= 
-* "n"= 
-* "hhi", 
+* geo=
+* subsector= 
+* n= 
+* hhi, 
 * "nhhi", 
-* "CR1"-"CR8", 
+* "CR1" to "CR8"= 
 * "kindex", 
 * "gini", 
 * "densityper100000",  
