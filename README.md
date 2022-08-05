@@ -8,8 +8,8 @@ library( npcompete )
 
 # compute revenue HHI for metros and subsectors: 
 
-data(nonprofit_sample)
-dat.hhi <-get_hhi( df=nonprofit_sample,
+data( nonprofit_sample )
+dat.hhi <- get_hhi( df=nonprofit_sample,
                    geo='MSA_NECH',
                    subsector='NTMAJ12',
                    resource='TOTREV'
