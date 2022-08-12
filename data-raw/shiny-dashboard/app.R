@@ -3,7 +3,7 @@ library(shinydashboard)
 
 comp.data <- load("data/competition-dataset.rda")
 dat.allyears <- na.omit(dat.allyears)
-msa.name <- read.csv("C:/Users/pradh/Documents/np-dashboard/data/msa-names-full.csv")
+msa.name <- read.csv("data/msa-names-full.csv")
 msa.names <- get_msanech(msa.name)
 
 # Define UI for app that draws a histogram ----

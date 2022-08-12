@@ -329,5 +329,113 @@ check_if_exists <- function(df, msa, metric, subsector,year){
 }
 
 ############################################################
-
+#Description for the dashboard
 ############################################################
+get_desc <- function(metric){
+  
+  if({{metric}}=='hhi'){
+    return ("HHI is a commonly used measure of market structure for research in nonprofit management and economics. 
+  Specifically, it is a measure of market concentration. The index is calculated as the sum of the squared market 
+  share of each firm competing in a market (Thornton & Belski, 2010). In the nonprofit sector, market share could 
+  be determined by the ratio of a nonprofit’s total revenue (or expenditures) to the aggregate revenue (or expenditures) 
+  for the organization's market. The calculated values range from 1/N to 1, where N is the number of organizations in a 
+  market. A market with an HHI of 1 is considered as a monopoly. In contrast, a market with an HHI close to 0 would be 
+  viewed as a near competition one.   In other words, the more concentrated a market is, the less competitive the market is.
+  (Source: Lecy, Jesse and Hung, Chiako. Measuring the Intensity of Nonprofit Competition: Introduction of New Research Metrics)")
+  }
+  
+  else if({{metric}} == 'nhhi'){
+    return ("HHI is a commonly used measure of market structure for research in nonprofit management and economics. 
+  Specifically, it is a measure of market concentration. Normalized HHi is the HHI normalized with a variable. The 
+  index is calculated as the sum of the squared market share of each firm competing in a market (Thornton & Belski, 2010). In the nonprofit sector, market share could 
+  be determined by the ratio of a nonprofit’s total revenue (or expenditures) to the aggregate revenue (or expenditures) 
+  for the organization's market. The calculated values range from 1/N to 1, where N is the number of organizations in a 
+  market. A market with an HHI of 1 is considered as a monopoly. In contrast, a market with an HHI close to 0 would be 
+  viewed as a near competition one.   In other words, the more concentrated a market is, the less competitive the market is.
+  (Source: Lecy, Jesse and Hung, Chiako. Measuring the Intensity of Nonprofit Competition: Introduction of New Research Metrics)")
+  }
+  else if(grepl( 'CR',{{metric}}, fixed = TRUE)){
+    return ("Concentration Ratio is often indicated with its abbreviation CR-n where n is the concentration ratio for top n organization
+            in a market. Unlike HHI requires the information of the market shares of all organizations in a particular market, 
+            CRN focuses on the largest N organizations. CR has been used by the U.S. Census Bureau as a measure of the level of competition for a 
+            number of industries. CRN is calculated as the summation of the market shares of the largest N nonprofit organizations. 
+            In general, a low value of the index indicates a high level of competition; a high value represents an oligopoly market. 
+            Although there is no consensus on the criteria required to evaluate the level of market competition, Gwin (2001) proposed that a market 
+            is considered as effective competition if CR4 is less than 40; a market is considered as loose oligopoly if CR4 is between 40 and 60; 
+            a market is considered as tight oligopoly if CR4 is greater than 60. CR4 has been applied to the nonprofit sector as well. Seaman et al., 
+            (2014) mentioned that CR4 is a simplest measure of market competition. Castaneda et al., (2008) used CR4 as one of the competition measures 
+            to examine how competition affects expenditure patterns of nonprofit organizations. 
+            (Source: Lecy, Jesse and Hung, Chiako. Measuring the Intensity of Nonprofit Competition: Introduction of New Research Metrics)"  )
+  }
+  else if({{metric}} == 'gini'){
+    return ("The Gini coefficient has been widely used in economics as a measure of income inequality. Specifically, it measures 
+            income distribution among a population. In economics, there are multiple formulas used to calculate the coefficient 
+            (Dorfman, 1979). However, no matter which formula is selected, a low value of the coefficient indicates a high level 
+            of competition (less inequality); a high value represents a low level of competition (greater inequality). 
+            In nonprofit study, Seaman et al., (2014) supplemented HHI with the Gini coefficient to capture the concept of 
+            market competition and suggested that a market is considered as a reasonable level of equality if the coefficient 
+            is less than 0.5; a market is considered as a modest level of inequality if the coefficient is between 0.5 and 0.75; 
+            a market is considered as a high level of inequality if the coefficient is greater than .75.
+            (Source: Lecy, Jesse and Hung, Chiako. Measuring the Intensity of Nonprofit Competition: Introduction of New Research Metrics)")
+  }
+  else if({{metric}} == 'kindex'){
+    return ("On the basis of his study, Kwoka (1979) argued that CR4 is an arbitrary statistic of market competition index. 
+            Instead, his suggests that the measure of the market share of largest three leading organizations in a market is 
+            a better index and a market becomes competitive when the three organizations have equal-sized market share. 
+            Built on Kwoka’s (1979) research findings, we generate an index aimed to measure market competition. We label 
+            it the “Kwoka Index.” Basically, it is the sum of the squared market share of the largest three organizations competing 
+            in a market. So, it is calculation logic is the same as that of HHI and CR4. Seaman et al., (2014) introduced the concept of the Kwoka index.
+            (Source: Lecy, Jesse and Hung, Chiako. Measuring the Intensity of Nonprofit Competition: Introduction of New Research Metrics)")
+    
+  }
+  else if({{metric}} == 'densityper100000'){
+    return ("Density is the other popular measure of market competition in the literature. Market competition measured by density has 
+            been used to examine its influence on nonprofit performance or survival (Abzug & Turnheim, 1998; Sorenson, 2003; Stretesky, 
+            Huss, Lynch, Zahran, & Childs, 2011). There are two competing forces generated by density: legitimacy force that attracts 
+            financial support for nonprofits and competition force that creates entry barrier for new organizations (Hannan & Freeman, 1987). 
+            The most straightforward approach to measure density is to count the number of nonprofits in a market (Harrison & Thornton, 2014; 
+            Saxton & Benson, 2005; LeRoux & Wright, 2010; Lecy & Van Slyke, 2013; Castaneda, et al., 2008). The other approach considers 
+            population in the markets, dividing the number of nonprofits by population. It counts the number of nonprofits per capita in 
+            a market (Harrison & Thornton, 2014; Paarlberg & Hwang, 2017). It is also called demand density (Harrison & Thornton, 2014). 
+            However, simply using density as the measure of market structure cannot capture the intensity of nonprofit competition as well (Walsh, 2013). 
+            (Source: Lecy, Jesse and Hung, Chiako. Measuring the Intensity of Nonprofit Competition: Introduction of New Research Metrics)")
+  }
+  else if({{metric}} == 'densitysmallper100000'){
+    return ("Unlike CR4, Kwoka Index, and the density of super big nonprofits look into big organizations in a market to measure competition, 
+            the index of small nonprofits density inquires into the percentage of nonprofits with annual revenue less than $50K in a market. 
+            The index can be calculated as the number of nonprofits with annual revenue below $50K in a market divided by the number of nonprofits 
+            in a market. However, a big shortcoming of calculating the number of less-than-50K-revenue nonprofits in a market to measure competition 
+            is that the calculation cannot reflect real competition intensity when there are not too many nonprofits in a market. For example, 
+            let’s say there is a market where only two public benefits nonprofits exist, and both are less-than-50K-revenue nonprofits. Using the 
+            calculation to evaluate market competition is misleading since the ratio would be 100%, which indicates a high level of competition in 
+            the market. However, the reality might be the opposite: the market is not competitive at all. Therefore, a better way to calculate the 
+            index of small nonprofits density is to measure the percentage of nonprofits with annual revenue below the average in a market. 
+            In other words, we look at a relative value rather than an absolute value. The relative value better reflects the density of small nonprofits 
+            in a market. A high ratio indicates greater competition in a market.
+            (Source: Lecy, Jesse and Hung, Chiako. Measuring the Intensity of Nonprofit Competition: Introduction of New Research Metrics)")
+  }
+  else if({{metric}} == 'densitybigper100000'){
+    return ("Another way to measure the degree to which leading nonprofits shape market competition is to measure the percentage of big nonprofits 
+            in a market. A big nonprofit is defined as an organization with annual revenue greater than 1M. 1M-revenue-nonprofit is a big enough organization 
+            to be able to employ professional fundraisers to raise fund on its behalf and to hire competent staff to provide public or social services. 
+            Therefore, we assume the more 1M-revenue-nonprofit a market has, the less competitive the market is. The metric can be calculated 
+            as the percentage of big nonprofits in a market divided by the number of nonprofits in a market. We label it the density of super big nonprofits. 
+            A high ratio indicates less competition in a market.
+            (Source: Lecy, Jesse and Hung, Chiako. Measuring the Intensity of Nonprofit Competition: Introduction of New Research Metrics)")
+    
+  }
+  else if({{metric}} == 'density_commercial'){
+    
+    return ("In general, nonprofits rely on diverse revenue streams such as government funding, private donations, and commercial revenues. 
+            Although the requests of any revenue streams come into inevitable competition, nonprofits that are dependent on commercial revenues 
+            might experience relatively higher competition since they not only compete with their nonprofit counterparts, but also for-profit enterprises 
+            (Dees, 1998; Frumkin & Andre-Clark, 2000). We extend this argument to the market level and argue that the more commercial nonprofits exist in a 
+            market, the more competitive the market is. Therefore, we generate an index that measures the percentage of commercial nonprofits in a market 
+            as a market competition metric. A commercial nonprofit is defined as an organization that has 50% of its revenues from commercial activities. 
+            The index is calculated as the number of commercial nonprofits in a market divided by the number of nonprofits in the market. We label the 
+            index the density of commercial nonprofits. A high ratio indicates greater competition in a market.
+            (Source: Lecy, Jesse and Hung, Chiako. Measuring the Intensity of Nonprofit Competition: Introduction of New Research Metrics)")
+  }
+  
+  
+}
