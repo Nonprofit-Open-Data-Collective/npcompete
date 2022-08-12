@@ -29,7 +29,6 @@
 #'
 #' @export
 get_cr <- function(df, geo, subsector, resource, number){
-
   df <- df %>% rename(geo = {{geo}},
                       subsector = {{subsector}},
                       resource = {{resource}})

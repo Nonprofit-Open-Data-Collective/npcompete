@@ -91,7 +91,8 @@ core.files <- list(core.2019,core.2018,core.2017,core.2016,core.2015,core.2014,c
           core.1993,core.1992,core.1991,core.1990)
 
  
-col.names <- c('PROGREV', 'INVINC')
+den.col.names <- c('PROGREV', 'INVINC')
+fund.col.names <- c('FUNDFEES', 'SOLICIT')
 indexlist = list()
 
 i = 1
@@ -116,7 +117,7 @@ for (cf in core.files){
   cfile$NTMAJ12[ cfile$NTMAJ12 == "UN" ] <- "Unknown"
 
   y <- cfile[2,'YEAR']
-  temp <- get_all_metrics(cfile,'MSA_NECH','NTMAJ12','TOTREV', 'Revenue', 'EIN', 'FIPS', y , 100000, 1000000, col.names)
+  temp <- get_all_metrics(cfile,'MSA_NECH','NTMAJ12','TOTREV', 'Revenue', 'EIN', 'FIPS', y , 100000, 1000000, fund.col.names, den.col.names)
   indexlist[[i]] <- temp 
   i <- i+1
 }

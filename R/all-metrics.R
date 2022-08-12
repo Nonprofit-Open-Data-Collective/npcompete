@@ -17,17 +17,19 @@
 #' @param number A numeric value that is used to calculate concentration ratio for top that number of firms. Value ranges from 1-8. Example, 4 if concentration ratio for top 4 firms.
 #' @param smaller.than A numeric value indicating that it is the upper limit of the resource for density evaluation. All organizations having resource value less than that would be counted for evaluation.
 #' @param resource.greater.than A numeric value indicating that it is the lower limit of the resource for density evaluation. All organizations having resource value greater than that would be counted for evaluation.
-#' @param fundraising.cols A vector containing list of column names that have the fundraising fees for the nonprofits.#' 
+#' @param comm.cols A vector containing list of column names that have the commercial metrics for the resource.
+#' @param fundraising.cols A vector containing list of column names that have the fundraising fees for the nonprofits.
 #' 
 #'
 #' @return A new dataframe with all metrics evaluated for each year.
 #'
 #' @examples
-#  dat.all <- get_all_metrics(nonprofit_sample,'MSA_NECH','NTMAJ12','TOTREV', 'Revenue', 'EIN',4, 'FIPS', 2000, 100000, 100000, col.names)
+#' 
+#  dat.all <- get_all_metrics(nonprofit_sample,'MSA_NECH','NTMAJ12','TOTREV', 'Revenue', 'EIN',4, 'FIPS', 2000, 100000, 100000, c('PROGREV', 'INVINC') ,c('FUNDFEES', 'SOLICIT'))
 #' head( dat.all )
 #'
 #' @export
-get_all_metrics <- function(df, geo, subsector, resource, resource.name, normalizer, fips, dat.year, resource.smaller.than, resource.greater.than, fundraising.cols ){
+get_all_metrics <- function(df, geo, subsector, resource, resource.name, normalizer, fips, dat.year, resource.smaller.than, resource.greater.than, comm.cols, fundraising.cols ){
   
   
   dat.hhi <- get_hhi(df, {{geo}}, subsector, resource, resource.name)
@@ -65,10 +67,13 @@ get_all_metrics <- function(df, geo, subsector, resource, resource.name, normali
   dat.gini <- select(dat.gini, geo, subsector, gini)
   
   
-  dat.density.comm <- get_density_commercial(df, geo, subsector, resource, fundraising.cols)
+  dat.density.comm <- get_density_commercial(df, geo, subsector, resource, comm.cols)
   dat.density.comm <- select(dat.density.comm, geo, subsector, density_commercial)
   
-  dat.all <- Reduce(merge, list(dat.hhi, dat.nhhi, dat.cr, dat.kindex, dat.gini, dat.density, dat.density.smallerthan, dat.density.greaterthan, dat.density.comm))
+  dat.fund.eff <- get_fundraising_efficiency (df, geo, subsector, resource, fundraising.cols)
+  dat.fund.eff <- select(dat.fund.eff, geo, subsector, fundraising_efficiency)
+  
+  dat.all <- Reduce(merge, list(dat.hhi, dat.nhhi, dat.cr, dat.kindex, dat.gini, dat.density, dat.density.smallerthan, dat.density.greaterthan, dat.density.comm, dat.fund.eff))
   dat.all$year <- dat.year
 
   return (dat.all)
