@@ -23,8 +23,16 @@ head( dat.hhi )
 
 The package will generate the following competition metrics: 
 
-* m1 
-* m2 
+* HHI 
+* Normalized HHI 
+* CR1 to CR8 
+* kindex
+* gini coefficient 
+* density rate (nonprofits per capita)  
+* density of small nonprofits
+* "density of large nonprofits  
+* "density of commercial nonprofits
+
 ... 
 
-To access the pre-compiled **np-compete.csv** dataset...
+To access the pre-compiled **np-compete.csv** dataset in the **data-share** folder. 
