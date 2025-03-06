@@ -8,7 +8,7 @@ library( scales )       # re-scaling numbers
 library( stargazer )    # nice tables
 library( pander )       # format tables for HTML
 library( DT )           # embed datasets in HTML docs
-library(plotly)
+library( plotly )
 
 
 
