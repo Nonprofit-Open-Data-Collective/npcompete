@@ -30,27 +30,51 @@
 #' head( dat.hhi )
 #'
 #' @export
-get_hhi <- function(df, geo, subsector, resource, resource.name='resource'){
+get_hhi <- function(df, geography="CENSUS_CBSA_FIPS", subsector="NTEEV2", resource="TOTREV", year="TAXYEAR"){
+
+  GEO <- df[[geography]] |> factor( exclude = NULL )
+  RES <- df[[resource]]  |> as.numeric() |> suppressWarnings()
+  if( subsector == "NTEEV2" )
+  { SUB <- df[[subsector]] |> substr(1,3) |> factor( exclude = NULL ) } else
+  { SUB <- df[[subsector]] |> factor( exclude = NULL ) }
+
+  if( any( RES < 0 ) ) warning("Negative resource values replaced with zero.")
+  RES <- bottomcode(RES)
+
+  if( ! is.null(year) ){ 
+
+    YEAR <- df[[year]] |> factor() 
   
-  df <- df %>% rename(geo = {{geo}},
-                      subsector = {{subsector}},
-                      resource = {{resource}})
+    dat.hhi <-
+      data.frame(GEO,SUB,YEAR,RES) %>%
+      na.omit() %>%
+      dplyr::arrange(RES) %>%
+      dplyr::group_by( GEO, SUB, YEAR ) %>%
+      dplyr::summarize( N=dplyr::n(),
+                        {{resource}} := sum(RES),
+                        HHI= sum( ( RES / sum(RES))^2 ),
+                        .groups = "drop" )
+  }
+  if( is.null(year) ){ 
   
-  if( any( df$resource < 0 ) ) warning("Negative values replaced with zero.")
-  dat.hhi <-
-    df %>%
-    dplyr::mutate( geo=factor(geo),
-                   subsector=factor(subsector),
-                   resource = as.numeric(resource),
-                   resource=bottomcode(resource) ) %>%
-    dplyr::group_by( geo, subsector ) %>%
-    dplyr::summarize( hhi= sum( ( resource / sum(resource))^2 ),
-                      n=dplyr::n(),
-                      {{resource.name}} := sum(resource) )
-  
-  dat.hhi$hhi[is.na(dat.hhi$hhi)] <- 0
+    dat.hhi <-
+      data.frame(GEO,SUB,RES) %>%
+      na.omit() %>%
+      dplyr::arrange(RES) %>%
+      dplyr::group_by( GEO, SUB ) %>%
+      dplyr::summarize( N=dplyr::n(),
+                        {{resource}} := sum(RES),
+                        HHI= sum( ( RES / sum(RES))^2 ),
+                        .groups = "drop" )
+  }
+
+  dat.hhi$HHI[is.na(dat.hhi$HHI)] <- 0
+  dat.hhi$HHI[is.nan(dat.hhi$HHI)] <- NA
   return (dat.hhi)
 }
+
+
+
 #' @title
 #' Normalized Herfindahl–Hirschman Index
 #'
@@ -80,31 +104,60 @@ get_hhi <- function(df, geo, subsector, resource, resource.name='resource'){
 #' head( dat.nhhi )
 #'
 #' @export
-get_nhhi <- function(df, geo, subsector, resource, normalizer, resource.name = 'resource'){
+get_nhhi <- function(df, geography="CENSUS_CBSA_FIPS", subsector="NTEEV2", resource="TOTREV", year="TAXYEAR"){
   
-  df <- df %>% rename(geo = {{geo}},
-                      subsector = {{subsector}},
-                      resource = {{resource}},
-                      normalizer = {{normalizer}})
+  GEO <- df[[geography]] |> factor( exclude = NULL )
+  RES <- df[[resource]]  |> as.numeric() |> suppressWarnings()
+  if( subsector == "NTEEV2" )
+  { SUB <- df[[subsector]] |> substr(1,3) |> factor( exclude = NULL ) } else
+  { SUB <- df[[subsector]] |> factor( exclude = NULL ) }
+
+  RES <- bottomcode(RES)
   
+  YEAR <- df[[year]] |> factor() 
   
-  if( any( df$resource < 0 ) ) warning("Negative values replaced with zero.")
-  dat.nhhi <-
-    df %>%
-    dplyr::mutate( geo=factor(geo),
-                   subsector=factor(subsector),
-                   resource = as.numeric(resource),
-                   resource=bottomcode(resource),
-                   normalizer = as.numeric(normalizer)) %>%
-    dplyr::group_by( geo, subsector ) %>%
-    dplyr::summarize( nhhi= sum( ( resource / sum(resource) )^2 -
-                                   ((1 / normalizer) / (1- ( 1 / normalizer)) )),
-                      n=dplyr::n(),
-                      {{resource.name}} := sum(resource) )
-  
-  dat.nhhi$nhhi[is.na(dat.nhhi$nhhi)] <- 0
-  return (dat.nhhi)
+    nhhi1 <-
+      data.frame(GEO,SUB,YEAR,RES) %>%
+      na.omit() %>%
+      dplyr::arrange(RES) %>%
+      dplyr::group_by( GEO, SUB, YEAR ) %>%
+      dplyr::summarize( N=dplyr::n(),
+                        {{resource}} := sum(RES),
+                        HHI= sum( ( RES / sum(RES))^2 ),
+                        NHHI= calc_nhhi(RES),
+                        .groups = "drop" )
+
+    nhhi2 <-
+      data.frame(GEO,YEAR,RES) %>%
+      na.omit() %>%
+      dplyr::arrange(RES) %>%
+      dplyr::group_by( GEO, YEAR ) %>%
+      dplyr::summarize( N=dplyr::n(),
+                        {{resource}} := sum(RES),
+                        HHI= sum( ( RES / sum(RES))^2 ),
+                        NHHI= calc_nhhi(RES),
+                        .groups = "drop" )
+    nhhi2$SUB <- "ALL" 
+    
+    nhhi3 <-
+      data.frame(SUB,YEAR,RES) %>%
+      na.omit() %>%
+      dplyr::arrange(RES) %>%
+      dplyr::group_by( SUB, YEAR ) %>%
+      dplyr::summarize( N=dplyr::n(),
+                        {{resource}} := sum(RES),
+                        HHI= sum( ( RES / sum(RES))^2 ),
+                        NHHI= calc_nhhi(RES),
+                        .groups = "drop" )
+    nhhi3$GEO <- "ALL" 
+
+    nhhi <- bind_rows( nhhi1, nhhi2, nhhi3 )
+    nhhi <- arrange( nhhi, GEO, SUB, YEAR )
+    
+  nhhi$NHHI[is.na(nhhi$NHHI)] <- 0
+  return (nhhi)
 }
+
 
 #' @keywords internal
 bottomcode <- function(x)
@@ -112,3 +165,13 @@ bottomcode <- function(x)
   x[ x < 0 ] <- 0
   return(x)
 }
+
+#' @keywords internal
+calc_nhhi <- function(x) {
+  n <- length(x)
+  s <- x / sum(x)
+  hhi <- sum(s^2)
+  nhhi <- (hhi - 1/n) / (1 - 1/n)
+  return(nhhi)
+}
+
