@@ -14,6 +14,48 @@
   area in 2019, by subsector, on total revenue.
 - Added this changelog.
 
+### Live NCCS source (Phase 4)
+
+- `source = "nccs"` in
+  [`npc_get_orgs()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_get_orgs.md)
+  and
+  [`npc_build_metrics()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_build_metrics.md)
+  builds from NCCS downloads instead of the local archive.
+  [`npc_build_nccs()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_build_nccs.md)
+  downloads the CORE 990combined files and the unified geocoded BMF,
+  harmonizes them to the archive’s layout
+  (`npc_standardize(source = "nccs_core")`) and caches them under
+  [`npc_cache_dir()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_cache_dir.md).
+  Missing years are built on demand.
+- Tax years follow the SOI convention (the year the fiscal period
+  began), so tax year *t* combines CORE files *t* and *t* + 1. A year
+  whose *t* + 1 file is still partial is flagged incomplete.
+- [`npc_nccs_download()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_nccs_download.md)
+  caches files with retries and logs URL, size and MD5 in
+  `downloads.csv`; `year-counts.csv` and `manifest.csv` record the CORE
+  files and BMF used for each year.
+- [`npc_match_county()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_match_county.md)
+  matches geocoded county names to FIPS codes, including parishes,
+  boroughs and independent cities.
+- [`npc_compare_sources()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_compare_sources.md)
+  compares a live build with the archive. For 2018 and 2019 the EIN sets
+  agree to within 4 organizations a year, and revenue, expenses and
+  assets agree for virtually every organization (net assets for 99.9%).
+- The archive now has one row per EIN and tax year. The SOI panel
+  repeats about 0.3% of EIN-years (short-period returns after an
+  accounting-period change, and repeats across extracts), which counted
+  those organizations twice.
+  [`npc_standardize()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_standardize.md)
+  and
+  [`npc_get_orgs()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_get_orgs.md)
+  keep a real filing over an imputed row, then the latest source file,
+  then the latest period end, the same filing the NCCS files keep.
+  Existing archives are deduplicated when read; rebuilding is not
+  needed.
+- Live builds have no fundraising fees, revocation fields or geocoded
+  CBSA; those columns are `NA`, and CBSAs come from the county
+  crosswalk.
+
 ### Local archive and multi-year builds (Phase 2)
 
 - [`npc_build_metrics()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_build_metrics.md)

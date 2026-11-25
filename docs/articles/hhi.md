@@ -26,10 +26,8 @@ returns HHI and
 returns both.
 
 ``` r
-
 library( npcompete )
 library( ggplot2 )
-#> Warning: package 'ggplot2' was built under R version 4.4.3
 
 # NTMAJ12 labels for the NTEEV2 major groups
 ntmaj12 <- c( ART = "Arts",           EDU = "Education",
@@ -46,7 +44,6 @@ Three markets: four equal organizations, one dominant organization with
 three small ones, and two equal organizations.
 
 ``` r
-
 GEO    <- rep( c( "equal", "dominant", "duopoly" ), c( 4, 4, 2 ) )
 TOTREV <- c( 25, 25, 25, 25,   70, 10, 10, 10,   50, 50 )
 
@@ -73,7 +70,6 @@ The dominant market has the highest HHI and a clearly positive NHHI.
 `TOTREV` and `TAXYEAR` columns; here the market is the county.
 
 ``` r
-
 vt <- get_nhhi( npo_panel_sample, geography = "COUNTY_FIPS" )
 
 # all subsectors combined, one row per county
@@ -109,7 +105,6 @@ measured on total revenue. It was built with
 [`get_all_metrics()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/get_all_metrics.md).
 
 ``` r
-
 metros <- cbsa_metrics
 metros$NTMAJ12 <- factor( ntmaj12[ metros$SUB ], levels = ntmaj12 )
 
@@ -121,7 +116,6 @@ markets <- subset( metros, SUB != "ALL" & N > 0 & !is.na( HHI ) )
 ### Descriptive statistics by subsector
 
 ``` r
-
 markets |>
   dplyr::group_by( NTMAJ12 ) |>
   dplyr::summarize(
@@ -163,7 +157,6 @@ Single-organization markets are left out of the density plots; they are
 a spike at 1.
 
 ``` r
-
 ggplot( subset( markets, N > 1 ), aes( HHI ) ) +
   geom_density( fill = "#3266ad", colour = NA, alpha = 0.8 ) +
   facet_wrap( ~ NTMAJ12, ncol = 4 ) +
@@ -183,7 +176,6 @@ as highly concentrated (on the 0-10,000 scale: 1,500 and 2,500). By that
 yardstick most nonprofit subsector markets are highly concentrated:
 
 ``` r
-
 cuts       <- c( 0, 0.15, 0.25, 1 )
 band_names <- c( "unconcentrated", "moderate", "high" )
 
@@ -216,7 +208,6 @@ population. The line is a loess smooth across metros, all subsectors
 combined.
 
 ``` r
-
 all_subs <- subset( metros, SUB == "ALL" & !is.na( POP ) )
 
 ggplot( all_subs, aes( POP, HHI ) ) +
@@ -233,7 +224,6 @@ ggplot( all_subs, aes( POP, HHI ) ) +
 By subsector:
 
 ``` r
-
 ggplot( subset( markets, !is.na( POP ) ), aes( POP, HHI ) ) +
   geom_point( colour = "grey60", alpha = 0.25, size = 0.6 ) +
   geom_smooth( method = "loess", formula = y ~ x, se = FALSE,
@@ -254,7 +244,6 @@ chart partly because of that floor, which is the reason for the
 normalized index.
 
 ``` r
-
 ggplot( markets, aes( N, HHI ) ) +
   geom_point( colour = "grey55", alpha = 0.25, size = 0.8 ) +
   geom_function( fun = function( x ) 1 / x, colour = "#3266ad",
@@ -270,7 +259,6 @@ In large markets $`1/N`$ is close to zero and the two indices agree.
 They diverge only in markets with a handful of organizations:
 
 ``` r
-
 ggplot( subset( markets, N > 1 ), aes( HHI, NHHI ) ) +
   geom_abline( colour = "grey70" ) +
   geom_point( aes( colour = N <= 5 ), alpha = 0.35, size = 0.8 ) +

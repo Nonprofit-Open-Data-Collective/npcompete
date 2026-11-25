@@ -18,10 +18,8 @@ computes it with
 [`DescTools::Gini()`](https://andrisignorell.github.io/DescTools/reference/Gini.html).
 
 ``` r
-
 library( npcompete )
 library( ggplot2 )
-#> Warning: package 'ggplot2' was built under R version 4.4.3
 
 # NTMAJ12 labels for the NTEEV2 major groups
 ntmaj12 <- c( ART = "Arts",           EDU = "Education",
@@ -35,7 +33,6 @@ ntmaj12 <- c( ART = "Arts",           EDU = "Education",
 ## A toy market
 
 ``` r
-
 GEO    <- rep( c( "even", "skewed" ), each = 5 )
 TOTREV <- c( 20, 20, 20, 20, 20,   2, 3, 5, 10, 80 )
 
@@ -53,7 +50,6 @@ subset( g, GEO != "ALL" & SUB != "ALL" ) |> knitr::kable( digits = 2 )
 The Lorenz curves behind those numbers:
 
 ``` r
-
 lorenz <- function( x ) {
   x <- sort( x )
   data.frame( p = c( 0, seq_along( x ) / length( x ) ),
@@ -82,7 +78,6 @@ ggplot( curves, aes( p, L ) ) +
 2019, one row per organization-year. Here the market is the county.
 
 ``` r
-
 vt <- get_gini( npo_panel_sample, geography = "COUNTY_FIPS" )
 
 # all subsectors combined, one row per county
@@ -115,7 +110,6 @@ Set `year = NULL` to pool all years.
 (CBSA) in 2019, by NTEE major group, measured on total revenue.
 
 ``` r
-
 metros <- cbsa_metrics
 metros$NTMAJ12 <- factor( ntmaj12[ metros$SUB ], levels = ntmaj12 )
 
@@ -129,7 +123,6 @@ out of everything below.
 ### Descriptive statistics by subsector
 
 ``` r
-
 markets |>
   dplyr::group_by( NTMAJ12 ) |>
   dplyr::summarize(
@@ -165,7 +158,6 @@ most markets mix a few large organizations with many small ones.
 ### Distribution by subsector
 
 ``` r
-
 ggplot( markets, aes( GINI ) ) +
   geom_density( fill = "#3266ad", colour = NA, alpha = 0.8 ) +
   facet_wrap( ~ NTMAJ12, ncol = 4 ) +
@@ -184,7 +176,6 @@ ggplot( markets, aes( GINI ) ) +
 All subsectors combined, one point per metro, with a loess smooth:
 
 ``` r
-
 all_subs <- subset( metros, SUB == "ALL" & !is.na( POP ) )
 
 ggplot( all_subs, aes( POP, GINI ) ) +
@@ -206,7 +197,6 @@ very large ones, which raises inequality.
 By subsector:
 
 ``` r
-
 ggplot( subset( markets, !is.na( POP ) ), aes( POP, GINI ) ) +
   geom_point( colour = "grey60", alpha = 0.25, size = 0.6 ) +
   geom_smooth( method = "loess", formula = y ~ x, se = FALSE,
@@ -227,7 +217,6 @@ right are unequal but not concentrated: many organizations, a few of
 them large.
 
 ``` r
-
 ggplot( markets, aes( GINI, HHI ) ) +
   geom_point( colour = "grey45", alpha = 0.2, size = 0.8 ) +
   labs( x = "Gini", y = "HHI" ) +

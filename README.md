@@ -168,7 +168,9 @@ rbind( head( big, 3 ), tail( big, 3 ) ) |>
 For national builds across years, npcompete reads from a local archive:
 the NCCS SOI panel sample frame (about 2 GB as CSV) converted once to a
 Parquet dataset partitioned by year. This needs the **arrow** and
-**data.table** packages.
+**data.table** packages. The article [Building metrics from an archived
+panel](https://nonprofit-open-data-collective.github.io/npcompete/articles/build-from-archive.html)
+walks through the steps.
 
 ``` r
 # where the archive lives (or set the NPCOMPETE_ARCHIVE environment variable)
@@ -200,7 +202,8 @@ files and the unified geocoded BMF, harmonizes them to the same layout
 as the archive, and caches the result (under `npc_cache_dir()`, or set
 `NPCOMPETE_CACHE`). The first build downloads about 0.7 GB for the BMF
 plus about 50 MB per year; later builds reuse the cache. Live builds
-cover tax years 2010 onward.
+cover tax years 2010 onward. See [Building metrics from fresh NCCS
+downloads](https://nonprofit-open-data-collective.github.io/npcompete/articles/build-from-nccs.html).
 
 ``` r
 m <- npc_build_metrics( 2015:2022, geo = "cbsa", source = "nccs" )

@@ -19,10 +19,8 @@ returns one ratio and
 returns several at once (CR1 to CR8 by default).
 
 ``` r
-
 library( npcompete )
 library( ggplot2 )
-#> Warning: package 'ggplot2' was built under R version 4.4.3
 
 # NTMAJ12 labels for the NTEEV2 major groups
 ntmaj12 <- c( ART = "Arts",           EDU = "Education",
@@ -36,7 +34,6 @@ ntmaj12 <- c( ART = "Arts",           EDU = "Education",
 ## A toy market
 
 ``` r
-
 TOTREV <- c( 50, 30, 10, 5, 5 )
 toy    <- data.frame( GEO = "A", SUB = "ART", YEAR = 2020, TOTREV )
 
@@ -57,7 +54,6 @@ Pass `as_percent = TRUE` for a 0-100 scale.
 2019, one row per organization-year. Here the market is the county.
 
 ``` r
-
 vt <- get_cr_all( npo_panel_sample, geography = "COUNTY_FIPS",
                   numbers = c( 1, 4, 8 ) )
 
@@ -89,7 +85,6 @@ vt19[ order( vt19$CR4 ), ] |> knitr::kable( digits = 2, row.names = FALSE )
 (CBSA) in 2019, by NTEE major group, measured on total revenue.
 
 ``` r
-
 metros <- cbsa_metrics
 metros$NTMAJ12 <- factor( ntmaj12[ metros$SUB ], levels = ntmaj12 )
 
@@ -101,7 +96,6 @@ markets <- subset( metros, SUB != "ALL" & N > 0 & !is.na( HHI ) )
 ### Descriptive statistics by subsector
 
 ``` r
-
 markets |>
   dplyr::group_by( NTMAJ12 ) |>
   dplyr::summarize(
@@ -143,7 +137,6 @@ account for the market. The lines are medians across metros, for markets
 with more than eight organizations so that no ratio is capped at 1.
 
 ``` r
-
 big <- subset( markets, N > 8 )
 
 cr_cols <- paste0( "CR", 1:8 )
@@ -173,7 +166,6 @@ Markets with four or fewer organizations are left out; they are a spike
 at 1.
 
 ``` r
-
 ggplot( subset( markets, N > 4 ), aes( CR4 ) ) +
   geom_density( fill = "#3266ad", colour = NA, alpha = 0.8 ) +
   facet_wrap( ~ NTMAJ12, ncol = 4 ) +
@@ -192,7 +184,6 @@ ggplot( subset( markets, N > 4 ), aes( CR4 ) ) +
 All subsectors combined, one point per metro, with a loess smooth:
 
 ``` r
-
 all_subs <- subset( metros, SUB == "ALL" & !is.na( POP ) )
 
 ggplot( all_subs, aes( POP, CR4 ) ) +
@@ -209,7 +200,6 @@ ggplot( all_subs, aes( POP, CR4 ) ) +
 By subsector:
 
 ``` r
-
 ggplot( subset( markets, !is.na( POP ) ), aes( POP, CR4 ) ) +
   geom_point( colour = "grey60", alpha = 0.25, size = 0.6 ) +
   geom_smooth( method = "loess", formula = y ~ x, se = FALSE,
@@ -229,7 +219,6 @@ The two measures largely agree, but CR4 saturates at 1 in small markets
 while HHI keeps separating them:
 
 ``` r
-
 ggplot( markets, aes( CR4, HHI ) ) +
   geom_point( colour = "grey55", alpha = 0.25, size = 0.8 ) +
   labs( x = "CR4", y = "HHI" ) +

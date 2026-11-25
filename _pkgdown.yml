@@ -23,6 +23,11 @@ articles:
   - kwoka
   - gini
   - density
+- title: Building metrics
+  navbar: Building metrics
+  contents:
+  - build-from-archive
+  - build-from-nccs
 - title: Comparing metrics
   navbar: Comparing metrics
   contents:

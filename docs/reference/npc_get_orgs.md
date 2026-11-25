@@ -2,7 +2,10 @@
 
 Returns organizations in the canonical schema (see
 [`npc_standardize()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_standardize.md))
-for the requested years, with `CBSA_FIPS` attached.
+for the requested years, with `CBSA_FIPS` attached, and one row per EIN
+and tax year. Archives built before duplicates were removed in
+[`npc_standardize()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_standardize.md)
+are deduplicated the same way when read.
 
 ## Usage
 
@@ -11,7 +14,7 @@ npc_get_orgs(
   years,
   universe = c("filers", "registered", "grassroots"),
   source = c("archive", "nccs"),
-  dir = npc_archive_dir(),
+  dir = NULL,
   subsection = 3,
   include_imputed = TRUE,
   cbsa = c("crosswalk", "geocode"),
@@ -32,13 +35,17 @@ npc_get_orgs(
 
 - source:
 
-  `"archive"` reads the local Parquet archive. Downloading from NCCS
-  (`"nccs"`) is planned.
+  `"archive"` reads the local Parquet archive built from the SOI panel.
+  `"nccs"` reads a live build from NCCS downloads (see
+  [`npc_build_nccs()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_build_nccs.md)),
+  downloading and building any missing years first.
 
 - dir:
 
-  Archive directory; see
-  [`npc_archive_dir()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_archive_dir.md).
+  Archive directory for `source = "archive"` (default
+  [`npc_archive_dir()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_archive_dir.md))
+  or cache directory for `source = "nccs"` (default
+  [`npc_cache_dir()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_cache_dir.md)).
 
 - subsection:
 
@@ -55,7 +62,7 @@ npc_get_orgs(
   CBSA under the 2023 delineation
   ([cbsa_county_xwalk](https://nonprofit-open-data-collective.github.io/npcompete/reference/cbsa_county_xwalk.md)),
   matching the population data; `"geocode"` uses the CBSA assigned when
-  the address was geocoded.
+  the address was geocoded (archive only).
 
 - columns:
 

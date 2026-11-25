@@ -26,6 +26,10 @@
     <li><a class="dropdown-item" href="../articles/gini.html">Gini coefficient</a></li>
     <li><a class="dropdown-item" href="../articles/density.html">Scale-free nonprofit density</a></li>
     <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Building metrics</h6></li>
+    <li><a class="dropdown-item" href="../articles/build-from-archive.html">Building metrics from an archived panel</a></li>
+    <li><a class="dropdown-item" href="../articles/build-from-nccs.html">Building metrics from fresh NCCS downloads</a></li>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Comparing metrics</h6></li>
     <li><a class="dropdown-item" href="../articles/metric-correlations.html">How the metrics relate: correlation, PCA and factor analysis</a></li>
   </ul></li>
@@ -62,17 +66,14 @@
 </ul></div>
 <div class="section level3">
 <h3 id="live-nccs-source-phase-development-version">Live NCCS source (Phase 4)<a class="anchor" aria-label="anchor" href="#live-nccs-source-phase-development-version"></a></h3>
-<ul><li>
-<code>source = "nccs"</code> in <code><a href="../reference/npc_get_orgs.html">npc_get_orgs()</a></code> and <code><a href="../reference/npc_build_metrics.html">npc_build_metrics()</a></code> builds from NCCS downloads instead of the local archive. <code><a href="../reference/npc_build_nccs.html">npc_build_nccs()</a></code> downloads the CORE 990combined files and the unified geocoded BMF, harmonizes them to the archive’s layout (<code>npc_standardize(source =   "nccs_core")</code>) and caches them under <code><a href="../reference/npc_cache_dir.html">npc_cache_dir()</a></code>. Missing years are built on demand.</li>
-<li>Tax years follow the SOI convention (the year the fiscal period began), so tax year <em>t</em> combines CORE files <em>t</em> and <em>t</em> + 1. A year whose <em>t</em> + 1 file is still partial is flagged incomplete.</li>
-<li>
-<code><a href="../reference/npc_nccs_download.html">npc_nccs_download()</a></code> caches files with retries and logs URL, size and MD5 in <code>downloads.csv</code>; <code>year-counts.csv</code> and <code>manifest.csv</code> record the CORE files and BMF used for each year.</li>
-<li>
-<code><a href="../reference/npc_match_county.html">npc_match_county()</a></code> matches geocoded county names to FIPS codes, including parishes, boroughs and independent cities.</li>
-<li>
-<code><a href="../reference/npc_compare_sources.html">npc_compare_sources()</a></code> compares a live build with the archive. For 2018 and 2019 the EIN sets agree to within 4 organizations a year, and revenue, expenses and assets agree for virtually every organization (net assets for 99.9%).</li>
-<li>The archive now has one row per EIN and tax year. The SOI panel repeats about 0.3% of EIN-years (short-period returns after an accounting-period change, and repeats across extracts), which counted those organizations twice. <code><a href="../reference/npc_standardize.html">npc_standardize()</a></code> and <code><a href="../reference/npc_get_orgs.html">npc_get_orgs()</a></code> keep a real filing over an imputed row, then the latest source file, then the latest period end, the same filing the NCCS files keep. Existing archives are deduplicated when read; rebuilding is not needed.</li>
-<li>Live builds have no fundraising fees, revocation fields or geocoded CBSA; those columns are <code>NA</code>, and CBSAs come from the county crosswalk.</li>
+<ul><li><p>New articles: “Building metrics from an archived panel” and “Building metrics from fresh NCCS downloads”.</p></li>
+<li><p><code>source = "nccs"</code> in <code><a href="../reference/npc_get_orgs.html">npc_get_orgs()</a></code> and <code><a href="../reference/npc_build_metrics.html">npc_build_metrics()</a></code> builds from NCCS downloads instead of the local archive. <code><a href="../reference/npc_build_nccs.html">npc_build_nccs()</a></code> downloads the CORE 990combined files and the unified geocoded BMF, harmonizes them to the archive’s layout (<code>npc_standardize(source =   "nccs_core")</code>) and caches them under <code><a href="../reference/npc_cache_dir.html">npc_cache_dir()</a></code>. Missing years are built on demand.</p></li>
+<li><p>Tax years follow the SOI convention (the year the fiscal period began), so tax year <em>t</em> combines CORE files <em>t</em> and <em>t</em> + 1. A year whose <em>t</em> + 1 file is still partial is flagged incomplete.</p></li>
+<li><p><code><a href="../reference/npc_nccs_download.html">npc_nccs_download()</a></code> caches files with retries and logs URL, size and MD5 in <code>downloads.csv</code>; <code>year-counts.csv</code> and <code>manifest.csv</code> record the CORE files and BMF used for each year.</p></li>
+<li><p><code><a href="../reference/npc_match_county.html">npc_match_county()</a></code> matches geocoded county names to FIPS codes, including parishes, boroughs and independent cities.</p></li>
+<li><p><code><a href="../reference/npc_compare_sources.html">npc_compare_sources()</a></code> compares a live build with the archive. For 2018 and 2019 the EIN sets agree to within 4 organizations a year, and revenue, expenses and assets agree for virtually every organization (net assets for 99.9%).</p></li>
+<li><p>The archive now has one row per EIN and tax year. The SOI panel repeats about 0.3% of EIN-years (short-period returns after an accounting-period change, and repeats across extracts), which counted those organizations twice. <code><a href="../reference/npc_standardize.html">npc_standardize()</a></code> and <code><a href="../reference/npc_get_orgs.html">npc_get_orgs()</a></code> keep a real filing over an imputed row, then the latest source file, then the latest period end, the same filing the NCCS files keep. Existing archives are deduplicated when read; rebuilding is not needed.</p></li>
+<li><p>Live builds have no fundraising fees, revocation fields or geocoded CBSA; those columns are <code>NA</code>, and CBSAs come from the county crosswalk.</p></li>
 </ul></div>
 <div class="section level3">
 <h3 id="local-archive-and-multi-year-builds-phase-development-version">Local archive and multi-year builds (Phase 2)<a class="anchor" aria-label="anchor" href="#local-archive-and-multi-year-builds-phase-development-version"></a></h3>

@@ -25,10 +25,8 @@ revenue on $`\log(POP)`$. Both imply a power law,
 $`expected = a \cdot POP^{\,b}`$.
 
 ``` r
-
 library( npcompete )
 library( ggplot2 )
-#> Warning: package 'ggplot2' was built under R version 4.4.3
 
 # NTMAJ12 labels for the NTEEV2 major groups
 ntmaj12 <- c( ART = "Arts",           EDU = "Education",
@@ -46,7 +44,6 @@ ntmaj12 <- c( ART = "Arts",           EDU = "Education",
 merged on. Here the market is the county.
 
 ``` r
-
 # with only 14 counties, a few thin subsector models do not converge
 d <- get_scale_free_density( npo_panel_sample,
                              geography  = "COUNTY_FIPS",
@@ -81,7 +78,6 @@ columns `model_n` and `model_r`; the slope on log population is the
 scaling exponent $`b`$:
 
 ``` r
-
 m_all <- subset( d, YEAR == 2019 & SUB == "ALL" & GEO != "ALL" )$model_n[[ 1 ]]
 coef( m_all )
 #> (Intercept)     LOG_POP 
@@ -98,7 +94,6 @@ every US metro.
 including the expected values from the density models.
 
 ``` r
-
 metros <- cbsa_metrics
 metros$NTMAJ12 <- factor( ntmaj12[ metros$SUB ], levels = ntmaj12 )
 metros <- subset( metros, !is.na( POP ) )
@@ -113,7 +108,6 @@ Across all subsectors, nonprofits per 100,000 residents are roughly flat
 across metro size, with much more scatter among small metros:
 
 ``` r
-
 all_subs$PER_100K <- 1e5 * all_subs$N / all_subs$POP
 
 ggplot( all_subs, aes( POP, PER_100K ) ) +
@@ -134,7 +128,6 @@ power law (blue) is the expected count; the density index is each
 metro’s distance from it.
 
 ``` r
-
 all_subs <- all_subs[ order( all_subs$POP ), ]
 
 ggplot( all_subs, aes( POP, N ) ) +
@@ -155,7 +148,6 @@ works fine. Below 1, larger metros have fewer per resident; above 1,
 more. The exponents by subsector, for counts and for revenue:
 
 ``` r
-
 # slope of log expected value on log population, by subsector
 exponent <- function( d, y ) {
   ok <- d[[ y ]] > 0 & !is.na( d[[ y ]] )
@@ -197,7 +189,6 @@ size effect.
 ### Descriptive statistics by subsector
 
 ``` r
-
 markets |>
   dplyr::group_by( NTMAJ12 ) |>
   dplyr::summarize(
@@ -239,7 +230,6 @@ home to a large hospital or university, exceed it many times over.
 Count density (`DENSITY_PCTL_N`):
 
 ``` r
-
 ggplot( markets, aes( DENSITY_PCTL_N ) ) +
   geom_histogram( binwidth = 0.1, boundary = 0, fill = "#3266ad" ) +
   geom_vline( xintercept = 0, colour = "grey40" ) +
@@ -260,7 +250,6 @@ universities, hospitals) pile up at both ends.
 Revenue density (`DENSITY_PCTL_R`):
 
 ``` r
-
 ggplot( markets, aes( DENSITY_PCTL_R ) ) +
   geom_histogram( binwidth = 0.1, boundary = 0, fill = "#3266ad" ) +
   geom_vline( xintercept = 0, colour = "grey40" ) +
@@ -280,7 +269,6 @@ If the model fits, the index should be flat across metro size: that is
 what “scale-free” means. All subsectors combined:
 
 ``` r
-
 ggplot( all_subs, aes( POP, DENSITY_PCTL_N ) ) +
   geom_hline( yintercept = 0, colour = "grey70" ) +
   geom_point( colour = "grey55", alpha = 0.4, size = 1.2 ) +
@@ -299,7 +287,6 @@ among the very largest metros. The spread narrows in larger metros,
 where counts are large and less noisy. By subsector:
 
 ``` r
-
 ggplot( markets, aes( POP, DENSITY_PCTL_N ) ) +
   geom_hline( yintercept = 0, colour = "grey70" ) +
   geom_point( colour = "grey60", alpha = 0.25, size = 0.6 ) +
@@ -321,7 +308,6 @@ groups) or few organizations with a lot of revenue (a dominant
 institution).
 
 ``` r
-
 ggplot( all_subs, aes( DENSITY_PCTL_N, DENSITY_PCTL_R ) ) +
   geom_hline( yintercept = 0, colour = "grey70" ) +
   geom_vline( xintercept = 0, colour = "grey70" ) +

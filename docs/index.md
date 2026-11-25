@@ -18,7 +18,6 @@ The package answers questions like:
 ## Installation
 
 ``` r
-
 # install.packages( "remotes" )
 remotes::install_github( "Nonprofit-Open-Data-Collective/npcompete" )
 ```
@@ -47,7 +46,6 @@ organization-year.
 computes every metric for every county, subsector and year:
 
 ``` r
-
 library( npcompete )
 
 m <- get_all_metrics( npo_panel_sample,
@@ -60,7 +58,6 @@ The result has one row per market. Rows with `SUB = "ALL"` combine every
 subsector in a county:
 
 ``` r
-
 vars <- c( "GEO", "N", "POP", "HHI", "CR4", "GINI", "DENSITY_PCTL_N" )
 
 subset( m, YEAR == 2019 & SUB == "ALL" & GEO != "ALL", vars ) |>
@@ -82,7 +79,6 @@ names of the NCCS panel (`CENSUS_CBSA_FIPS`, `NTEEV2`, `TOTREV`,
 `TAXYEAR`), and any of them can be changed:
 
 ``` r
-
 h <- get_hhi( npo_panel_sample, geography = "COUNTY_FIPS", resource = "NETASS" )
 
 subset( h, YEAR == 2019 & GEO == "50007" ) |>
@@ -139,7 +135,6 @@ subset( h, YEAR == 2019 & GEO == "50007" ) |>
 building anything:
 
 ``` r
-
 # the most and least concentrated large metros, all subsectors combined
 big <- subset( cbsa_metrics, SUB == "ALL" & POP > 2e6 )
 
@@ -170,7 +165,6 @@ Parquet dataset partitioned by year. This needs the **arrow** and
 **data.table** packages.
 
 ``` r
-
 # where the archive lives (or set the NPCOMPETE_ARCHIVE environment variable)
 options( npcompete.archive_dir = "D:/data/npcompete-archive" )
 
@@ -194,14 +188,38 @@ attaches populations from `pop_county` and `pop_cbsa` at the market
 level, so markets with no organizations in a subsector are still part of
 the density models.
 
+### Without a local archive: NCCS downloads
+
+With `source = "nccs"`, npcompete downloads the NCCS CORE 990combined
+files and the unified geocoded BMF, harmonizes them to the same layout
+as the archive, and caches the result (under
+[`npc_cache_dir()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_cache_dir.md),
+or set `NPCOMPETE_CACHE`). The first build downloads about 0.7 GB for
+the BMF plus about 50 MB per year; later builds reuse the cache. Live
+builds cover tax years 2010 onward.
+
+``` r
+m <- npc_build_metrics( 2015:2022, geo = "cbsa", source = "nccs" )
+
+# or build the organization table first and inspect it
+npc_build_nccs( 2015:2022 )
+npc_archive_info( npc_cache_dir() )   # rows per year, files and BMF used
+```
+
+For 2018 and 2019, live builds hold the same 501(c)(3) filers as the SOI
+panel archive (all but 3 or 4 EINs a year), with revenue, expenses and
+assets identical for virtually every organization and net assets for
+99.9%. Counties differ for about 4% of organizations, because live
+builds place each organization at its current BMF address in every year.
+[`npc_compare_sources()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_compare_sources.md)
+repeats this comparison for any years.
+
 ## Status and roadmap
 
-The metric functions and the archive builder are stable and tested.
-Planned work, described in
+The metric functions, the archive builder and the live NCCS source are
+stable and tested. Planned work, described in
 [`dev/DEV-PLAN.md`](https://nonprofit-open-data-collective.github.io/npcompete/dev/DEV-PLAN.md):
 
-- **Live NCCS source** (`source = "nccs"`): build metrics from NCCS
-  downloads instead of a local archive.
 - **Registered and grassroots universes** (`universe = "registered"`,
   `"grassroots"`): include organizations that file a 990-N or do not
   file, for count-based metrics.

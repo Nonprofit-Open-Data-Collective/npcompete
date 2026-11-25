@@ -14,6 +14,9 @@
 
 ## Live NCCS source (Phase 4)
 
+* New articles: "Building metrics from an archived panel" and "Building
+  metrics from fresh NCCS downloads".
+
 * `source = "nccs"` in `npc_get_orgs()` and `npc_build_metrics()` builds
   from NCCS downloads instead of the local archive. `npc_build_nccs()`
   downloads the CORE 990combined files and the unified geocoded BMF,

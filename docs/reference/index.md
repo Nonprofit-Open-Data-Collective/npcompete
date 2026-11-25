@@ -14,18 +14,38 @@ of years.
 
 - [`npc_build_metrics()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_build_metrics.md)
   : Build competition and density metrics for any set of years
+- [`npc_compute_metrics()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_compute_metrics.md)
+  : Compute a set of metrics from the registry
+- [`npc_metrics()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_metrics.md)
+  : List the available metrics
 - [`npc_build_archive()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_build_archive.md)
   : Build the local Parquet archive from the SOI panel CSV
 - [`npc_archive_dir()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_archive_dir.md)
   : Location of the local data archive
 - [`npc_archive_info()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_archive_info.md)
-  : Describe the local archive
+  : Describe the local archive or a live NCCS build
 - [`npc_get_orgs()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_get_orgs.md)
   : Read organization-years for a set of years
 - [`npc_get_population()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_get_population.md)
   : Market populations for a geography level
 - [`npc_standardize()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_standardize.md)
   : Convert an organization panel to the canonical npcompete schema
+
+## Building from NCCS downloads
+
+Download NCCS CORE and BMF files, harmonize them to the archive layout,
+and check them against the archive.
+
+- [`npc_build_nccs()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_build_nccs.md)
+  : Build the harmonized organization table from NCCS downloads
+- [`npc_cache_dir()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_cache_dir.md)
+  : Location of the NCCS download cache
+- [`npc_nccs_download()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_nccs_download.md)
+  : Download a file from the NCCS data bucket
+- [`npc_match_county()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_match_county.md)
+  : Match county names to county FIPS codes
+- [`npc_compare_sources()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_compare_sources.md)
+  : Compare live NCCS filers with the local archive
 
 ## Concentration
 
@@ -56,6 +76,8 @@ Nonprofits per capita, overall and by size or type.
   : Density big
 - [`get_density_commercial()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/get_density_commercial.md)
   : Density commercial
+- [`get_density_per_capita()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/get_density_per_capita.md)
+  : Nonprofit density per capita, overall and by size
 - [`get_density_small()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/get_density_small.md)
   : Density small
 
@@ -63,11 +85,17 @@ Nonprofits per capita, overall and by size or type.
 
 - [`get_fundraising_efficiency()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/get_fundraising_efficiency.md)
   : Fundraising efficiency
+- [`get_fundraising_ratio()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/get_fundraising_ratio.md)
+  : Professional fundraising in a market
+- [`get_commercial_share()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/get_commercial_share.md)
+  : Commercial share of a market
 
 ## Utilities
 
 - [`check_year_completeness()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/check_year_completeness.md)
   : Flag years with incomplete data
+- [`get_median_age()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/get_median_age.md)
+  : Median organization age
 
 ## Data
 
