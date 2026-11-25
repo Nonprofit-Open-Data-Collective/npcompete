@@ -39,3 +39,6 @@ Test_Data/
 
 # R Environment Variables
 .Renviron
+
+# Manuscript drafts
+/paper
