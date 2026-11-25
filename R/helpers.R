@@ -52,26 +52,30 @@ prep_market_data <- function(df, geography, subsector, resource = NULL,
 #   GEO x SUB x YEAR   (markets; rows with missing GEO are dropped)
 #   GEO x YEAR         (SUB = "ALL")
 #   SUB x YEAR         (GEO = "ALL"; includes orgs with missing GEO)
+#   YEAR               (GEO = "ALL", SUB = "ALL"; national total)
 #
-# `.f` takes the resource vector for one group and returns a one-row
-# data frame of metric columns.
+# `.f` takes the resource vector for one group and returns a named list of
+# metric values. Grouping uses data.table, which is much faster than
+# building a data frame per group when there are many small markets.
 summarize_levels <- function(dat, .f) {
 
   yr <- if ("YEAR" %in% names(dat)) "YEAR" else character(0)
+  dt <- data.table::as.data.table(dat)
 
   run <- function(d, keys) {
-    d |>
-      dplyr::group_by(dplyr::across(dplyr::all_of(keys))) |>
-      dplyr::summarize(.f(RES), .groups = "drop")
+    out <- if (length(keys) > 0) d[, .f(RES), by = keys] else d[, .f(RES)]
+    dplyr::as_tibble(as.data.frame(out))
   }
 
-  markets <- dat[!is.na(dat$GEO), , drop = FALSE]
+  markets <- dt[!is.na(GEO)]
+  dat <- dt
 
   by_geo_sub <- run(markets, c("GEO", "SUB", yr))
   by_geo     <- run(markets, c("GEO", yr));  by_geo$SUB <- "ALL"
   by_sub     <- run(dat,     c("SUB", yr));  by_sub$GEO <- "ALL"
+  national   <- run(dat,     yr);            national$GEO <- "ALL"; national$SUB <- "ALL"
 
-  out <- dplyr::bind_rows(by_geo_sub, by_geo, by_sub)
+  out <- dplyr::bind_rows(by_geo_sub, by_geo, by_sub, national)
   out <- dplyr::relocate(out, dplyr::all_of(c("GEO", "SUB", yr)))
   dplyr::arrange(out, dplyr::across(dplyr::all_of(c("GEO", "SUB", yr))))
 }
@@ -87,10 +91,12 @@ name_total <- function(out, resource) {
 #' Panels built from IRS filings fill in over several years, so the most
 #' recent tax years (and the first years of a panel) hold only part of the
 #' population. A year is flagged when its row count is below `threshold`
-#' times the median row count across years.
+#' times the typical yearly count. The typical count is the median over
+#' "substantial" years, those with at least 10% of the largest year's count,
+#' so a long tail of nearly empty early years does not drag it down.
 #'
 #' @param x Vector of years, one element per organization-year row.
-#' @param threshold Share of the median yearly count below which a year is
+#' @param threshold Share of the typical yearly count below which a year is
 #'   flagged.
 #'
 #' @return A data frame with `YEAR`, `N`, `SHARE_OF_MEDIAN` and `INCOMPLETE`.
@@ -102,14 +108,16 @@ name_total <- function(out, resource) {
 #' @export
 check_year_completeness <- function(x, threshold = 0.8) {
   tab <- table(x[!is.na(x)])
-  n <- as.numeric(tab)
-  share <- n / stats::median(n)
-  data.frame(
-    YEAR = utils::type.convert(names(tab), as.is = TRUE),
-    N = n,
-    SHARE_OF_MEDIAN = round(share, 3),
-    INCOMPLETE = share < threshold
-  )
+  year_completeness(utils::type.convert(names(tab), as.is = TRUE),
+                    as.numeric(tab), threshold)
+}
+
+# Completeness flags from yearly counts (see check_year_completeness()).
+year_completeness <- function(years, n, threshold = 0.8) {
+  ref <- stats::median(n[n >= 0.1 * max(n)])
+  share <- n / ref
+  data.frame(YEAR = years, N = n, SHARE_OF_MEDIAN = round(share, 3),
+             INCOMPLETE = share < threshold)
 }
 
 # Deprecation notice for functions built on the legacy NCCS core-file layout.

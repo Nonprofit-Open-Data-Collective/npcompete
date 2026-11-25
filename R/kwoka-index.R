@@ -51,5 +51,5 @@ kwoka_kernel <- function(x) {
     k <- NA_real_
   }
   top <- share[1:3]                     # NA when fewer than three orgs
-  data.frame(N = n, top1 = top[1], top2 = top[2], top3 = top[3], KWOKA = k)
+  list(N = n, top1 = top[1], top2 = top[2], top3 = top[3], KWOKA = k)
 }

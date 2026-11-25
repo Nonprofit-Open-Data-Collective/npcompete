@@ -79,7 +79,5 @@ cr_kernel <- function(x, numbers, pct = FALSE) {
              else NA_real_
     if (pct) 100 * ratio else ratio
   }, numeric(1))
-  out <- data.frame(N = n, TOTAL = total)
-  out[paste0("CR", numbers)] <- as.list(vals)
-  out
+  c(list(N = n, TOTAL = total), stats::setNames(as.list(vals), paste0("CR", numbers)))
 }

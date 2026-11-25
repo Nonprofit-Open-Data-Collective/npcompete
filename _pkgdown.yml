@@ -12,7 +12,21 @@ home:
 
 navbar:
   structure:
-    left: [intro, reference]
+    left: [intro, reference, articles]
+
+articles:
+- title: Metrics
+  navbar: Metrics
+  contents:
+  - hhi
+  - concentration-ratios
+  - kwoka
+  - gini
+  - density
+- title: Comparing metrics
+  navbar: Comparing metrics
+  contents:
+  - metric-correlations
 
 reference:
 - title: All metrics at once
@@ -25,17 +39,27 @@ reference:
   - get_hhi
   - get_nhhi
   - get_cr
-  - get_kwoka_index
+  - get_cr_all
+  - get_kwoka
   - get_gini
 - title: Density
   desc: Nonprofits per capita, overall and by size or type.
   contents:
+  - get_scale_free_density
   - starts_with("get_density")
 - title: Efficiency
   contents:
   - get_fundraising_efficiency
+- title: Utilities
+  contents:
+  - check_year_completeness
 - title: Data
   desc: Sample organizations and population counts used by the examples.
   contents:
+  - npo_panel_sample
+  - cbsa_metrics
   - nonprofit_sample
   - county_population
+  - pop_county
+  - pop_cbsa
+  - cbsa_county_xwalk

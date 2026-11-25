@@ -1,0 +1,203 @@
+---
+title: "Concentration ratios"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Concentration ratios}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse  = TRUE,
+  comment   = "#>",
+  fig.width = 7,
+  fig.asp   = 0.62,
+  out.width = "100%",
+  dpi       = 96
+)
+```
+
+A concentration ratio is the share of a market held by its largest
+organizations. CR4 is the share held by the four largest:
+
+$$CR_k = \sum_{i=1}^{k} s_{(i)}$$
+
+where $s_{(1)} \ge s_{(2)} \ge \dots$ are market shares sorted from largest to
+smallest. Concentration ratios are easy to explain ("the four largest
+arts organizations take in 80% of arts revenue") but ignore how the share is
+split among the top $k$ and everything below them. A market with $k$ or fewer
+organizations has $CR_k = 1$.
+
+`get_cr()` returns one ratio and `get_cr_all()` returns several at once
+(CR1 to CR8 by default).
+
+```{r setup}
+library( npcompete )
+library( ggplot2 )
+
+# NTMAJ12 labels for the NTEEV2 major groups
+ntmaj12 <- c( ART = "Arts",           EDU = "Education",
+              ENV = "Environment",    HEL = "Health",
+              HMS = "Human services", IFA = "International",
+              PSB = "Public benefit", REL = "Religion",
+              MMB = "Mutual benefit", UNI = "Universities",
+              HOS = "Hospitals",      UNU = "Unknown" )
+```
+
+## A toy market
+
+```{r}
+TOTREV <- c( 50, 30, 10, 5, 5 )
+toy    <- data.frame( GEO = "A", SUB = "ART", YEAR = 2020, TOTREV )
+
+cr <- get_cr_all( toy, geography = "GEO", subsector = "SUB",
+                  year = "YEAR", numbers = 1:5 )
+subset( cr, GEO == "A" & SUB == "ART" ) |> knitr::kable( digits = 2 )
+```
+
+Pass `as_percent = TRUE` for a 0-100 scale.
+
+## Computing concentration ratios from org-level data
+
+`npo_panel_sample` holds every 501(c)(3) filer in Vermont from 2015 to 2019,
+one row per organization-year. Here the market is the county.
+
+```{r}
+vt <- get_cr_all( npo_panel_sample, geography = "COUNTY_FIPS",
+                  numbers = c( 1, 4, 8 ) )
+
+# all subsectors combined, one row per county
+vt19 <- subset( vt, YEAR == 2019 & SUB == "ALL" & GEO != "ALL" )
+vt19[ order( vt19$CR4 ), ] |> knitr::kable( digits = 2, row.names = FALSE )
+```
+
+## Concentration ratios across US metro areas
+
+`cbsa_metrics` holds every metric for every US metro and micro area (CBSA)
+in 2019, by NTEE major group, measured on total revenue.
+
+```{r}
+metros <- cbsa_metrics
+metros$NTMAJ12 <- factor( ntmaj12[ metros$SUB ], levels = ntmaj12 )
+
+# subsector markets with at least one organization and some revenue
+# (HHI is NA where total revenue is zero, which leaves shares undefined)
+markets <- subset( metros, SUB != "ALL" & N > 0 & !is.na( HHI ) )
+```
+
+### Descriptive statistics by subsector
+
+```{r}
+markets |>
+  dplyr::group_by( NTMAJ12 ) |>
+  dplyr::summarize(
+    metros     = dplyr::n(),
+    median_N   = median( N ),
+    CR1_median = median( CR1 ),
+    CR4_p25    = quantile( CR4, 0.25 ),
+    CR4_median = median( CR4 ),
+    CR4_p75    = quantile( CR4, 0.75 ),
+    N_le_4     = mean( N <= 4 )
+  ) |>
+  knitr::kable( digits = 2 )
+```
+
+`N_le_4` is the share of metros where the subsector has four or fewer
+organizations, so CR4 is 1 by definition. In most subsectors the median CR4
+is already well above one half: a handful of organizations holds most of
+the revenue even where there are dozens of organizations.
+
+### The concentration curve
+
+Plotting $CR_k$ against $k$ shows how fast the top organizations account for
+the market. The lines are medians across metros, for markets with more than
+eight organizations so that no ratio is capped at 1.
+
+```{r}
+big <- subset( markets, N > 8 )
+
+cr_cols <- paste0( "CR", 1:8 )
+curve   <- aggregate( big[ cr_cols ], by = list( NTMAJ12 = big$NTMAJ12 ),
+                      FUN = median )
+curve   <- tidyr::pivot_longer( curve, -NTMAJ12, names_to = "k",
+                                values_to = "CR" )
+curve$k <- as.integer( sub( "CR", "", curve$k ) )
+
+ggplot( curve, aes( k, CR ) ) +
+  geom_line( colour = "#3266ad", linewidth = 0.9 ) +
+  geom_point( colour = "#3266ad", size = 1.5 ) +
+  facet_wrap( ~ NTMAJ12, ncol = 4 ) +
+  scale_x_continuous( breaks = c( 1, 4, 8 ) ) +
+  scale_y_continuous( limits = c( 0, 1 ), breaks = c( 0, 0.5, 1 ) ) +
+  labs( x = "k (number of largest organizations)",
+        y = "Median CRk, markets with N > 8" ) +
+  theme_minimal() +
+  theme( panel.grid.minor = element_blank() )
+```
+
+### Distribution of CR4 by subsector
+
+Markets with four or fewer organizations are left out; they are a spike at 1.
+
+```{r, fig.asp = 0.8}
+ggplot( subset( markets, N > 4 ), aes( CR4 ) ) +
+  geom_density( fill = "#3266ad", colour = NA, alpha = 0.8 ) +
+  facet_wrap( ~ NTMAJ12, ncol = 4 ) +
+  scale_x_continuous( breaks = c( 0, 0.5, 1 ), labels = c( "0", ".5", "1" ) ) +
+  labs( x = "CR4 (revenue)", y = NULL ) +
+  theme_minimal() +
+  theme( axis.text.y      = element_blank(),
+         panel.grid.minor = element_blank(),
+         panel.spacing.x  = unit( 1, "lines" ) )
+```
+
+### CR4 and metro size
+
+All subsectors combined, one point per metro, with a loess smooth:
+
+```{r}
+all_subs <- subset( metros, SUB == "ALL" & !is.na( POP ) )
+
+ggplot( all_subs, aes( POP, CR4 ) ) +
+  geom_point( colour = "grey55", alpha = 0.4, size = 1.2 ) +
+  geom_smooth( method = "loess", formula = y ~ x, se = FALSE,
+               colour = "#3266ad", linewidth = 1 ) +
+  scale_x_log10( labels = scales::label_comma() ) +
+  labs( x = "Metro population (log scale)", y = "CR4, all subsectors" ) +
+  theme_minimal()
+```
+
+By subsector:
+
+```{r, fig.asp = 0.8}
+ggplot( subset( markets, !is.na( POP ) ), aes( POP, CR4 ) ) +
+  geom_point( colour = "grey60", alpha = 0.25, size = 0.6 ) +
+  geom_smooth( method = "loess", formula = y ~ x, se = FALSE,
+               colour = "#3266ad", linewidth = 0.9 ) +
+  facet_wrap( ~ NTMAJ12, ncol = 4 ) +
+  scale_x_log10( breaks = c( 1e4, 1e6 ), labels = c( "10k", "1M" ) ) +
+  labs( x = "Metro population (log scale)", y = "CR4" ) +
+  theme_minimal() +
+  theme( panel.grid.minor = element_blank() )
+```
+
+### CR4 versus HHI
+
+The two measures largely agree, but CR4 saturates at 1 in small markets
+while HHI keeps separating them:
+
+```{r}
+ggplot( markets, aes( CR4, HHI ) ) +
+  geom_point( colour = "grey55", alpha = 0.25, size = 0.8 ) +
+  labs( x = "CR4", y = "HHI" ) +
+  theme_minimal()
+```
+
+## Notes
+
+* Pick $k$ to fit the market. CR4 is the convention in industrial
+  organization, but in nonprofit subsectors with a median of a few
+  organizations per metro, CR1 or CR2 carries more information.
+* Because $CR_k = 1$ whenever $N \le k$, compare concentration ratios only
+  among markets with more than $k$ organizations.

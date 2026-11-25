@@ -20,7 +20,8 @@ zero.}
 \code{"TAXYEAR"}.}
 
 \item{population}{Name of the column that holds the market's population,
-such as \code{"POP_METRO"} or \code{"POP_COUNTY"}.}
+such as \code{"POP_METRO"} or \code{"POP_COUNTY"}. Ignored, and may be \code{NULL},
+when \code{pop_table} is supplied.}
 }
 \description{
 Shared arguments for npcompete metric functions

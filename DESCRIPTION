@@ -14,6 +14,7 @@ BugReports: https://github.com/Nonprofit-Open-Data-Collective/npcompete/issues
 Depends: 
     R (>= 4.1.0)
 Imports:
+    data.table,
     DescTools,
     MASS,
     dplyr,
@@ -24,9 +25,14 @@ Imports:
     tidyr,
     utils
 Suggests:
-    data.table,
+    arrow,
     devtools,
+    ggplot2,
+    knitr,
+    rmarkdown,
+    scales,
     testthat (>= 3.0.0)
+VignetteBuilder: knitr
 Config/testthat/edition: 3
 Config/Needs/website: Nonprofit-Open-Data-Collective/pkgstyle
 Encoding: UTF-8

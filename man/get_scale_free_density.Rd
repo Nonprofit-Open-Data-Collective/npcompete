@@ -22,7 +22,8 @@ get_scale_free_density(
 geography, such as \code{"CENSUS_CBSA_FIPS"} or \code{"COUNTY_FIPS"}.}
 
 \item{population}{Name of the column that holds the market's population,
-such as \code{"POP_METRO"} or \code{"POP_COUNTY"}.}
+such as \code{"POP_METRO"} or \code{"POP_COUNTY"}. Ignored, and may be \code{NULL},
+when \code{pop_table} is supplied.}
 
 \item{subsector}{Name of the column that identifies the subsector. When it
 is \code{"NTEEV2"}, the first three characters (the major group) are used.}

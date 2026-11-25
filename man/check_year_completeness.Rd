@@ -9,7 +9,7 @@ check_year_completeness(x, threshold = 0.8)
 \arguments{
 \item{x}{Vector of years, one element per organization-year row.}
 
-\item{threshold}{Share of the median yearly count below which a year is
+\item{threshold}{Share of the typical yearly count below which a year is
 flagged.}
 }
 \value{
@@ -19,7 +19,9 @@ A data frame with \code{YEAR}, \code{N}, \code{SHARE_OF_MEDIAN} and \code{INCOMP
 Panels built from IRS filings fill in over several years, so the most
 recent tax years (and the first years of a panel) hold only part of the
 population. A year is flagged when its row count is below \code{threshold}
-times the median row count across years.
+times the typical yearly count. The typical count is the median over
+"substantial" years, those with at least 10\% of the largest year's count,
+so a long tail of nearly empty early years does not drag it down.
 }
 \examples{
 yrs <- c( rep( 2019, 100 ), rep( 2020, 98 ), rep( 2021, 101 ), rep( 2022, 40 ) )
