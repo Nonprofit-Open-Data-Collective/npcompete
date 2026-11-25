@@ -2,20 +2,14 @@
 ###   Gini Coefficient
 ###---------------------------------------------------
 
-#' @title
-#' Gini Coefficient
+#' Gini coefficient
 #'
-#' @description
-#' Calculate the Gini Coefficient and return a dataframe.
+#' Inequality of the resource distribution in each geography, subsector and
+#' year, with rollups for all subsectors (`SUB = "ALL"`) and all geographies
+#' (`GEO = "ALL"`).
 #'
-#' @param df A dataframe containing the required fields for computing the metric(gini) grouped by geographical level and sub sector.
-#' @param geo A character string indicating the column name for geographical area unique code.
-#' @param subsector A character string indicating the column name for sub sectors.
-#' @param resource A character string indicating the column name for resource based on which gini is calculated. Example: Revenue, assets etc.
-#' @param resource.name A character string indicating the column name for the new column generated with aggregated resource.
-#' @param fips A character string indicating the column name for FIPS code of the geographical area
-#' @param year A numeric parameter indicating the year to be used for population estimate and metric evaluation for that year. Example: 1999
-#' @param resource.smaller.than A numeric value indicating that it is the upper limit of the resource for density evaluation. All organizations having resource value less than that would be counted for evaluation.
+#' @inheritParams npcompete-params
+#' @param year Name of the year column, or `NULL` to pool all years.
 #'
 #' @return A new dataframe with the Gini Coefficient (`gini`),
 #'  grouped by geographical level and sub sectors.
@@ -31,9 +25,9 @@
 #' inequality if the coefficient is greater than .75.
 #'
 #' @examples
-#' data(nonprofit_sample)
-#  dat.gini <-get_gini( df=nonprofit_sample,'MSA_NECH','NTMAJ12','TOTREV')
-#' head( dat.gini )
+#' \dontrun{
+#' get_gini( df, resource = "TOTREV" )
+#' }
 #'
 #' @export
 get_gini <- function(df, geography="CENSUS_CBSA_FIPS", subsector="NTEEV2", resource="TOTREV", year="TAXYEAR"){
@@ -52,7 +46,7 @@ get_gini <- function(df, geography="CENSUS_CBSA_FIPS", subsector="NTEEV2", resou
   
     dat.gini1 <-
       data.frame(GEO,SUB,YEAR,RES) %>%
-      na.omit() %>%
+      stats::na.omit() %>%
       dplyr::arrange(RES) %>%
       dplyr::group_by( GEO, SUB, YEAR ) %>%
       dplyr::summarize( N=dplyr::n(),
@@ -62,7 +56,7 @@ get_gini <- function(df, geography="CENSUS_CBSA_FIPS", subsector="NTEEV2", resou
 
     dat.gini2 <-
       data.frame(GEO,YEAR,RES) %>%
-      na.omit() %>%
+      stats::na.omit() %>%
       dplyr::arrange(RES) %>%
       dplyr::group_by( GEO, YEAR ) %>%
       dplyr::summarize( N=dplyr::n(),
@@ -73,7 +67,7 @@ get_gini <- function(df, geography="CENSUS_CBSA_FIPS", subsector="NTEEV2", resou
 
     dat.gini3 <-
       data.frame(SUB,YEAR,RES) %>%
-      na.omit() %>%
+      stats::na.omit() %>%
       dplyr::arrange(RES) %>%
       dplyr::group_by( SUB, YEAR ) %>%
       dplyr::summarize( N=dplyr::n(),
@@ -92,7 +86,7 @@ get_gini <- function(df, geography="CENSUS_CBSA_FIPS", subsector="NTEEV2", resou
 
     dat.gini <-
       data.frame(GEO,SUB,RES) %>%
-      na.omit() %>%
+      stats::na.omit() %>%
       dplyr::arrange(RES) %>%
       dplyr::group_by( GEO, SUB ) %>%
       dplyr::summarize( N=dplyr::n(),
@@ -105,13 +99,6 @@ get_gini <- function(df, geography="CENSUS_CBSA_FIPS", subsector="NTEEV2", resou
   dat.gini$GINI[ is.nan(dat.gini$GINI) ] <- NA
 
   return (dat.gini)
-}
-
-#' @keywords internal
-bottomcode <- function(x)
-{
-  x[ x < 0 ] <- 0
-  return(x)
 }
 
 

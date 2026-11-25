@@ -20,9 +20,10 @@
 #' Lower ratio indicates greater fundraising competition in a market.Fundraising efficiency be calculated as follows: Private donations divided by fundraising expenses  
 #'
 #' @examples
-#' data(nonprofit_sample)
-#' dat.fe <- get_density_commercial( df=nonprofit_sample,'MSA_NECH','NTMAJ12', 'CONT', c('FUNDFEES', 'SOLICIT'))
-#' head( dat.fe)
+#' \dontrun{
+#' get_fundraising_efficiency( nonprofit_sample, 'MSA_NECH', 'NTMAJ12',
+#'                             'CONT', c( 'FUNDFEES', 'SOLICIT' ) )
+#' }
 #'
 #' @export
 get_fundraising_efficiency <- function(df, geo, subsector, resource, list.of.cols){

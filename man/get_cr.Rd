@@ -2,36 +2,52 @@
 % Please edit documentation in R/cr.R
 \name{get_cr}
 \alias{get_cr}
-\title{Concentration Ratio}
+\title{Concentration ratio (CRk)}
 \usage{
-get_cr(df, geo, subsector, resource, number)
+get_cr(
+  df,
+  geography = "CENSUS_CBSA_FIPS",
+  subsector = "NTEEV2",
+  year = "TAXYEAR",
+  resource = "TOTREV",
+  number = 4
+)
 }
 \arguments{
-\item{df}{A dataframe containing the required fields for computing the metric(concentration ratio) grouped by geographical level and sub sector.}
+\item{df}{A data frame with one row per organization-year.}
 
-\item{geo}{A character string indicating the column name for geographical area unique code.}
+\item{geography}{Name of the column that identifies the market's
+geography, such as \code{"CENSUS_CBSA_FIPS"} or \code{"COUNTY_FIPS"}.}
 
-\item{subsector}{A character string indicating the column name for sub sectors.}
+\item{subsector}{Name of the column that identifies the subsector. When it
+is \code{"NTEEV2"}, the first three characters (the major group) are used.}
 
-\item{resource}{A character string indicating the column name for resource based on which cr is calculated. Example: Revenue, assets etc.}
+\item{year}{Name of the column that identifies the year, such as
+\code{"TAXYEAR"}.}
 
-\item{number}{A numeric value that is used to calculate concentration ratio for top that number of firms. Value ranges from 1-8. Example, 4 if concentration ratio for top 4 firms.}
+\item{resource}{Name of the numeric column that measures organization size,
+such as \code{"TOTREV"}, \code{"TOTEXP"} or \code{"NETASS"}. Negative values are set to
+zero.}
+
+\item{number}{Number of top organizations to include, for example \code{4} for
+CR4. Values above 8 produce a warning.}
 }
 \value{
-A new dataframe with the Concentration Ratio of n(number) largest organizations ('cr'),
-grouped by geographical level and sub sectors *Note: For the markets where total number of firms is less than n(umber),
-the concentration ratio is assigned 100\%.
+A tibble with one row per \code{GEO}, \code{SUB} and \code{YEAR}, containing \code{n}
+(number of organizations), \code{total}, \code{top_k_sum} and \verb{CR<number>}. Markets
+with \code{number} or fewer organizations get a ratio of 1.
 }
 \description{
-Calculate the Concentration Ratio (CR) of top n(number) largest organizations and return a dataframe.
+Share of a market's total resource held by its \code{number} largest
+organizations, computed for each geography, subsector and year.
 }
 \details{
-Concentration Ratio is defined as the summation of the market shares of the largest n firms.
-It is calculated using the summation of revenue of the largest n nonprofits divided by the summation of
-revenue of all nonprofits in a market. The formula is \eqn{\frac{\sigma{revnue of top-n firms}}{Total resource of that subsector}}
+CRk is the sum of the resource held by the k largest organizations
+divided by the market total.
 }
 \examples{
-data(nonprofit_sample)
-head( dat.cr )
+\dontrun{
+get_cr( df, geography = "CENSUS_CBSA_FIPS", resource = "TOTREV", number = 4 )
+}
 
 }

@@ -1,14 +1,35 @@
 Package: npcompete
-Title: What the Package Does (One Line, Title Case)
+Title: Competition and Density Metrics for Nonprofit Markets
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+    person("Jesse", "Lecy", , "jdlecy@gmail.com", role = c("aut", "cre"))
+Description: Builds measures of competition in local nonprofit markets,
+    including the Herfindahl-Hirschman Index, normalized HHI, concentration
+    ratios, the Kwoka index, Gini coefficients and population-adjusted
+    density, by geography, subsector and year.
+License: MIT + file LICENSE
+URL: https://nonprofit-open-data-collective.github.io/npcompete/,
+    https://github.com/Nonprofit-Open-Data-Collective/npcompete
+BugReports: https://github.com/Nonprofit-Open-Data-Collective/npcompete/issues
+Depends: 
+    R (>= 4.1.0)
+Imports:
+    DescTools,
+    dplyr,
+    magrittr,
+    purrr,
+    rlang,
+    stats,
+    tidyr,
+    utils
+Suggests:
+    data.table,
+    devtools,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Config/Needs/website: Nonprofit-Open-Data-Collective/pkgstyle
 Encoding: UTF-8
 LazyData: true
-Imports: dplyr
+LazyDataCompression: xz
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.1
+RoxygenNote: 7.3.2

@@ -6,7 +6,6 @@ Test_Data/
 # History files
 .Rhistory
 .Rapp.history
-.Rbuildignore
 
 # Session Data files
 .RData
@@ -39,3 +38,9 @@ Test_Data/
 
 # R Environment Variables
 .Renviron
+
+# Manuscript drafts
+/paper
+
+# Local data archive (large input/output tables, not versioned)
+/data-local
