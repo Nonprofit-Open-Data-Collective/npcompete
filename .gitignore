@@ -44,3 +44,7 @@ Test_Data/
 
 # Local data archive (large input/output tables, not versioned)
 /data-local
+
+# testthat failure snapshots
+tests/testthat/_problems/
+tests/testthat/testthat-problems.rds
