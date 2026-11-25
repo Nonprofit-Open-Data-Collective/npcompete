@@ -72,7 +72,7 @@ get_nhhi <- function(df, geography = "CENSUS_CBSA_FIPS", subsector = "NTEEV2",
 hhi_kernel <- function(x) {
   total <- sum(x)
   hhi <- if (total > 0) sum((x / total)^2) else NA_real_
-  data.frame(N = length(x), TOTAL = total, HHI = hhi, NHHI = calc_nhhi(x))
+  list(N = length(x), TOTAL = total, HHI = hhi, NHHI = calc_nhhi(x))
 }
 
 # Normalized HHI for a vector of resource values: 1 for a single

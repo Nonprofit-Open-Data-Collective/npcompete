@@ -17,3 +17,6 @@ utils::globalVariables( c(
   "LOG_NPO", "LOG_POP", "DENSITY_PCTL_N", "DENSITY_PCTL_R",
   "EXPECTED_N", "EXPECTED_RES", "SUBSECTION", "IMPUTED"
 ) )
+
+# Tell data.table that this package uses data.table syntax.
+.datatable.aware <- TRUE

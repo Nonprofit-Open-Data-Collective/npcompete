@@ -41,5 +41,5 @@ gini_kernel <- function(x) {
   n <- length(x)
   g <- if (n == 1) 1 else suppressWarnings(DescTools::Gini(x))
   if (is.nan(g)) g <- NA_real_
-  data.frame(N = n, TOTAL = sum(x), GINI = g)
+  list(N = n, TOTAL = sum(x), GINI = g)
 }

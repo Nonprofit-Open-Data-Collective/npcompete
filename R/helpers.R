@@ -54,19 +54,21 @@ prep_market_data <- function(df, geography, subsector, resource = NULL,
 #   SUB x YEAR         (GEO = "ALL"; includes orgs with missing GEO)
 #   YEAR               (GEO = "ALL", SUB = "ALL"; national total)
 #
-# `.f` takes the resource vector for one group and returns a one-row
-# data frame of metric columns.
+# `.f` takes the resource vector for one group and returns a named list of
+# metric values. Grouping uses data.table, which is much faster than
+# building a data frame per group when there are many small markets.
 summarize_levels <- function(dat, .f) {
 
   yr <- if ("YEAR" %in% names(dat)) "YEAR" else character(0)
+  dt <- data.table::as.data.table(dat)
 
   run <- function(d, keys) {
-    d |>
-      dplyr::group_by(dplyr::across(dplyr::all_of(keys))) |>
-      dplyr::summarize(.f(RES), .groups = "drop")
+    out <- if (length(keys) > 0) d[, .f(RES), by = keys] else d[, .f(RES)]
+    dplyr::as_tibble(as.data.frame(out))
   }
 
-  markets <- dat[!is.na(dat$GEO), , drop = FALSE]
+  markets <- dt[!is.na(GEO)]
+  dat <- dt
 
   by_geo_sub <- run(markets, c("GEO", "SUB", yr))
   by_geo     <- run(markets, c("GEO", yr));  by_geo$SUB <- "ALL"
