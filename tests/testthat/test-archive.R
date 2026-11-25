@@ -114,7 +114,7 @@ test_that("npc_build_metrics builds long and wide output", {
   expect_message(
     long <- npc_build_metrics(2018:2021, geo = c("cbsa", "county"),
                               resources = c("TOTREV", "NETASS"), dir = arch),
-    "Dropping incomplete years: 2021")
+    "with incomplete data: 2021")
   expect_named(long, c("GEO_LEVEL", "GEO", "SUB", "YEAR", "UNIVERSE",
                        "RESOURCE", "METRIC", "VALUE"))
   expect_setequal(unique(long$YEAR), 2018:2020)
@@ -140,7 +140,49 @@ test_that("npc_build_metrics writes CSVs and a manifest", {
   suppressMessages(
     npc_build_metrics(2019:2020, geo = "cbsa", resources = "TOTREV",
                       dir = arch, format = "wide", out_dir = out))
-  expect_true(file.exists(file.path(out, "CONCENTRATION-METRICS-BY-CBSA-TOTREV.CSV")))
+  expect_true(file.exists(file.path(out, "NPCOMPETE-METRICS-BY-CBSA-TOTREV.CSV")))
   mf <- utils::read.csv(file.path(out, "manifest.csv"))
   expect_equal(mf$value[mf$key == "years"], "2019,2020")
+})
+
+test_that("npc_build_metrics long format keeps one copy of resource-free metrics", {
+  arch <- build_tmp_archive()
+  long <- suppressMessages(
+    npc_build_metrics(2020, geo = "county", resources = c("TOTREV", "NETASS"),
+                      dir = arch))
+  dens <- long[long$METRIC == "DENSITY_PER_100K", ]
+  expect_true(all(is.na(dens$RESOURCE)))
+  expect_false(anyDuplicated(paste(dens$GEO, dens$SUB, dens$YEAR)) > 0)
+  expect_setequal(unique(long$RESOURCE[long$METRIC == "HHI"]), c("TOTREV", "NETASS"))
+})
+
+test_that("count-only builds give one table per geography", {
+  arch <- build_tmp_archive()
+  wide <- suppressMessages(
+    npc_build_metrics(2020, geo = "county", metrics = c("DENSITY_PER_100K", "MEDIAN_AGE"),
+                      dir = arch, format = "wide"))
+  expect_named(wide, "county")
+  expect_true(all(c("DENSITY_PER_100K", "MEDIAN_AGE") %in% names(wide$county)))
+  expect_error(npc_build_metrics(2020, metrics = "HHI", universe = "grassroots", dir = arch),
+               "requires financial data")
+})
+
+test_that("rolling windows pool years and drop years without a full window", {
+  arch <- build_tmp_archive()
+  expect_message(
+    w <- npc_build_metrics(2018:2020, geo = "county", window = 2,
+                           metrics = c("DENSITY_PER_100K", "HHI"),
+                           resources = "TOTREV", dir = arch, format = "wide"),
+    "missing window years: 2018")
+  t <- w$county_TOTREV
+  expect_setequal(unique(t$YEAR), 2019:2020)
+  # counts are organizations active in 2019-2020 (no exits in the fixture)
+  raw <- npc_get_orgs(2019:2020, dir = arch)
+  expect_equal(t$N[t$GEO == "ALL" & t$SUB == "ALL" & t$YEAR == 2020],
+               length(unique(raw$EIN2)))
+  # population is the two-year average
+  p <- npc_get_population("county", 2019:2020)
+  expect_equal(t$POP[t$GEO == "50007" & t$SUB == "ALL" & t$YEAR == 2020],
+               mean(p$POP[p$GEO == "50007"]))
+  expect_error(npc_build_metrics(2020, window = 0, dir = arch), "whole number")
 })

@@ -20,11 +20,13 @@ make_subsector <- function(x, subsector) {
 #   `drop_missing_res = TRUE`, as the concentration metrics require.
 # - GEO is kept as character with NA for missing geography. Market-level
 #   rows later drop NA geographies, but national rollups keep those orgs.
+# - `extra` is a named character vector of further numeric columns to carry
+#   along, e.g. c(PROG = "REVPROG"); they are not bottom-coded.
 prep_market_data <- function(df, geography, subsector, resource = NULL,
                              year = NULL, population = NULL,
-                             drop_missing_res = TRUE) {
+                             drop_missing_res = TRUE, extra = NULL) {
 
-  need <- c(geography, subsector, resource, year, population)
+  need <- c(geography, subsector, resource, year, population, unname(extra))
   missing_cols <- setdiff(need, names(df))
   if (length(missing_cols) > 0) {
     stop("Column(s) not found in df: ", paste(missing_cols, collapse = ", "),
@@ -41,6 +43,7 @@ prep_market_data <- function(df, geography, subsector, resource = NULL,
   if (!is.null(year))       dat$YEAR <- df[[year]]
   if (!is.null(resource))   dat$RES  <- bottomcode(suppressWarnings(as.numeric(df[[resource]])))
   if (!is.null(population)) dat$POP  <- suppressWarnings(as.numeric(df[[population]]))
+  for (nm in names(extra)) dat[[nm]] <- suppressWarnings(as.numeric(df[[extra[[nm]]]]))
 
   if (drop_missing_res && !is.null(resource)) dat <- dat[!is.na(dat$RES), , drop = FALSE]
   if (!is.null(year)) dat <- dat[!is.na(dat$YEAR), , drop = FALSE]
@@ -54,16 +57,22 @@ prep_market_data <- function(df, geography, subsector, resource = NULL,
 #   SUB x YEAR         (GEO = "ALL"; includes orgs with missing GEO)
 #   YEAR               (GEO = "ALL", SUB = "ALL"; national total)
 #
-# `.f` takes the resource vector for one group and returns a named list of
-# metric values. Grouping uses data.table, which is much faster than
-# building a data frame per group when there are many small markets.
-summarize_levels <- function(dat, .f) {
+# `.f` takes the group's values of `cols` (by default the resource vector)
+# as positional arguments and returns a named list of metric values.
+# Grouping uses data.table, which is much faster than building a data frame
+# per group when there are many small markets.
+summarize_levels <- function(dat, .f, cols = "RES") {
 
   yr <- if ("YEAR" %in% names(dat)) "YEAR" else character(0)
   dt <- data.table::as.data.table(dat)
 
   run <- function(d, keys) {
-    out <- if (length(keys) > 0) d[, .f(RES), by = keys] else d[, .f(RES)]
+    by <- if (length(keys) > 0) keys else NULL
+    out <- if (identical(cols, "RES")) {
+      d[, .f(RES), by = by]
+    } else {
+      d[, do.call(.f, unname(as.list(.SD))), by = by, .SDcols = cols]
+    }
     dplyr::as_tibble(as.data.frame(out))
   }
 
