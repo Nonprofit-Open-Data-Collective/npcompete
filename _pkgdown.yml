@@ -1,0 +1,41 @@
+url: https://nonprofit-open-data-collective.github.io/npcompete/
+destination: docs
+
+# The NODC site style (colours, fonts, navbar, light/dark switch) comes from
+# the pkgstyle template package. Do not add bslib settings or
+# pkgdown/extra.css here unless this site needs to differ.
+template:
+  package: pkgstyle
+
+home:
+  title: "npcompete: Competition Metrics for Nonprofit Markets"
+
+navbar:
+  structure:
+    left: [intro, reference]
+
+reference:
+- title: All metrics at once
+  desc: Compute every competition metric for each market in one call.
+  contents:
+  - get_all_metrics
+- title: Concentration
+  desc: How resources are shared among the organizations in a market.
+  contents:
+  - get_hhi
+  - get_nhhi
+  - get_cr
+  - get_kwoka_index
+  - get_gini
+- title: Density
+  desc: Nonprofits per capita, overall and by size or type.
+  contents:
+  - starts_with("get_density")
+- title: Efficiency
+  contents:
+  - get_fundraising_efficiency
+- title: Data
+  desc: Sample organizations and population counts used by the examples.
+  contents:
+  - nonprofit_sample
+  - county_population

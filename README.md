@@ -18,7 +18,7 @@ dat.hhi <- get_hhi( df=nonprofit_sample,
 head( dat.hhi )
 ```
 
-![](img/hhi.png)
+![HHI output for the sample data](man/figures/hhi.png)
 
 
 The package will generate the following competition metrics: 
