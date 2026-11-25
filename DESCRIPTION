@@ -26,7 +26,12 @@ Imports:
 Suggests:
     data.table,
     devtools,
+    ggplot2,
+    knitr,
+    rmarkdown,
+    scales,
     testthat (>= 3.0.0)
+VignetteBuilder: knitr
 Config/testthat/edition: 3
 Config/Needs/website: Nonprofit-Open-Data-Collective/pkgstyle
 Encoding: UTF-8
