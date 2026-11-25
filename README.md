@@ -163,6 +163,24 @@ rbind( head( big, 3 ), tail( big, 3 ) ) |>
 | Pittsburgh, PA                               |  2456039 |  3708 | 0.183 | 0.617 |
 | San Francisco-Oakland-Fremont, CA            |  4707646 |  8597 | 0.236 | 0.747 |
 
+### Published national tables
+
+Precomputed tables with every metric, every year from 2012 to 2022,
+CBSAs and counties, and the filers, registered and grassroots universes
+are published as [GitHub release
+assets](https://github.com/Nonprofit-Open-Data-Collective/npcompete/releases).
+`npc_load_metrics()` downloads one and caches it:
+
+``` r
+m <- npc_load_metrics( universe = "filers", geo = "cbsa", resource = "TOTREV" )
+subset( m, GEO == "35620" & SUB == "ALL", c( YEAR, N, HHI, ENTRY_RATE, EXIT_RATE ) )
+
+npc_metric_vintages()   # published versions, newest first
+```
+
+They replace the 1990-2019 `data-share/np-compete.csv` of the first
+version of the package.
+
 ## Building metrics for many years
 
 For national builds across years, npcompete reads from a local archive:

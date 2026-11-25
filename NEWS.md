@@ -1,5 +1,15 @@
 # npcompete (development version)
 
+## Published metric tables
+
+* `npc_load_metrics()` downloads precomputed national metric tables from
+  the package's GitHub releases (tagged `metrics-YYYY.MM`) and caches them;
+  `npc_metric_vintages()` lists the releases. The tables cover 501(c)(3)s,
+  tax years 2012-2022, CBSAs and counties, the filers (three resources),
+  registered and grassroots universes, and every metric including
+  dynamics. `data-raw/publish-metrics.R` builds them from public NCCS data.
+  They replace `data-share/np-compete.csv` (1990-2019).
+
 ## Dashboard (Phase 6)
 
 * `npc_dashboard()` opens a Shiny app on any output of

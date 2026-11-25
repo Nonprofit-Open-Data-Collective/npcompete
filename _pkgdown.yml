@@ -72,6 +72,11 @@ reference:
   desc: Entry, exit, churn, graduation and downgrade rates by market.
   contents:
   - get_dynamics
+- title: Published tables
+  desc: Download precomputed national metric tables.
+  contents:
+  - npc_load_metrics
+  - npc_metric_vintages
 - title: Dashboard
   desc: Browse metric output in an interactive Shiny app.
   contents:
