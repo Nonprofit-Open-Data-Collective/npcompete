@@ -8,14 +8,17 @@ npc_build_metrics(
   years,
   geo = c("cbsa", "county"),
   resources = c("TOTREV", "TOTEXP", "NETASS"),
+  metrics = "default",
   universe = c("filers", "registered", "grassroots"),
   source = c("archive", "nccs"),
   dir = npc_archive_dir(),
   subsection = 3,
   include_imputed = TRUE,
   cbsa = c("crosswalk", "geocode"),
+  window = 1,
   density_model = c("negbin", "poisson", "loglinear"),
-  cr_n = 1:8,
+  small_max = 1e+05,
+  large_min = 1e+07,
   drop_incomplete_years = TRUE,
   format = c("long", "wide"),
   out_dir = NULL
@@ -26,8 +29,11 @@ npc_build_metrics(
 
 \item{geo}{Geography levels: \code{"cbsa"}, \code{"county"}, or both.}
 
-\item{resources}{Resource columns for the concentration metrics, any of
+\item{resources}{Resource columns for the resource-based metrics, any of
 \code{"TOTREV"}, \code{"TOTEXP"}, \code{"NETASS"}, \code{"TOTASS"}.}
+
+\item{metrics}{Metric ids from \code{\link[=npc_metrics]{npc_metrics()}}, or \code{"default"} for every
+metric valid for \code{universe}.}
 
 \item{universe}{Which organizations: \code{"filers"} (Form 990 and 990-EZ
 filers). The registered and grassroots universes are planned.}
@@ -48,26 +54,36 @@ to its CBSA under the 2023 delineation (\link{cbsa_county_xwalk}), matching
 the population data; \code{"geocode"} uses the CBSA assigned when the
 address was geocoded.}
 
-\item{density_model}{Passed to \code{\link[=get_scale_free_density]{get_scale_free_density()}} as \code{model}.}
+\item{window}{Number of years pooled for each reported year. With
+\code{window = 3}, the value for 2020 uses 2018-2020: each organization's
+financial values are averaged over the years it appears, its location
+and subsector come from its latest year, and population is the
+three-year average. Counts are then organizations active at any point
+in the window. Use it to steady metrics for small markets.}
 
-\item{cr_n}{Integer vector of concentration ratio levels to compute.}
+\item{small_max}{Organizations with a resource value below this are
+"small". The default is $100,000.}
 
-\item{drop_incomplete_years}{Drop requested years that hold a partial
-panel, judged against the year counts of the whole archive (see
-\code{\link[=npc_archive_info]{npc_archive_info()}}).}
+\item{large_min}{Organizations with a resource value at or above this are
+"large". The default is $10 million.}
+
+\item{drop_incomplete_years}{Drop reported years whose data (including
+the earlier years of a window) hold a partial panel, judged against the
+year counts of the whole archive (see \code{\link[=npc_archive_info]{npc_archive_info()}}).}
 
 \item{format}{\code{"long"} (one row per market, metric and resource) or
-\code{"wide"} (a named list of tables, one per geography and resource, in the
-layout of \code{\link[=get_all_metrics]{get_all_metrics()}}).}
+\code{"wide"} (a named list of tables, one per geography and resource).}
 
 \item{out_dir}{Optional directory. When set, results are written there as
 CSV along with \code{manifest.csv}.}
 }
 \value{
 For \code{format = "long"}, a tibble with \code{GEO_LEVEL}, \code{GEO}, \code{SUB},
-\code{YEAR}, \code{UNIVERSE}, \code{RESOURCE}, \code{METRIC} and \code{VALUE}. For
-\code{format = "wide"}, a named list of tibbles such as \code{cbsa_TOTREV}. Both
-carry a \code{"manifest"} attribute describing the build.
+\code{YEAR}, \code{UNIVERSE}, \code{RESOURCE}, \code{METRIC} and \code{VALUE}. Metrics that do not
+depend on the resource (counts, age, commercial share, ...) appear once,
+with \code{RESOURCE = NA}. For \code{format = "wide"}, a named list of tibbles such
+as \code{cbsa_TOTREV} (or \code{cbsa} when no requested metric depends on the
+resource). Both carry a \code{"manifest"} attribute describing the build.
 
 Rows with \code{GEO = "ALL"} are national: they include organizations outside
 any market of that level (for example, outside every CBSA), and their
@@ -75,9 +91,9 @@ any market of that level (for example, outside every CBSA), and their
 }
 \description{
 Reads organizations for the requested years, attaches market populations,
-and computes every metric from \code{\link[=get_all_metrics]{get_all_metrics()}} for each geography
-level and resource. Returns a tidy long table (or the familiar wide
-tables) and can write the results with a manifest of what was used.
+and computes the requested metrics (see \code{\link[=npc_metrics]{npc_metrics()}}) for each
+geography level and resource. Returns a tidy long table (or wide tables)
+and can write the results with a manifest of what was used.
 }
 \examples{
 \dontrun{
@@ -86,7 +102,8 @@ options( npcompete.archive_dir = "D:/data/npcompete-archive" )
 m <- npc_build_metrics( 2015:2020, geo = "cbsa", resources = "TOTREV" )
 subset( m, GEO == "35620" & SUB == "ALL" & METRIC == "HHI" )
 
-# Same tables as the original build script, written to disk
-npc_build_metrics( 2011:2022, format = "wide", out_dir = "metrics" )
+# Density and age only, three-year windows, county level
+npc_build_metrics( 2014:2022, geo = "county", window = 3,
+                   metrics = c( "DENSITY_PER_100K", "MEDIAN_AGE" ) )
 }
 }

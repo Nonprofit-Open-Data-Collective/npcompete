@@ -23,6 +23,8 @@ old_dir <- "data-local"
 
 new <- npc_build_metrics( 2011:2022, geo = "cbsa",
                           resources = c( "TOTREV", "TOTEXP", "NETASS" ),
+                          metrics = c( "HHI", "NHHI", paste0( "CR", 1:8 ), "KWOKA",
+                                       "GINI", "DENSITY_PCTL_N" ),
                           cbsa = "geocode", density_model = "loglinear",
                           dir = arch, format = "wide" )
 
@@ -33,6 +35,7 @@ compare_one <- function( res )
     as.data.frame() |>
     filter( YEAR %in% 2011:2022 )
   nw <- new[[ paste0( "cbsa_", res ) ]] |> as.data.frame()
+  nw$N <- nw$N_RES     # the original N counted orgs with a non-missing resource
 
   key <- c( "GEO", "SUB", "YEAR" )
   m <- inner_join( old, nw, by = key, suffix = c( ".old", ".new" ) ) |>
