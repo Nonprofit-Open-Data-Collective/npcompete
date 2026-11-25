@@ -66,6 +66,9 @@ get_scale_free_density <- function(df, geography = "CENSUS_CBSA_FIPS",
                                    model = c("negbin", "poisson", "loglinear")) {
 
   model <- match.arg(model)
+  if (is.null(pop_table) && is.null(population))
+    stop("Supply either a `population` column or a `pop_table`.", call. = FALSE)
+  if (!is.null(pop_table)) population <- NULL       # market-level population only
 
   dat <- prep_market_data(df, geography, subsector, resource, year,
                           population, drop_missing_res = FALSE)
@@ -132,10 +135,9 @@ get_scale_free_density <- function(df, geography = "CENSUS_CBSA_FIPS",
     dplyr::ungroup()
 
   # --- National rows (GEO = "ALL"), not part of the models -----------------
-  national <- dat |>
-    dplyr::group_by(SUB, YEAR) |>
-    dplyr::summarize(N = dplyr::n(), RES2 = sum(RES, na.rm = TRUE),
-                     .groups = "drop") |>
+  national <- dplyr::bind_rows(
+      count_cells(dat, c("SUB", "YEAR")),
+      count_cells(dat, "YEAR") |> dplyr::mutate(SUB = "ALL")) |>
     dplyr::left_join(
       frame |> dplyr::group_by(YEAR) |>
         dplyr::summarize(POP = sum(POP), .groups = "drop"),
@@ -175,25 +177,42 @@ fit_density_model <- function(d, outcome, model) {
     return(stats::lm(Y ~ LOG_POP, data = d))
   }
 
-  d$Y <- y
-  if (outcome == "RES2") {
-    # Poisson pseudo-maximum likelihood for non-negative continuous totals
-    return(stats::glm(Y ~ LOG_POP, family = stats::quasipoisson(), data = d))
+  ctrl <- stats::glm.control(maxit = 100)
+  fit_glm <- function(family) {
+    fit <- tryCatch(suppressWarnings(
+      stats::glm(Y ~ LOG_POP, family = family, data = d, control = ctrl)),
+      error = function(e) NULL)
+    if (is.null(fit) || !fit$converged) NULL else fit
   }
 
+  if (outcome == "RES2") {
+    # Poisson pseudo-maximum likelihood for non-negative dollar totals. The
+    # outcome is divided by its mean for numerical stability; this changes
+    # only the intercept, and fitted values are scaled back.
+    s <- mean(y)
+    d$Y <- y / s
+    fit <- fit_glm(stats::quasipoisson())
+    if (!is.null(fit)) fit$npc_scale <- s
+    return(fit)
+  }
+
+  d$Y <- y
   if (model == "negbin") {
     fit <- tryCatch(
-      suppressWarnings(MASS::glm.nb(Y ~ LOG_POP, data = d)),
+      suppressWarnings(MASS::glm.nb(Y ~ LOG_POP, data = d, control = ctrl)),
       error = function(e) NULL)
-    if (!is.null(fit) && is.finite(fit$theta)) return(fit)
+    if (!is.null(fit) && fit$converged && is.finite(fit$theta)) return(fit)
   }
-  suppressWarnings(stats::glm(Y ~ LOG_POP, family = stats::poisson(), data = d))
+  fit_glm(stats::poisson())
 }
 
 # Expected values on the original scale (counts or dollars).
 expected_value <- function(m, n) {
   if (is.null(m)) return(rep(NA_real_, n))
-  if (inherits(m, "glm")) return(unname(stats::fitted(m)))
+  if (inherits(m, "glm")) {
+    s <- if (is.null(m$npc_scale)) 1 else m$npc_scale
+    return(unname(stats::fitted(m)) * s)
+  }
   unname(exp(stats::fitted(m)) - 1)                 # loglinear: back-transform
 }
 

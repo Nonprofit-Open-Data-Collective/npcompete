@@ -87,3 +87,11 @@ test_that("NTEEV2 codes are cut to the major group", {
 test_that("missing columns give an informative error", {
   expect_error(get_hhi(toy_panel(), geography = "NOPE"), "not found")
 })
+
+test_that("a national all-subsector row is included", {
+  out <- run_toy(get_nhhi)
+  nat <- cell(out, "ALL", "ALL")
+  expect_equal(nrow(nat), 1)
+  expect_equal(nat$N, 9)                             # all 2020 orgs with revenue
+  expect_equal(nat$TOTREV, 325)
+})

@@ -11,7 +11,8 @@
 #' @param year Name of the column that identifies the year, such as
 #'   `"TAXYEAR"`.
 #' @param population Name of the column that holds the market's population,
-#'   such as `"POP_METRO"` or `"POP_COUNTY"`.
+#'   such as `"POP_METRO"` or `"POP_COUNTY"`. Ignored, and may be `NULL`,
+#'   when `pop_table` is supplied.
 #'
 #' @name npcompete-params
 #' @keywords internal

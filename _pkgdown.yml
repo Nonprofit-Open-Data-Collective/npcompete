@@ -60,3 +60,6 @@ reference:
   - cbsa_metrics
   - nonprofit_sample
   - county_population
+  - pop_county
+  - pop_cbsa
+  - cbsa_county_xwalk

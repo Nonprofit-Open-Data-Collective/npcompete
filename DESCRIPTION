@@ -24,6 +24,7 @@ Imports:
     tidyr,
     utils
 Suggests:
+    arrow,
     data.table,
     devtools,
     ggplot2,
