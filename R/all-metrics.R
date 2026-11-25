@@ -2,79 +2,71 @@
 ###   Get all metrics
 ###---------------------------------------------------
 
-#' @title
-#' Get all metrics
+#' Compute all competition metrics in one table
 #'
-#' @description
-#' Calculate all competition metrics and return in a single dataframe and return a dataframe.
+#' Runs [get_gini()], [get_nhhi()], [get_kwoka()], [get_cr_all()] and
+#' [get_scale_free_density()] and joins the results, one row per geography,
+#' subsector and year (plus `ALL` rollups).
 #'
-#' @param df A dataframe containing the required fields for computing the metric grouped by geographical level and sub sector.
-#' @param geo A character string indicating the column name for geographical area unique code.
-#' @param subsector A character string indicating the column name for sub sectors.
-#' @param resource A character string indicating the column name for resource based on which HHI is calculated. Example: Revenue, assets etc.
-#' @param resource.name A character string indicating the column name for the new column generated with aggregated resource.
-#' @param normalizer A character string indicating the column name for the column used to normalize the HHI index.
-#' @param number A numeric value that is used to calculate concentration ratio for top that number of firms. Value ranges from 1-8. Example, 4 if concentration ratio for top 4 firms.
-#' @param smaller.than A numeric value indicating that it is the upper limit of the resource for density evaluation. All organizations having resource value less than that would be counted for evaluation.
-#' @param resource.greater.than A numeric value indicating that it is the lower limit of the resource for density evaluation. All organizations having resource value greater than that would be counted for evaluation.
-#' @param comm.cols A vector containing list of column names that have the commercial metrics for the resource.
-#' @param fundraising.cols A vector containing list of column names that have the fundraising fees for the nonprofits.
-#' 
+#' @inheritParams npcompete-params
+#' @param cr_n Integer vector of concentration ratio levels to compute.
 #'
-#' @return A new dataframe with all metrics evaluated for each year.
+#' @return A tibble with `GEO`, `SUB`, `YEAR`, `N`, `POP`, the summed
+#'   resource, `LOG_NPO`, `LOG_POP`, `LOG_<resource>`, `DENSITY_PCTL_N`,
+#'   `DENSITY_PCTL_R`, `GINI`, `HHI`, `NHHI`, `KWOKA` and `CR1` to `CR8`.
 #'
 #' @examples
-#' 
-#  dat.all <- get_all_metrics(nonprofit_sample,'MSA_NECH','NTMAJ12','TOTREV', 'Revenue', 'EIN',4, 'FIPS', 2000, 100000, 100000, c('PROGREV', 'INVINC') ,c('FUNDFEES', 'SOLICIT'))
-#' head( dat.all )
+#' \dontrun{
+#' get_all_metrics( df, geography = "CENSUS_CBSA_FIPS",
+#'                  population = "POP_METRO", resource = "TOTREV" )
+#' }
 #'
 #' @export
-get_all_metrics <- function(df, geo, subsector, resource, resource.name, normalizer, fips, dat.year, resource.smaller.than, resource.greater.than, comm.cols, fundraising.cols ){
-  
-  
-  dat.hhi <- get_hhi(df, {{geo}}, subsector, resource, resource.name)
-  dat.hhi <- select(dat.hhi, geo, subsector, hhi,n)
-   
-  dat.nhhi <- get_nhhi(df, geo, subsector, resource, normalizer)
-  dat.nhhi <- select(dat.nhhi, geo, subsector, nhhi)
+get_all_metrics <- function(df,
+                            geography  = "CENSUS_CBSA_FIPS",
+                            population = "POP_METRO",
+                            subsector  = "NTEEV2",
+                            resource   = "TOTREV",
+                            year       = "TAXYEAR",
+                            cr_n       = 1:8) {
 
-  
-  crlist = list()
-  for (num in 1:8){
-    dat.cr <- get_cr(df, geo, subsector, resource, num)
-    crlist[[num]] <- dat.cr 
-  } 
-  dat.cr <- Reduce(merge, crlist)
-  drop.cols <- c("top1","top2","top3","top4","top5","top6","top7","top8","total")
-  dat.cr <- dat.cr[ , !(names(dat.cr) %in% drop.cols)]
+  # --- Run all individual metrics ------------------------------------------
+  message("Calculating Gini...")
+  dat_gini  <- get_gini(df, geography, subsector, resource, year)
 
-  dat.kindex <- get_kwoka_index(df, geo, subsector, resource)
-  dat.kindex <- select(dat.kindex, geo, subsector, kindex)
-  
-  
-  dat.density <- get_density(df, geo, subsector, all_of(fips) , dat.year)
-  dat.density <- select(dat.density, geo, subsector, densityper100000)
-  
-  
-  dat.density.smallerthan <- get_density_small(df, geo, subsector, all_of(fips) , dat.year, resource, resource.smaller.than )
-  dat.density.smallerthan <- select(dat.density.smallerthan, geo, subsector, densitysmallper100000 )
-  
-  dat.density.greaterthan <- get_density_big(df, geo, subsector, all_of(fips) , dat.year, resource, resource.greater.than )
-  dat.density.greaterthan <- select(dat.density.greaterthan, geo, subsector, densitybigper100000 )
-  
-  
-  dat.gini <- get_gini(df,geo, subsector, resource)
-  dat.gini <- select(dat.gini, geo, subsector, gini)
-  
-  
-  dat.density.comm <- get_density_commercial(df, geo, subsector, resource, comm.cols)
-  dat.density.comm <- select(dat.density.comm, geo, subsector, density_commercial)
-  
-  dat.fund.eff <- get_fundraising_efficiency (df, geo, subsector, resource, fundraising.cols)
-  dat.fund.eff <- select(dat.fund.eff, geo, subsector, fundraising_efficiency)
-  
-  dat.all <- Reduce(merge, list(dat.hhi, dat.nhhi, dat.cr, dat.kindex, dat.gini, dat.density, dat.density.smallerthan, dat.density.greaterthan, dat.density.comm, dat.fund.eff))
-  dat.all$year <- dat.year
+  message("Calculating normalized HHI...")
+  dat_nhhi  <- get_nhhi(df, geography, subsector, resource, year)
 
-  return (dat.all)
-} 
+  message("Calculating Kwoka index...")
+  dat_kwoka <- get_kwoka(df, geography, subsector, resource, year)
+
+  message("Calculating concentration ratios...")
+  dat_cr    <- get_cr_all(df, geography, subsector, year, resource, numbers = cr_n)
+
+  message("Calculating nonprofit density...")
+  dat_den   <- get_scale_free_density(df, geography, population, subsector, year, resource)
+  dat_den   <- dplyr::select( dat_den, -model_n, -model_r, -N, -dplyr::all_of(resource) )
+
+  # --- Merge all results ---------------------------------------------------
+  # Joins use every shared column (GEO, SUB, YEAR, and N / resource where
+  # both tables have them), matching the behavior of the original build.
+  join_all <- function(x, y) dplyr::full_join(x, y, by = intersect(names(x), names(y)))
+
+  out <- dat_gini |>
+    join_all( dat_nhhi ) |>
+    join_all( dat_kwoka ) |>
+    join_all( dat_cr ) |>
+    dplyr::full_join( dat_den, by = c("GEO", "SUB", "YEAR") )
+
+  # --- Tidy up column order ------------------------------------------------
+  log_resource <- paste0( "LOG_", resource )
+  metric_cols <- c(
+    "N", "POP", resource, "LOG_NPO", "LOG_POP", log_resource,
+    "DENSITY_PCTL_N", "DENSITY_PCTL_R", "GINI", "HHI", "NHHI", "KWOKA",
+    paste0("CR", cr_n)
+  )
+  existing_cols <- intersect(metric_cols, names(out))
+  out <- dplyr::select(out, GEO, SUB, YEAR, dplyr::all_of(existing_cols))
+
+  return(out)
+}

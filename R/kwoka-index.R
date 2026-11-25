@@ -2,27 +2,25 @@
 ###   Kwoka Index
 ###---------------------------------------------------
 
-#' @title
-#' Kwoka Index
+#' Kwoka index
 #'
-#' @description
-#' Calculate the Kwoka Index (kindex) and return a dataframe.
+#' Concentration among the three largest organizations in each geography,
+#' subsector and year, with rollups for all subsectors (`SUB = "ALL"`) and all
+#' geographies (`GEO = "ALL"`).
 #'
-#' @param df A dataframe containing the required fields for computing the metric(kwoka index) grouped by geographical level and sub sector.
-#' @param geo A character string indicating the column name for georaphical area unique code.
-#' @param subsector A character string indicating the column name for sub sectors.
-#' @param resource A character string indicating the column name for resource based on which cr4 is calculated. Example: Revenue, assets etc.
+#' @inheritParams npcompete-params
 #'
-#' @return A new dataframe with the Kwoka Index (`kindex`),
-#'  grouped by geographical level and sub sectors.
+#' @return A tibble with `GEO`, `SUB`, `YEAR`, `N`, the shares of the three
+#'   largest organizations (`top1`, `top2`, `top3`, `total_top3`) and `KWOKA`.
+#'   Markets with fewer than three organizations get `KWOKA = 1`.
 #'
-#' @details The Kwoka Index(kindex) is a measure of market concentration that is used to understand market competitiveness,
-#'  competitive behavior and performance in markets.
+#' @details `KWOKA` is computed as the sum of the squared shares of the top
+#'   three organizations, each rescaled by their combined share.
 #'
 #' @examples
-#' data(nonprofit_sample)
-#  dat.kindex <-get_kwoka_index( df=nonprofit_sample,'MSA_NECH','NTMAJ12','TOTREV')
-#' head( dat.kindex )
+#' \dontrun{
+#' get_kwoka( df, resource = "TOTREV" )
+#' }
 #'
 #' @export
 get_kwoka <- function(df, geography="CENSUS_CBSA_FIPS", subsector="NTEEV2", resource="TOTREV", year="TAXYEAR"){
@@ -39,7 +37,7 @@ get_kwoka <- function(df, geography="CENSUS_CBSA_FIPS", subsector="NTEEV2", reso
 
   dat.k1 <- 
     data.frame(GEO,SUB,YEAR,RES) %>%
-    na.omit() %>%
+    stats::na.omit() %>%
     dplyr::filter(!is.na(RES)) %>%
     dplyr::group_by(GEO, SUB, YEAR) %>%
     dplyr::mutate(share = RES / sum(RES, na.rm = TRUE)) %>%  # normalize to shares
@@ -58,7 +56,7 @@ get_kwoka <- function(df, geography="CENSUS_CBSA_FIPS", subsector="NTEEV2", reso
 
   dat.k2 <- 
     data.frame(GEO,YEAR,RES) %>%
-    na.omit() %>%
+    stats::na.omit() %>%
     dplyr::filter(!is.na(RES)) %>%
     dplyr::group_by(GEO, YEAR) %>%
     dplyr::mutate(share = RES / sum(RES, na.rm = TRUE)) %>%  # normalize to shares
@@ -78,7 +76,7 @@ get_kwoka <- function(df, geography="CENSUS_CBSA_FIPS", subsector="NTEEV2", reso
     
   dat.k3 <- 
     data.frame(SUB,YEAR,RES) %>%
-    na.omit() %>%
+    stats::na.omit() %>%
     dplyr::filter(!is.na(RES)) %>%
     dplyr::group_by(SUB, YEAR) %>%
     dplyr::mutate(share = RES / sum(RES, na.rm = TRUE)) %>%  # normalize to shares
@@ -128,7 +126,9 @@ get_kwoka <- function(df, geography="CENSUS_CBSA_FIPS", subsector="NTEEV2", reso
 #' }
 #'
 #' @examples
-#' get_kwoka_index_k(df, "RES", c("GEO", "SUB", "YEAR"), k = 3)
+#' \dontrun{
+#' get_kwoka_k( df, "RES", c("GEO", "SUB", "YEAR"), k = 3 )
+#' }
 #'
 #' @export
 get_kwoka_k <- function(data, share_var, group_vars, k = 3) {
@@ -137,7 +137,7 @@ get_kwoka_k <- function(data, share_var, group_vars, k = 3) {
 
   data %>%
     dplyr::filter(!is.na(!!share_sym)) %>%
-    dplyr::group_by(dplyr::across(all_of(group_vars))) %>%
+    dplyr::group_by(dplyr::across(dplyr::all_of(group_vars))) %>%
     dplyr::mutate(share = !!share_sym / sum(!!share_sym, na.rm = TRUE)) %>%
     dplyr::arrange(dplyr::desc(share), .by_group = TRUE) %>%
     dplyr::summarize(

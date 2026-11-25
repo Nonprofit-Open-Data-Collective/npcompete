@@ -1,6 +1,4 @@
-#' @importFrom magrittr "%>%"
 # @export
-# magrittr::`%>%`
 
 bottomcode <- function(x)
 {

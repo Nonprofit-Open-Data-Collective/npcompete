@@ -4,25 +4,35 @@
 \alias{get_hhi}
 \title{Herfindahl–Hirschman Index}
 \usage{
-get_hhi(df, geo, subsector, resource, resource.name = "resource")
+get_hhi(
+  df,
+  geography = "CENSUS_CBSA_FIPS",
+  subsector = "NTEEV2",
+  resource = "TOTREV",
+  year = "TAXYEAR"
+)
 }
 \arguments{
-\item{df}{A dataframe containing the required fields for computing the metric(hhi) grouped by geographical level and sub sector.}
+\item{df}{A data frame with one row per organization-year.}
 
-\item{geo}{A character string indicating the column name for geographical area unique code.}
+\item{geography}{Name of the column that identifies the market's
+geography, such as \code{"CENSUS_CBSA_FIPS"} or \code{"COUNTY_FIPS"}.}
 
-\item{subsector}{A character string indicating the column name for sub sectors.}
+\item{subsector}{Name of the column that identifies the subsector. When it
+is \code{"NTEEV2"}, the first three characters (the major group) are used.}
 
-\item{resource}{A character string indicating the column name for resource based on which HHI is calculated. Example: Revenue, assets etc.}
+\item{resource}{Name of the numeric column that measures organization size,
+such as \code{"TOTREV"}, \code{"TOTEXP"} or \code{"NETASS"}. Negative values are set to
+zero.}
 
-\item{resource.name}{A character string indicating the column name for the new column generated with aggregated resource.}
+\item{year}{Name of the year column, or \code{NULL} to pool all years.}
 }
 \value{
-A new dataframe with the Herfindahl–Hirschman Index (\code{hhi}),
-grouped by geographical level and sub sectors.
+A tibble with \code{GEO}, \code{SUB}, \code{YEAR} (unless \code{year = NULL}), \code{N}, the
+summed resource and \code{HHI}.
 }
 \description{
-Calculate the Herfindahl–Hirschman Index (HHI) and return a dataframe.
+Market concentration in each geography, subsector and year.
 }
 \details{
 The Herfindahl–Hirschman Index(HHI) is a measure of market concentration that is used to understand market competitiveness,
@@ -33,7 +43,8 @@ The calculated values range from 1/N to 1, where N is the number of organization
 In contrast, a market with an HHI close to 0 would be viewed as a nearly competition one.
 }
 \examples{
-data(nonprofit_sample)
-head( dat.hhi )
+\dontrun{
+get_hhi( df, resource = "TOTREV" )
+}
 
 }

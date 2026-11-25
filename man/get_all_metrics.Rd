@@ -2,50 +2,53 @@
 % Please edit documentation in R/all-metrics.R
 \name{get_all_metrics}
 \alias{get_all_metrics}
-\title{Get all metrics}
+\title{Compute all competition metrics in one table}
 \usage{
 get_all_metrics(
   df,
-  geo,
-  subsector,
-  resource,
-  resource.name,
-  normalizer,
-  fips,
-  dat.year,
-  resource.smaller.than,
-  resource.greater.than,
-  fundraising.cols
+  geography = "CENSUS_CBSA_FIPS",
+  population = "POP_METRO",
+  subsector = "NTEEV2",
+  resource = "TOTREV",
+  year = "TAXYEAR",
+  cr_n = 1:8
 )
 }
 \arguments{
-\item{df}{A dataframe containing the required fields for computing the metric grouped by geographical level and sub sector.}
+\item{df}{A data frame with one row per organization-year.}
 
-\item{geo}{A character string indicating the column name for geographical area unique code.}
+\item{geography}{Name of the column that identifies the market's
+geography, such as \code{"CENSUS_CBSA_FIPS"} or \code{"COUNTY_FIPS"}.}
 
-\item{subsector}{A character string indicating the column name for sub sectors.}
+\item{population}{Name of the column that holds the market's population,
+such as \code{"POP_METRO"} or \code{"POP_COUNTY"}.}
 
-\item{resource}{A character string indicating the column name for resource based on which HHI is calculated. Example: Revenue, assets etc.}
+\item{subsector}{Name of the column that identifies the subsector. When it
+is \code{"NTEEV2"}, the first three characters (the major group) are used.}
 
-\item{resource.name}{A character string indicating the column name for the new column generated with aggregated resource.}
+\item{resource}{Name of the numeric column that measures organization size,
+such as \code{"TOTREV"}, \code{"TOTEXP"} or \code{"NETASS"}. Negative values are set to
+zero.}
 
-\item{normalizer}{A character string indicating the column name for the column used to normalize the HHI index.}
+\item{year}{Name of the column that identifies the year, such as
+\code{"TAXYEAR"}.}
 
-\item{resource.greater.than}{A numeric value indicating that it is the lower limit of the resource for density evaluation. All organizations having resource value greater than that would be counted for evaluation.}
-
-\item{fundraising.cols}{A vector containing list of column names that have the fundraising fees for the nonprofits.#'}
-
-\item{number}{A numeric value that is used to calculate concentration ratio for top that number of firms. Value ranges from 1-8. Example, 4 if concentration ratio for top 4 firms.}
-
-\item{smaller.than}{A numeric value indicating that it is the upper limit of the resource for density evaluation. All organizations having resource value less than that would be counted for evaluation.}
+\item{cr_n}{Integer vector of concentration ratio levels to compute.}
 }
 \value{
-A new dataframe with all metrics evaluated for each year.
+A tibble with \code{GEO}, \code{SUB}, \code{YEAR}, \code{N}, \code{POP}, the summed
+resource, \code{LOG_NPO}, \code{LOG_POP}, \verb{LOG_<resource>}, \code{DENSITY_PCTL_N},
+\code{DENSITY_PCTL_R}, \code{GINI}, \code{HHI}, \code{NHHI}, \code{KWOKA} and \code{CR1} to \code{CR8}.
 }
 \description{
-Calculate all competition metrics and return in a single dataframe and return a dataframe.
+Runs \code{\link[=get_gini]{get_gini()}}, \code{\link[=get_nhhi]{get_nhhi()}}, \code{\link[=get_kwoka]{get_kwoka()}}, \code{\link[=get_cr_all]{get_cr_all()}} and
+\code{\link[=get_scale_free_density]{get_scale_free_density()}} and joins the results, one row per geography,
+subsector and year (plus \code{ALL} rollups).
 }
 \examples{
-head( dat.all )
+\dontrun{
+get_all_metrics( df, geography = "CENSUS_CBSA_FIPS",
+                 population = "POP_METRO", resource = "TOTREV" )
+}
 
 }

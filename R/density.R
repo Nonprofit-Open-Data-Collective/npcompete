@@ -21,10 +21,9 @@
 #' as the number of organizations per 100,000 population.
 #'
 #' @examples
-#' data(county_population)
-#' data(nonprofit_sample)
-#  dat.den.2009 <- get_density( df=nonprofit_sample,'MSA_NECH','NTMAJ12','FIPS', 2009)
-#' head( dat.den.2009 )
+#' \dontrun{
+#' get_density( nonprofit_sample, 'MSA_NECH', 'NTMAJ12', 'FIPS', 2009 )
+#' }
 #'
 #' @export
 get_density <- function(df, geo, subsector, fips, year){
@@ -83,10 +82,10 @@ get_density <- function(df, geo, subsector, fips, year){
 #' as the number of organizations per 100,000 population.
 #'
 #' @examples
-#' data(county_population)
-#' data(nonprofit_sample)
-#' dat.den.2009 <- get_density_small( df=nonprofit_sample,'MSA_NECH','NTMAJ12','FIPS', 2009, 'TOTREV', 100000)
-#' head( dat.den.2009 )
+#' \dontrun{
+#' get_density_small( nonprofit_sample, 'MSA_NECH', 'NTMAJ12', 'FIPS',
+#'                    2009, 'TOTREV', 100000 )
+#' }
 #'
 #' @export
 get_density_small <- function(df, geo, subsector, fips, year, resource, smaller.than){
@@ -148,10 +147,10 @@ get_density_small <- function(df, geo, subsector, fips, year, resource, smaller.
 #' as the number of organizations per 100,000 population.
 #'
 #' @examples
-#' data(county_population)
-#' data(nonprofit_sample)
-#' dat.den.2009 <- get_density_big( df=nonprofit_sample,'MSA_NECH','NTMAJ12','FIPS', 2009, 'TOTREV', 100000)
-#' head( dat.den.2009 )
+#' \dontrun{
+#' get_density_big( nonprofit_sample, 'MSA_NECH', 'NTMAJ12', 'FIPS',
+#'                  2009, 'TOTREV', 100000 )
+#' }
 #'
 #' @export
 get_density_big <- function(df, geo, subsector, fips, year, resource, greater.than){
@@ -210,10 +209,10 @@ get_density_big <- function(df, geo, subsector, fips, year, resource, greater.th
 #' as the number of organizations per 1000 population and per 10,000 population.
 #'
 #' @examples
-#' data(county_population)
-#' data(nonprofit_sample)
-#' dat.den.comm <- get_density_commercial( df=nonprofit_sample,'MSA_NECH','NTMAJ12', 'TOTREV', c('PROGREV', 'INVINC'))
-#' head( dat.den.comm )
+#' \dontrun{
+#' get_density_commercial( nonprofit_sample, 'MSA_NECH', 'NTMAJ12',
+#'                         'TOTREV', c( 'PROGREV', 'INVINC' ) )
+#' }
 #'
 #' @export
 get_density_commercial <- function(df, geo, subsector, resource, list.of.cols){

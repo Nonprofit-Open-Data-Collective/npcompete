@@ -41,3 +41,6 @@ Test_Data/
 
 # Manuscript drafts
 /paper
+
+# Local data archive (large input/output tables, not versioned)
+/data-local

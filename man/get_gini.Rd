@@ -2,33 +2,39 @@
 % Please edit documentation in R/gini.R
 \name{get_gini}
 \alias{get_gini}
-\title{Gini Coefficient}
+\title{Gini coefficient}
 \usage{
-get_gini(df, geo, subsector, resource)
+get_gini(
+  df,
+  geography = "CENSUS_CBSA_FIPS",
+  subsector = "NTEEV2",
+  resource = "TOTREV",
+  year = "TAXYEAR"
+)
 }
 \arguments{
-\item{df}{A dataframe containing the required fields for computing the metric(gini) grouped by geographical level and sub sector.}
+\item{df}{A data frame with one row per organization-year.}
 
-\item{geo}{A character string indicating the column name for geographical area unique code.}
+\item{geography}{Name of the column that identifies the market's
+geography, such as \code{"CENSUS_CBSA_FIPS"} or \code{"COUNTY_FIPS"}.}
 
-\item{subsector}{A character string indicating the column name for sub sectors.}
+\item{subsector}{Name of the column that identifies the subsector. When it
+is \code{"NTEEV2"}, the first three characters (the major group) are used.}
 
-\item{resource}{A character string indicating the column name for resource based on which gini is calculated. Example: Revenue, assets etc.}
+\item{resource}{Name of the numeric column that measures organization size,
+such as \code{"TOTREV"}, \code{"TOTEXP"} or \code{"NETASS"}. Negative values are set to
+zero.}
 
-\item{resource.name}{A character string indicating the column name for the new column generated with aggregated resource.}
-
-\item{fips}{A character string indicating the column name for FIPS code of the geographical area}
-
-\item{year}{A numeric parameter indicating the year to be used for population estimate and metric evaluation for that year. Example: 1999}
-
-\item{resource.smaller.than}{A numeric value indicating that it is the upper limit of the resource for density evaluation. All organizations having resource value less than that would be counted for evaluation.}
+\item{year}{Name of the year column, or \code{NULL} to pool all years.}
 }
 \value{
 A new dataframe with the Gini Coefficient (\code{gini}),
 grouped by geographical level and sub sectors.
 }
 \description{
-Calculate the Gini Coefficient and return a dataframe.
+Inequality of the resource distribution in each geography, subsector and
+year, with rollups for all subsectors (\code{SUB = "ALL"}) and all geographies
+(\code{GEO = "ALL"}).
 }
 \details{
 The Gini coefficient has been widely used in economics as a measure of income inequality.
@@ -42,7 +48,8 @@ level of inequality if the coefficient is between 0.5 and 0.75; a market is cons
 inequality if the coefficient is greater than .75.
 }
 \examples{
-data(nonprofit_sample)
-head( dat.gini )
+\dontrun{
+get_gini( df, resource = "TOTREV" )
+}
 
 }

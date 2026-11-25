@@ -2,55 +2,31 @@
 ###   Concentration Ratio
 ###---------------------------------------------------
 
-#' @title
-#' Concentration Ratio
+#' Concentration ratio (CRk)
 #'
-#' @description
-#' Calculate the Concentration Ratio (CR) of top n(number) largest organizations and return a dataframe.
+#' Share of a market's total resource held by its `number` largest
+#' organizations, computed for each geography, subsector and year.
 #'
-#' @param df A dataframe containing the required fields for computing the metric(concentration ratio) grouped by geographical level and sub sector.
-#' @param geo A character string indicating the column name for geographical area unique code.
-#' @param subsector A character string indicating the column name for sub sectors.
-#' @param resource A character string indicating the column name for resource based on which cr is calculated. Example: Revenue, assets etc.
-#' @param number A numeric value that is used to calculate concentration ratio for top that number of firms. Value ranges from 1-8. Example, 4 if concentration ratio for top 4 firms.
+#' @inheritParams npcompete-params
+#' @param number Number of top organizations to include, for example `4` for
+#'   CR4. Values above 8 produce a warning.
 #'
-#' @return A new dataframe with the Concentration Ratio of n(number) largest organizations ('cr'),
-#'  grouped by geographical level and sub sectors *Note: For the markets where total number of firms is less than n(umber),
-#'  the concentration ratio is assigned 100%.
+#' @return A tibble with one row per `GEO`, `SUB` and `YEAR`, containing `n`
+#'   (number of organizations), `total`, `top_k_sum` and `CR<number>`. Markets
+#'   with `number` or fewer organizations get a ratio of 1.
 #'
-#' @details Concentration Ratio is defined as the summation of the market shares of the largest n firms.
-#'  It is calculated using the summation of revenue of the largest n nonprofits divided by the summation of
-#'  revenue of all nonprofits in a market. The formula is \eqn{\frac{\sigma{revnue of top-n firms}}{Total resource of that subsector}}
+#' @details CRk is the sum of the resource held by the k largest organizations
+#'   divided by the market total.
 #'
 #' @examples
-#' data(nonprofit_sample)
-#  dat.cr <-get_cr( df=nonprofit_sample,'MSA_NECH','NTMAJ12','TOTREV',4)
-#' head( dat.cr )
-#'
-#' @export
-#' Compute Concentration Ratio (CRk)
-#'
-#' Calculates the concentration ratio of the top `k` firms (or organizations)
-#' within each group, defined as the proportion of total market resources
-#' controlled by the largest `k` firms.
-#'
-#' @param df A data frame containing the grouping and resource variables.
-#' @param geo,subsector Unquoted grouping variables (e.g. GEO, SUB).
-#' @param resource Unquoted variable indicating firm size (e.g. revenue).
-#' @param number Integer. The number of top firms to include (e.g. 4 for CR4).
-#'
-#' @return A tibble with one row per group and columns:
-#'   \item{n}{number of firms}
-#'   \item{total}{sum of resources}
-#'   \item{CRk}{share of top `k` firms (0–1 scale)}
-#'
-#' @examples
-#' get_cr(df, GEO, SUB, RES, number = 4)
+#' \dontrun{
+#' get_cr( df, geography = "CENSUS_CBSA_FIPS", resource = "TOTREV", number = 4 )
+#' }
 #'
 #' @export
 get_cr <- function(df, geography="CENSUS_CBSA_FIPS", subsector="NTEEV2", year="TAXYEAR", resource="TOTREV", number = 4){
 
-  if (number > 8) warning("Number > 8 — top 8 is typical for CR measures.")
+  if (number > 8) warning("Number > 8; top 8 is typical for CR measures.")
 
   GEO <- df[[geography]] |> factor( exclude = NULL )
   RES <- df[[resource]]  |> as.numeric() |> suppressWarnings()
@@ -81,23 +57,25 @@ get_cr <- function(df, geography="CENSUS_CBSA_FIPS", subsector="NTEEV2", year="T
 }
 
 
-#' Compute Multiple Concentration Ratios (CR1–CRk)
+#' Concentration ratios CR1 to CRk
 #'
-#' Calculates concentration ratios (CR1, CR2, ..., CRk) for each group,
-#' where CRk is the proportion of total resources held by the top k firms.
+#' Computes several concentration ratios at once for each geography,
+#' subsector and year, with rollups for all subsectors (`SUB = "ALL"`) and all
+#' geographies (`GEO = "ALL"`).
 #'
-#' @param df A data frame containing the grouping and resource variables.
-#' @param geo,subsector Unquoted grouping variables (e.g., GEO, SUB).
-#' @param resource Unquoted variable indicating firm size (e.g., revenue).
-#' @param numbers Integer vector of CR levels to calculate (e.g., c(1,3,4,5,8)).
+#' @inheritParams npcompete-params
+#' @param numbers Integer vector of CR levels to calculate, for example
+#'   `c(1, 4, 8)`.
+#' @param as_percent If `TRUE`, ratios are returned on a 0-100 scale instead
+#'   of 0-1.
 #'
-#' @return A tibble with one row per group and columns:
-#'   \item{n}{Number of firms in the group}
-#'   \item{total}{Sum of resource values}
-#'   \item{CRk}{Concentration ratio for top k firms (0–1 scale)}
+#' @return A tibble with `GEO`, `SUB`, `YEAR`, `N`, the summed resource and one
+#'   column per requested ratio (`CR1`, `CR2`, ...).
 #'
 #' @examples
-#' get_cr_all(df, GEO, SUB, RES, numbers = c(1,3,4,5,8))
+#' \dontrun{
+#' get_cr_all( df, resource = "TOTREV", numbers = 1:8 )
+#' }
 #'
 #' @export
 get_cr_all <- function(df,
@@ -132,7 +110,7 @@ get_cr_all <- function(df,
 
   out1 <- 
     data.frame(GEO, SUB, YEAR, RES) |>
-    na.omit() %>%
+    stats::na.omit() %>%
     dplyr::mutate(RES = pmax(0, as.numeric(RES))) |>
     dplyr::group_by(GEO, SUB, YEAR) |>
     dplyr::summarize(
@@ -161,7 +139,7 @@ get_cr_all <- function(df,
 
   out2 <- 
     data.frame(GEO, YEAR, RES) |>
-    na.omit() %>%
+    stats::na.omit() %>%
     dplyr::mutate(RES = pmax(0, as.numeric(RES))) |>
     dplyr::group_by(GEO, YEAR) |>
     dplyr::summarize(
@@ -191,7 +169,7 @@ get_cr_all <- function(df,
   
   out3 <- 
     data.frame(SUB, YEAR, RES) |>
-    na.omit() %>%
+    stats::na.omit() %>%
     dplyr::mutate(RES = pmax(0, as.numeric(RES))) |>
     dplyr::group_by(SUB, YEAR) |>
     dplyr::summarize(
