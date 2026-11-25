@@ -1,69 +1,73 @@
 # Normalized Herfindahl–Hirschman Index
 
-Calculate the normalized Herfindahl–Hirschman Index (HHI) and return a
-dataframe.
+HHI rescaled so that it runs from 0 to 1 whatever the number of
+organizations, computed for each geography, subsector and year, with
+rollups for all subsectors (`SUB = "ALL"`) and all geographies
+(`GEO = "ALL"`).
 
 ## Usage
 
 ``` r
-get_nhhi(df, geo, subsector, resource, normalizer, resource.name = "resource")
+get_nhhi(
+  df,
+  geography = "CENSUS_CBSA_FIPS",
+  subsector = "NTEEV2",
+  resource = "TOTREV",
+  year = "TAXYEAR"
+)
 ```
 
 ## Arguments
 
 - df:
 
-  A dataframe containing the required fields for computing the
-  metric(hhi) grouped by geographical level and sub sector.
+  A data frame with one row per organization-year.
 
-- geo:
+- geography:
 
-  A character string indicating the column name for geographical area
-  unique code.
+  Name of the column that identifies the market's geography, such as
+  `"CENSUS_CBSA_FIPS"` or `"COUNTY_FIPS"`.
 
 - subsector:
 
-  A character string indicating the column name for sub sectors.
+  Name of the column that identifies the subsector. When it is
+  `"NTEEV2"`, the first three characters (the major group) are used.
 
 - resource:
 
-  A character string indicating the column name for resource based on
-  which HHI is calculated. Example: Revenue, assets etc.
+  Name of the numeric column that measures organization size, such as
+  `"TOTREV"`, `"TOTEXP"` or `"NETASS"`. Negative values are set to zero.
 
-- normalizer:
+- year:
 
-  A character string indicating the column name for the column used to
-  normalize the HHI index.
-
-- resource.name:
-
-  A character string indicating the column name for the new column
-  generated with aggregated resource.
+  Name of the column that identifies the year, such as `"TAXYEAR"`.
 
 ## Value
 
-A new dataframe with the normalized Herfindahl–Hirschman Index (`hhi`),
-grouped by geographical level and sub sectors.
+A tibble with `GEO`, `SUB`, `YEAR`, `N`, the summed resource, `HHI` and
+`NHHI`.
 
 ## Details
 
-The Herfindahl–Hirschman Index(HHI) is a measure of market concentration
-that is used to understand market competitiveness, competitive behavior
-and performance in markets. The index could be calculated as the sum of
-the squared market share of each firm competing in a market (Thornton &
-Belski, 2010).In the nonprofit sector, market share is determined by the
-ratio of a nonprofit's total revenue to the aggregate revenue for the
-organization’s market.The formula used here is \\{\sigma
-\frac{resource}{Total resource}}^2 -
-\frac{\frac{1}{normalizer}}{1-\frac{1}{normalizer}}\\ The calculated
-values range from 1/N to 1, where N is the number of organizations in a
-market. A market with an HHI of 1 is considered as a monopoly. In
-contrast, a market with an HHI close to 0 would be viewed as a nearly
-competition one.
+`NHHI = (HHI - 1/N) / (1 - 1/N)`, where `N` is the number of
+organizations in the market. The formula is undefined for a single
+organization; such markets are monopolies and get `NHHI = 1`, consistent
+with `HHI`, `CR1` and `KWOKA`. Markets whose resource total is zero get
+`NA`. Filter on `N` to exclude single-organization markets.
 
 ## Examples
 
 ``` r
-data(nonprofit_sample)
-head( dat.nhhi )
+toy <- data.frame( GEO = c( "A", "A", "B" ), SUB = "ART", YEAR = 2020,
+                   TOTREV = c( 75, 25, 10 ) )
+get_nhhi( toy, geography = "GEO", subsector = "SUB", year = "YEAR" )
+#> # A tibble: 6 × 7
+#>   GEO   SUB    YEAR     N TOTREV   HHI  NHHI
+#>   <chr> <chr> <dbl> <int>  <dbl> <dbl> <dbl>
+#> 1 A     ALL    2020     2    100 0.625 0.25 
+#> 2 A     ART    2020     2    100 0.625 0.25 
+#> 3 ALL   ALL    2020     3    110 0.525 0.287
+#> 4 ALL   ART    2020     3    110 0.525 0.287
+#> 5 B     ALL    2020     1     10 1     1    
+#> 6 B     ART    2020     1     10 1     1    
 ```

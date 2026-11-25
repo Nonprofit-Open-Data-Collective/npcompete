@@ -1,61 +1,71 @@
 # Herfindahl–Hirschman Index
 
-Calculate the Herfindahl–Hirschman Index (HHI) and return a dataframe.
+Market concentration in each geography, subsector and year, with rollups
+for all subsectors (`SUB = "ALL"`) and all geographies (`GEO = "ALL"`).
 
 ## Usage
 
 ``` r
-get_hhi(df, geo, subsector, resource, resource.name = "resource")
+get_hhi(
+  df,
+  geography = "CENSUS_CBSA_FIPS",
+  subsector = "NTEEV2",
+  resource = "TOTREV",
+  year = "TAXYEAR"
+)
 ```
 
 ## Arguments
 
 - df:
 
-  A dataframe containing the required fields for computing the
-  metric(hhi) grouped by geographical level and sub sector.
+  A data frame with one row per organization-year.
 
-- geo:
+- geography:
 
-  A character string indicating the column name for geographical area
-  unique code.
+  Name of the column that identifies the market's geography, such as
+  `"CENSUS_CBSA_FIPS"` or `"COUNTY_FIPS"`.
 
 - subsector:
 
-  A character string indicating the column name for sub sectors.
+  Name of the column that identifies the subsector. When it is
+  `"NTEEV2"`, the first three characters (the major group) are used.
 
 - resource:
 
-  A character string indicating the column name for resource based on
-  which HHI is calculated. Example: Revenue, assets etc.
+  Name of the numeric column that measures organization size, such as
+  `"TOTREV"`, `"TOTEXP"` or `"NETASS"`. Negative values are set to zero.
 
-- resource.name:
+- year:
 
-  A character string indicating the column name for the new column
-  generated with aggregated resource.
+  Name of the year column, or `NULL` to pool all years.
 
 ## Value
 
-A new dataframe with the Herfindahl–Hirschman Index (`hhi`), grouped by
-geographical level and sub sectors.
+A tibble with `GEO`, `SUB`, `YEAR` (unless `year = NULL`), `N`, the
+summed resource and `HHI`. Markets whose resource total is zero get
+`HHI = NA`.
 
 ## Details
 
-The Herfindahl–Hirschman Index(HHI) is a measure of market concentration
-that is used to understand market competitiveness, competitive behavior
-and performance in markets. The index could be calculated as the sum of
-the squared market share of each firm competing in a market (Thornton &
-Belski, 2010).In the nonprofit sector, market share is determined by the
-ratio of a nonprofit's total revenue to the aggregate revenue for the
-organization’s market. The formula used here is \\{\sigma
-\frac{resource}{Total resource}}^2\\ The calculated values range from
-1/N to 1, where N is the number of organizations in a market. A market
-with an HHI of 1 is considered as a monopoly. In contrast, a market with
-an HHI close to 0 would be viewed as a nearly competition one.
+HHI is the sum of squared market shares, where an organization's share
+is its resource divided by the market total (Thornton & Belski, 2010).
+It ranges from 1/N to 1; a market with an HHI of 1 is a monopoly and
+values near 0 indicate many similar-sized competitors.
 
 ## Examples
 
 ``` r
-data(nonprofit_sample)
-head( dat.hhi )
+toy <- data.frame( GEO = c( "A", "A", "B" ), SUB = "ART", YEAR = 2020,
+                   TOTREV = c( 75, 25, 10 ) )
+get_hhi( toy, geography = "GEO", subsector = "SUB", year = "YEAR" )
+#> # A tibble: 6 × 6
+#>   GEO   SUB    YEAR     N TOTREV   HHI
+#>   <chr> <chr> <dbl> <int>  <dbl> <dbl>
+#> 1 A     ALL    2020     2    100 0.625
+#> 2 A     ART    2020     2    100 0.625
+#> 3 ALL   ALL    2020     3    110 0.525
+#> 4 ALL   ART    2020     3    110 0.525
+#> 5 B     ALL    2020     1     10 1    
+#> 6 B     ART    2020     1     10 1    
 ```

@@ -1,23 +1,29 @@
-# Get all metrics
+# Compute all competition metrics in one table
 
-Calculate all competition metrics and return in a single dataframe and
-return a dataframe.
+Runs
+[`get_gini()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/get_gini.md),
+[`get_nhhi()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/get_nhhi.md),
+[`get_kwoka()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/get_kwoka.md),
+[`get_cr_all()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/get_cr_all.md)
+and
+[`get_scale_free_density()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/get_scale_free_density.md)
+and joins the results, one row per geography, subsector and year (plus
+`ALL` rollups).
 
 ## Usage
 
 ``` r
 get_all_metrics(
   df,
-  geo,
-  subsector,
-  resource,
-  resource.name,
-  normalizer,
-  fips,
-  dat.year,
-  resource.smaller.than,
-  resource.greater.than,
-  fundraising.cols
+  geography = "CENSUS_CBSA_FIPS",
+  population = "POP_METRO",
+  subsector = "NTEEV2",
+  resource = "TOTREV",
+  year = "TAXYEAR",
+  cr_n = 1:8,
+  pop_table = NULL,
+  density_model = c("negbin", "poisson", "loglinear"),
+  drop_incomplete_years = TRUE
 )
 ```
 
@@ -25,62 +31,88 @@ get_all_metrics(
 
 - df:
 
-  A dataframe containing the required fields for computing the metric
-  grouped by geographical level and sub sector.
+  A data frame with one row per organization-year.
 
-- geo:
+- geography:
 
-  A character string indicating the column name for geographical area
-  unique code.
+  Name of the column that identifies the market's geography, such as
+  `"CENSUS_CBSA_FIPS"` or `"COUNTY_FIPS"`.
+
+- population:
+
+  Name of the column that holds the market's population, such as
+  `"POP_METRO"` or `"POP_COUNTY"`. Ignored, and may be `NULL`, when
+  `pop_table` is supplied.
 
 - subsector:
 
-  A character string indicating the column name for sub sectors.
+  Name of the column that identifies the subsector. When it is
+  `"NTEEV2"`, the first three characters (the major group) are used.
 
 - resource:
 
-  A character string indicating the column name for resource based on
-  which HHI is calculated. Example: Revenue, assets etc.
+  Name of the numeric column that measures organization size, such as
+  `"TOTREV"`, `"TOTEXP"` or `"NETASS"`. Negative values are set to zero.
 
-- resource.name:
+- year:
 
-  A character string indicating the column name for the new column
-  generated with aggregated resource.
+  Name of the column that identifies the year, such as `"TAXYEAR"`.
 
-- normalizer:
+- cr_n:
 
-  A character string indicating the column name for the column used to
-  normalize the HHI index.
+  Integer vector of concentration ratio levels to compute.
 
-- resource.greater.than:
+- pop_table:
 
-  A numeric value indicating that it is the lower limit of the resource
-  for density evaluation. All organizations having resource value
-  greater than that would be counted for evaluation.
+  Optional data frame of market populations with columns `GEO`, `YEAR`
+  and `POP`. Supply it so that markets with no organizations at all are
+  still included. When `NULL`, market populations are taken from the
+  `population` column of `df`, so only markets with at least one
+  organization (in any subsector) are included.
 
-- fundraising.cols:
+- density_model:
 
-  A vector containing list of column names that have the fundraising
-  fees for the nonprofits.#'
+  Passed to
+  [`get_scale_free_density()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/get_scale_free_density.md)
+  as `model`.
 
-- number:
+- drop_incomplete_years:
 
-  A numeric value that is used to calculate concentration ratio for top
-  that number of firms. Value ranges from 1-8. Example, 4 if
-  concentration ratio for top 4 firms.
-
-- smaller.than:
-
-  A numeric value indicating that it is the upper limit of the resource
-  for density evaluation. All organizations having resource value less
-  than that would be counted for evaluation.
+  If `TRUE` (the default), years flagged by
+  [`check_year_completeness()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/check_year_completeness.md)
+  are dropped with a message before any metric is computed.
 
 ## Value
 
-A new dataframe with all metrics evaluated for each year.
+A tibble with `GEO`, `SUB`, `YEAR`, `N`, `POP`, the summed resource,
+`LOG_NPO`, `LOG_POP`, `LOG_<resource>`, `DENSITY_PCTL_N`,
+`DENSITY_PCTL_R`, `GINI`, `HHI`, `NHHI`, `KWOKA` and `CR1` to `CR8`.
+Market cells with no organizations (from the density frame) have `N = 0`
+and `NA` concentration metrics.
 
 ## Examples
 
 ``` r
-head( dat.all )
+m <- get_all_metrics( npo_panel_sample,
+                      geography = "COUNTY_FIPS",
+                      population = "POP_COUNTY",
+                      resource = "TOTREV" )
+#> Calculating Gini...
+#> Calculating normalized HHI...
+#> Calculating Kwoka index...
+#> Calculating concentration ratios...
+#> Calculating nonprofit density...
+head( m )
+#> # A tibble: 6 × 23
+#>   GEO   SUB    YEAR     N    POP    TOTREV LOG_NPO LOG_POP LOG_TOTREV
+#>   <chr> <chr> <int> <int>  <dbl>     <dbl>   <dbl>   <dbl>      <dbl>
+#> 1 50001 ALL    2015   121 37092  609899321    4.83    10.5       20.2
+#> 2 50001 ALL    2016   118 37146. 582431292    4.81    10.5       20.2
+#> 3 50001 ALL    2017   119 37200. 656375751    4.81    10.5       20.3
+#> 4 50001 ALL    2018   122 37255. 642370035    4.82    10.5       20.3
+#> 5 50001 ALL    2019   123 37309. 655600800    4.84    10.5       20.3
+#> 6 50001 ART    2015    19 37092   25718965    3.00    10.5       17.1
+#> # ℹ 14 more variables: DENSITY_PCTL_N <dbl>, DENSITY_PCTL_R <dbl>, GINI <dbl>,
+#> #   HHI <dbl>, NHHI <dbl>, KWOKA <dbl>, CR1 <dbl>, CR2 <dbl>, CR3 <dbl>,
+#> #   CR4 <dbl>, CR5 <dbl>, CR6 <dbl>, CR7 <dbl>, CR8 <dbl>
 ```

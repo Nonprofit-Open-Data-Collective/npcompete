@@ -1,79 +1,75 @@
-# Gini Coefficient
+# Gini coefficient
 
-Calculate the Gini Coefficient and return a dataframe.
+Inequality of the resource distribution in each geography, subsector and
+year, with rollups for all subsectors (`SUB = "ALL"`) and all
+geographies (`GEO = "ALL"`).
 
 ## Usage
 
 ``` r
-get_gini(df, geo, subsector, resource)
+get_gini(
+  df,
+  geography = "CENSUS_CBSA_FIPS",
+  subsector = "NTEEV2",
+  resource = "TOTREV",
+  year = "TAXYEAR"
+)
 ```
 
 ## Arguments
 
 - df:
 
-  A dataframe containing the required fields for computing the
-  metric(gini) grouped by geographical level and sub sector.
+  A data frame with one row per organization-year.
 
-- geo:
+- geography:
 
-  A character string indicating the column name for geographical area
-  unique code.
+  Name of the column that identifies the market's geography, such as
+  `"CENSUS_CBSA_FIPS"` or `"COUNTY_FIPS"`.
 
 - subsector:
 
-  A character string indicating the column name for sub sectors.
+  Name of the column that identifies the subsector. When it is
+  `"NTEEV2"`, the first three characters (the major group) are used.
 
 - resource:
 
-  A character string indicating the column name for resource based on
-  which gini is calculated. Example: Revenue, assets etc.
-
-- resource.name:
-
-  A character string indicating the column name for the new column
-  generated with aggregated resource.
-
-- fips:
-
-  A character string indicating the column name for FIPS code of the
-  geographical area
+  Name of the numeric column that measures organization size, such as
+  `"TOTREV"`, `"TOTEXP"` or `"NETASS"`. Negative values are set to zero.
 
 - year:
 
-  A numeric parameter indicating the year to be used for population
-  estimate and metric evaluation for that year. Example: 1999
-
-- resource.smaller.than:
-
-  A numeric value indicating that it is the upper limit of the resource
-  for density evaluation. All organizations having resource value less
-  than that would be counted for evaluation.
+  Name of the year column, or `NULL` to pool all years.
 
 ## Value
 
-A new dataframe with the Gini Coefficient (`gini`), grouped by
-geographical level and sub sectors.
+A tibble with `GEO`, `SUB`, `YEAR` (unless `year = NULL`), `N`, the
+summed resource and `GINI`. Markets with a single organization get
+`GINI = 1`.
 
 ## Details
 
-The Gini coefficient has been widely used in economics as a measure of
-income inequality. Specifically, it measures income distribution among a
-population. In economics, there are multiple formulas used to calculate
-the coefficient (Dorfman, 1979). However, no matter which formula is
-selected, a low value of the coefficient indicates a high level of
-competition (less inequality); a high value represents a low level of
-competition (greater inequality). In nonprofit study, Seaman et al.,
-(2014) supplemented HHI with the Gini coefficient to capture the concept
-of market competition and suggested that a market is considered as a
-reasonable level of equality if the coefficient is less than 0.5; a
-market is considered as a modest level of inequality if the coefficient
-is between 0.5 and 0.75; a market is considered as a high level of
-inequality if the coefficient is greater than .75.
+The Gini coefficient is a widely used measure of inequality (Dorfman,
+1979). Low values indicate less inequality and more competition; high
+values indicate greater inequality. Seaman et al. (2014) used it
+alongside HHI and suggested reading values below 0.5 as reasonable
+equality, 0.5 to 0.75 as modest inequality, and above 0.75 as high
+inequality. Computed with
+[`DescTools::Gini()`](https://andrisignorell.github.io/DescTools/reference/Gini.html).
 
 ## Examples
 
 ``` r
-data(nonprofit_sample)
-head( dat.gini )
+toy <- data.frame( GEO = c( "A", "A", "A", "B" ), SUB = "ART", YEAR = 2020,
+                   TOTREV = c( 10, 20, 70, 5 ) )
+get_gini( toy, geography = "GEO", subsector = "SUB", year = "YEAR" )
+#> # A tibble: 6 × 6
+#>   GEO   SUB    YEAR     N TOTREV  GINI
+#>   <chr> <chr> <dbl> <int>  <dbl> <dbl>
+#> 1 A     ALL    2020     3    100 0.6  
+#> 2 A     ART    2020     3    100 0.6  
+#> 3 ALL   ALL    2020     4    105 0.651
+#> 4 ALL   ART    2020     4    105 0.651
+#> 5 B     ALL    2020     1      5 1    
+#> 6 B     ART    2020     1      5 1    
 ```

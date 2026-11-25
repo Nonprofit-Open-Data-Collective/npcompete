@@ -16,6 +16,20 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Metrics</h6></li>
+    <li><a class="dropdown-item" href="../articles/hhi.html">Herfindahl-Hirschman Index</a></li>
+    <li><a class="dropdown-item" href="../articles/concentration-ratios.html">Concentration ratios</a></li>
+    <li><a class="dropdown-item" href="../articles/kwoka.html">Kwoka dominance index</a></li>
+    <li><a class="dropdown-item" href="../articles/gini.html">Gini coefficient</a></li>
+    <li><a class="dropdown-item" href="../articles/density.html">Scale-free nonprofit density</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Comparing metrics</h6></li>
+    <li><a class="dropdown-item" href="../articles/metric-correlations.html">How the metrics relate: correlation, PCA and factor analysis</a></li>
+  </ul></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
 <li class="nav-item dropdown">
@@ -24,6 +38,7 @@
     <li><button class="dropdown-item" data-bs-theme-value="dark"><span class="fa fa-moon"></span> Dark</button></li>
     <li><button class="dropdown-item" data-bs-theme-value="auto"><span class="fa fa-adjust"></span> Auto</button></li>
   </ul></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/Nonprofit-Open-Data-Collective/npcompete/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul></div>
 
 
@@ -33,7 +48,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Density small</h1>
-
+      <small class="dont-index">Source: <a href="https://github.com/Nonprofit-Open-Data-Collective/npcompete/blob/HEAD/R/density.R" class="external-link"><code>R/density.R</code></a></small>
       <div class="d-none name"><code>get_density_small.Rd</code></div>
     </div>
 
@@ -88,21 +103,28 @@ grouped by geographical level and sub sectors.</p>
     <p>The density metric is the number of nonprofits per-capita in a market. In this function, it is measured
 as the number of organizations per 100,000 population.</p>
     </div>
+    <div class="section level2">
+    <h2 id="deprecated">Deprecated<a class="anchor" aria-label="anchor" href="#deprecated"></a></h2>
+
+
+<p>This function uses the legacy NCCS core-file layout and is deprecated.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">county_population</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">nonprofit_sample</span><span class="op">)</span></span>
-<span><span class="va">dat.den.2009</span> <span class="op">&lt;-</span> <span class="fu">get_density_small</span><span class="op">(</span> df<span class="op">=</span><span class="va">nonprofit_sample</span>,<span class="st">'MSA_NECH'</span>,<span class="st">'NTMAJ12'</span>,<span class="st">'FIPS'</span>, <span class="fl">2009</span>, <span class="st">'TOTREV'</span>, <span class="fl">100000</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span> <span class="va">dat.den.2009</span> <span class="op">)</span></span>
-<span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="fu">get_density_small</span><span class="op">(</span> <span class="va">nonprofit_sample</span>, <span class="st">'MSA_NECH'</span>, <span class="st">'NTMAJ12'</span>, <span class="st">'FIPS'</span>,</span></span>
+<span class="r-in"><span>                   <span class="fl">2009</span>, <span class="st">'TOTREV'</span>, <span class="fl">100000</span> <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by First Last.</p>
+  <p>Developed by Jesse Lecy.</p>
 </div>
 
 <div class="pkgdown-footer-right">
