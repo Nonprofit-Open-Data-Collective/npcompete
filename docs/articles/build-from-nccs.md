@@ -1,0 +1,220 @@
+# Building metrics from fresh NCCS downloads
+
+You don’t need the SOI panel to build metrics. With `source = "nccs"`,
+npcompete downloads the public files of the National Center for
+Charitable Statistics (NCCS) and harmonizes them to the archive’s
+layout. It caches the result, so later builds work offline. Every metric
+and option in
+[`vignette("build-from-archive")`](https://nonprofit-open-data-collective.github.io/npcompete/articles/build-from-archive.md)
+works the same way.
+
+The downloads need an internet connection and the **arrow** package. The
+code chunks in this article are shown with output from a real run (tax
+years 2018 and 2019) rather than run when the article is built.
+
+``` r
+library( npcompete )
+```
+
+## What gets downloaded
+
+Live builds use two NCCS products:
+
+| File | What it supplies | Size |
+|----|----|----|
+| CORE **990combined**, one Parquet file per year (`processed_merged/core/{Y}/990combined/`) | Form 990 and 990-EZ financials for every subsection: revenue, expenses, assets, liabilities, net assets, program revenue, contributions, investment income | about 50 MB a year, 2010 onward |
+| Unified geocoded **BMF** (`geocoding/unified-bmf/latest/`) | One record per EIN: geocoded county, NTEEV2 subsector, ruling date | about 640 MB, once |
+
+Each CORE file holds the returns whose fiscal year ended in that
+calendar year. npcompete uses the SOI convention for tax years: tax year
+*t* is the year the fiscal year began. Returns for years ending in
+December come from file *t*, and returns for years ending in any other
+month come from file *t* + 1. Building tax year 2019 therefore downloads
+the 2019 and 2020 files. A tax year whose *t* + 1 file is still partial
+is flagged as incomplete.
+
+## Where the downloads go
+
+Files are cached under
+[`npc_cache_dir()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_cache_dir.md).
+By default this is the user cache folder that
+[`tools::R_user_dir()`](https://rdrr.io/r/tools/userdir.html) returns.
+Choose another folder with `options(npcompete.cache_dir = )` or the
+`NPCOMPETE_CACHE` environment variable.
+
+``` r
+npc_cache_dir()
+#> [1] "C:\\Users\\jlecy\\AppData\\Local/R/cache/R/npcompete"
+```
+
+``` r
+options( npcompete.cache_dir = "D:/data/npcompete-nccs" )
+```
+
+## Build metrics in one call
+
+[`npc_build_metrics()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_build_metrics.md)
+builds any tax years it needs that are not in the cache yet, then
+computes the metrics:
+
+``` r
+m <- npc_build_metrics( 2018:2019, geo = "cbsa",
+                        resources = c( "TOTREV", "NETASS" ),
+                        source = "nccs" )
+```
+
+    #> Building tax year(s) 2018, 2019 from NCCS downloads into D:/data/npcompete-nccs ...
+    #> Downloading https://nccsdata.s3.us-east-1.amazonaws.com/geocoding/unified-bmf/latest/bmf_unified_geocoded.parquet ...
+    #> Reading the unified BMF ...
+    #> Downloading https://nccsdata.s3.us-east-1.amazonaws.com/processed_merged/core/2018/990combined/core_2018_990combined.parquet ...
+    #> Downloading https://nccsdata.s3.us-east-1.amazonaws.com/processed_merged/core/2019/990combined/core_2019_990combined.parquet ...
+    #> Downloading https://nccsdata.s3.us-east-1.amazonaws.com/processed_merged/core/2020/990combined/core_2020_990combined.parquet ...
+    #> Harmonizing 1,580,115 CORE rows ...
+    #> Done: 1,047,660 rows for tax years 2018-2019.
+    #> Reading 2 year(s) from the NCCS build ...
+    #> Building cbsa metrics for TOTREV ...
+    #> Building cbsa metrics for NETASS ...
+
+The first run downloads about 0.8 GB and takes a few minutes. Later runs
+for the same years read only the cache.
+
+## Or build the organization table first
+
+[`npc_build_nccs()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_build_nccs.md)
+downloads and harmonizes the requested years without computing metrics.
+It keeps years already built, so the table can grow a few years at a
+time:
+
+``` r
+npc_build_nccs( 2015:2022 )
+```
+
+A live build has the same layout as the archive, so
+[`npc_archive_info()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_archive_info.md)
+and
+[`npc_get_orgs()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_get_orgs.md)
+work on it. Its year counts also record the CORE files and the BMF
+version used for each tax year:
+
+``` r
+npc_archive_info( npc_cache_dir() )$year_counts
+```
+
+    #>   YEAR      N SHARE_OF_MEDIAN INCOMPLETE
+    #> 1 2018 524647           1.002      FALSE
+    #> 2 2019 523013           0.998      FALSE
+
+These counts include every subsection.
+[`npc_get_orgs()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_get_orgs.md)
+keeps 501(c)(3) organizations by default:
+
+``` r
+orgs <- npc_get_orgs( 2019, source = "nccs" )
+head( orgs[ c( "EIN2", "YEAR", "COUNTY_FIPS", "CBSA_FIPS", "NTEEV2",
+               "FILER_TYPE", "TOTREV" ) ] )
+```
+
+    #>             EIN2 YEAR COUNTY_FIPS CBSA_FIPS     NTEEV2 FILER_TYPE   TOTREV
+    #> 1 EIN-01-0011694 2019       25009     14460 PSB-S00-NS      990EZ     8332
+    #> 2 EIN-01-0015091 2019       34027     35620 HMS-N64-RG      990EZ   113339
+    #> 3 EIN-01-0017496 2019       23031     38860 UNU-Z99-RG      990EZ   152931
+    #> 4 EIN-01-0024645 2019       23019     12620 ART-A69-RG        990  1084597
+    #> 5 EIN-01-0032215 2019       23015      <NA> UNU-Z99-RG        990     1405
+    #> 6 EIN-01-0130427 2019       23005     38860 HOS-E22-RG        990 49375323
+
+`CBSA_FIPS` is `NA` for counties outside every metro and micro area.
+
+## Reproducibility
+
+Every downloaded file is logged in `downloads.csv` in the cache, with
+its URL, size, MD5 hash and download time. The year counts record which
+CORE files and which BMF (by hash and vintage) went into each tax year.
+The metrics manifest (`attr(m, "manifest")`, or `manifest.csv` when you
+set `out_dir`) records the source and options.
+
+NCCS updates its files, and the BMF in particular is replaced every
+month. A cached build does not change until you ask:
+
+``` r
+npc_build_nccs( 2018:2019, refresh = TRUE )   # download again and rebuild
+```
+
+A cache folder is a frozen build. Copy it, or build straight into a
+project folder with `npc_build_nccs( years, dir = "..." )`. Then pass
+the folder as `dir` to `npc_build_metrics( ..., source = "nccs" )` to
+rebuild the same tables later.
+
+## How live builds differ from the archive
+
+**County comes from the current address.** The unified BMF has one
+record per EIN, so an organization that moved is placed at its latest
+address in every year. The archive geocodes each year’s filing.
+
+**Counties are matched by name.** The BMF geocodes give county and state
+names but not FIPS codes.
+[`npc_match_county()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_match_county.md)
+matches them to the counties in `pop_county`, handling parishes,
+boroughs, census areas and independent cities:
+
+``` r
+npc_match_county( c( "Cook County", "City of Baltimore", "Baltimore County",
+                     "Lafourche Parish", "Municipality of Anchorage" ),
+                  c( "IL", "MD", "MD", "LA", "AK" ) )
+#> [1] "17031" "24510" "24005" "22057" "02020"
+```
+
+About 0.2% of filers end up without a county, usually because they have
+no usable address.
+
+**Some fields are missing.** The CORE 990combined files have no
+professional fundraising fees, so `FNDFEE` is `NA` and the
+`FUNDRAISER_SHARE` and `FUNDRAISING_RATIO` metrics are empty. Revocation
+dates are also `NA`, as is the geocoded CBSA, so use the default
+`cbsa = "crosswalk"`.
+
+**Net assets for 990-EZ filers** are total assets minus total
+liabilities, as in the SOI panel. The net assets line on the 990-EZ
+often disagrees with the balance sheet.
+
+## Checking a live build against the archive
+
+If you also have the archive,
+[`npc_compare_sources()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_compare_sources.md)
+reads the same years from both and reports where they agree:
+
+``` r
+cmp <- npc_compare_sources( 2018:2019,
+                            archive_dir = npc_archive_dir(),
+                            nccs_dir    = npc_cache_dir() )
+cmp$totals[ c( "YEAR", "SOURCE", "N", "TOTREV", "NETASS" ) ]
+```
+
+    #>   YEAR  SOURCE      N       TOTREV       NETASS
+    #> 1 2018 archive 398437 2.388472e+12 2.877826e+12
+    #> 2 2018    nccs 398434 2.388471e+12 2.877825e+12
+    #> 3 2019 archive 399848 2.502469e+12 3.029709e+12
+    #> 4 2019    nccs 399844 2.502468e+12 3.029709e+12
+
+``` r
+cmp$ein_match[ c( "YEAR", "BOTH", "ARCHIVE_ONLY", "NCCS_ONLY", "SAME_COUNTY",
+                  "SAME_TOTREV", "SAME_NETASS" ) ]
+```
+
+    #>   YEAR   BOTH ARCHIVE_ONLY NCCS_ONLY SAME_COUNTY SAME_TOTREV SAME_NETASS
+    #> 1 2018 398434            3         0   0.9600780   1.0000000   0.9988656
+    #> 2 2019 399844            4         0   0.9588233   0.9999975   0.9991747
+
+``` r
+cmp$market_summary
+```
+
+    #>   YEAR MARKETS     COR_N MEDIAN_ABS_PCT_DIFF
+    #> 1 2018    2392 0.9998691            2.241597
+    #> 2 2019    2397 0.9998682            2.173913
+
+The two sources hold the same 501(c)(3) filers, apart from three or four
+a year, and identical financial values for virtually all of them.
+Organization counts by county correlate at 0.9999. The median county
+differs by about 2%, almost all of it from the address difference
+described above. `data-raw/validate-nccs-source.R` in the package
+repository runs this check for any years.

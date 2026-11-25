@@ -28,9 +28,29 @@ soi_panel_cols <- c(
 #' up in the same layout.
 #'
 #' @param df A data frame from the source panel.
-#' @param source Which source layout `df` follows. Currently only
-#'   `"soi_panel"`, the NCCS SOI panel sample frame of Form 990 and 990-EZ
-#'   filers.
+#' @param source Which source layout `df` follows: `"soi_panel"`, the NCCS
+#'   SOI panel sample frame of Form 990 and 990-EZ filers, or `"nccs_core"`,
+#'   rows of the NCCS CORE 990combined files (see [npc_build_nccs()]).
+#' @param bmf For `source = "nccs_core"`: the unified geocoded BMF, with at
+#'   least `EIN2`, `geo_county`, `geo_state_abbr`, `nteev2` and
+#'   `ruling_date`. It supplies county, NTEEV2 and ruling year.
+#'
+#' @details
+#' Both layouts are reduced to one row per EIN and tax year. The SOI panel
+#' repeats about 0.3% of EIN-years, mostly short-period returns after an
+#' accounting-period change; the row kept is a real filing over an imputed
+#' gap row, then the one from the latest source file (`SOURCE`), then the
+#' latest period end. This is the filing the NCCS CORE files keep.
+#'
+#' For `"nccs_core"`, the tax year is the year the fiscal period began (a
+#' December year end in `Y` is tax year `Y`, any other year end is `Y - 1`),
+#' matching the SOI panel. Duplicate filings for an EIN and tax year are
+#' reduced to one: the latest extract, then the latest period end. For
+#' 990-EZ filers `NETASS` is total assets less total liabilities, as in the
+#' SOI panel, since the reported Part I figure often disagrees. CORE
+#' files have no fundraising fee or revocation fields, so `FNDFEE`,
+#' `REVOKED`, `REVOCATION_YEAR` and `REINSTATEMENT_YEAR` are `NA`, and
+#' `CBSA_FIPS_GEOCODE` is `NA` (CBSAs come from the county crosswalk).
 #'
 #' @return A data frame with one row per organization-year and columns:
 #' \describe{
@@ -69,9 +89,10 @@ soi_panel_cols <- c(
 #' npc_standardize( raw )
 #'
 #' @export
-npc_standardize <- function(df, source = "soi_panel") {
+npc_standardize <- function(df, source = c("soi_panel", "nccs_core"), bmf = NULL) {
 
   source <- match.arg(source)
+  if (source == "nccs_core") return(standardize_nccs_core(df, bmf))
   missing_cols <- setdiff(soi_panel_cols, names(df))
   if (length(missing_cols) > 0)
     stop("Not an SOI panel layout; missing columns: ",
@@ -124,7 +145,26 @@ npc_standardize <- function(df, source = "soi_panel") {
     stringsAsFactors   = FALSE
   )
   out$RULING_YEAR[out$RULING_YEAR %in% 0L] <- NA
-  out[canonical_cols]
+  dedupe_org_years(out[canonical_cols])
+}
+
+
+# Keep one row per EIN and tax year. The SOI panel repeats an EIN within a
+# tax year when the organization changed its accounting period (short-period
+# returns) or a return appears in two extracts. Keep a real filing over an
+# imputed gap row, then the row from the latest source file, then the latest
+# period end. This picks the same filing as the NCCS CORE files.
+dedupe_org_years <- function(dat) {
+  key <- paste(dat$EIN2, dat$YEAR)
+  if (!anyDuplicated(key)) return(dat)
+  src_year <- suppressWarnings(as.integer(sub("^\\D*(\\d{4}).*$", "\\1", dat$SOURCE)))
+  period <- dat$FISYEAR * 100 + dat$FISMO
+  ord <- order(key, dat$IMPUTED %in% TRUE, -src_year, -period, na.last = TRUE)
+  out <- dat[ord, ]
+  out <- out[!duplicated(key[ord]), ]
+  out <- out[order(match(paste(out$EIN2, out$YEAR), key)), ]
+  rownames(out) <- NULL
+  out
 }
 
 
@@ -221,9 +261,12 @@ npc_build_archive <- function(csv, dir = npc_archive_dir(), overwrite = FALSE) {
 }
 
 
-#' Describe the local archive
+#' Describe the local archive or a live NCCS build
 #'
-#' @inheritParams npc_build_archive
+#' Works for both the SOI panel archive ([npc_build_archive()]) and a live
+#' build ([npc_build_nccs()]), which share a layout.
+#'
+#' @param dir Archive or cache directory.
 #' @return A list with `manifest` (key/value data frame) and `year_counts`
 #'   (rows per year with completeness flags from [check_year_completeness()]).
 #' @export
@@ -233,23 +276,32 @@ npc_archive_info <- function(dir = npc_archive_dir()) {
   if (!file.exists(mf) || !file.exists(yc))
     stop("No archive found in ", dir, ". Build one with npc_build_archive().",
          call. = FALSE)
-  counts <- utils::read.csv(yc)
+  counts <- utils::read.csv(yc, stringsAsFactors = FALSE)
+  flags <- year_completeness(counts$YEAR, counts$N)
+  # Live builds also judge each tax year by the CORE files behind it.
+  if ("INCOMPLETE" %in% names(counts))
+    flags$INCOMPLETE <- flags$INCOMPLETE | counts$INCOMPLETE %in% TRUE
   list(manifest = utils::read.csv(mf, stringsAsFactors = FALSE),
-       year_counts = year_completeness(counts$YEAR, counts$N))
+       year_counts = flags)
 }
 
 
 #' Read organization-years for a set of years
 #'
 #' Returns organizations in the canonical schema (see [npc_standardize()])
-#' for the requested years, with `CBSA_FIPS` attached.
+#' for the requested years, with `CBSA_FIPS` attached, and one row per EIN
+#' and tax year. Archives built before duplicates were removed in
+#' [npc_standardize()] are deduplicated the same way when read.
 #'
 #' @param years Integer vector of tax years.
 #' @param universe Which organizations: `"filers"` (Form 990 and 990-EZ
 #'   filers). The registered and grassroots universes are planned.
-#' @param source `"archive"` reads the local Parquet archive. Downloading from
-#'   NCCS (`"nccs"`) is planned.
-#' @param dir Archive directory; see [npc_archive_dir()].
+#' @param source `"archive"` reads the local Parquet archive built from the
+#'   SOI panel. `"nccs"` reads a live build from NCCS downloads (see
+#'   [npc_build_nccs()]), downloading and building any missing years first.
+#' @param dir Archive directory for `source = "archive"` (default
+#'   [npc_archive_dir()]) or cache directory for `source = "nccs"` (default
+#'   [npc_cache_dir()]).
 #' @param subsection 501(c) subsections to keep, or `NULL` for all.
 #' @param include_imputed Keep rows that fill gap years between filings.
 #'   They have no financial data but mark years when the organization
@@ -257,7 +309,7 @@ npc_archive_info <- function(dir = npc_archive_dir()) {
 #' @param cbsa How to assign CBSAs: `"crosswalk"` (default) maps each county
 #'   to its CBSA under the 2023 delineation ([cbsa_county_xwalk]), matching
 #'   the population data; `"geocode"` uses the CBSA assigned when the
-#'   address was geocoded.
+#'   address was geocoded (archive only).
 #' @param columns Optional character vector of columns to return.
 #'
 #' @return A data frame of organization-years.
@@ -269,7 +321,7 @@ npc_archive_info <- function(dir = npc_archive_dir()) {
 npc_get_orgs <- function(years,
                          universe = c("filers", "registered", "grassroots"),
                          source = c("archive", "nccs"),
-                         dir = npc_archive_dir(),
+                         dir = NULL,
                          subsection = 3,
                          include_imputed = TRUE,
                          cbsa = c("crosswalk", "geocode"),
@@ -280,9 +332,14 @@ npc_get_orgs <- function(years,
   cbsa     <- match.arg(cbsa)
   check_planned(universe, source)
   need_pkg("arrow", "read the Parquet archive")
+  dir <- resolve_data_dir(source, dir)
+  if (source == "nccs" && cbsa == "geocode")
+    stop("NCCS live builds have no geocoded CBSA; use cbsa = \"crosswalk\".",
+         call. = FALSE)
 
-  info <- npc_archive_info(dir)
   years <- as.integer(years)
+  if (source == "nccs") ensure_nccs_years(years, dir)
+  info <- npc_archive_info(dir)
   absent <- setdiff(years, info$year_counts$YEAR)
   if (length(absent) > 0)
     stop("Year(s) not in the archive: ", paste(absent, collapse = ", "),
@@ -298,6 +355,7 @@ npc_get_orgs <- function(years,
   if (!include_imputed) q <- dplyr::filter(q, !IMPUTED)
   dat <- as.data.frame(dplyr::collect(q))
   dat$YEAR <- as.integer(dat$YEAR)
+  dat <- dedupe_org_years(dat[intersect(canonical_cols, names(dat))])   # archives built before deduplication
 
   xw <- npcompete::cbsa_county_xwalk
   dat$CBSA_FIPS <- if (cbsa == "crosswalk") {
@@ -349,12 +407,27 @@ need_pkg <- function(pkg, why) {
          "install.packages(\"", pkg, "\").", call. = FALSE)
 }
 
-# Universes and sources that are planned but not yet built.
+# Default data directory for each source.
+resolve_data_dir <- function(source, dir = NULL) {
+  if (!is.null(dir)) return(dir)
+  if (source == "nccs") npc_cache_dir() else npc_archive_dir()
+}
+
+# Build any requested tax years missing from a live NCCS build.
+ensure_nccs_years <- function(years, dir) {
+  yc <- file.path(dir, "year-counts.csv")
+  have <- if (file.exists(yc)) utils::read.csv(yc)$YEAR else integer()
+  todo <- setdiff(years, have)
+  if (length(todo) > 0) {
+    message("Building tax year(s) ", paste(todo, collapse = ", "),
+            " from NCCS downloads into ", dir, " ...")
+    npc_build_nccs(todo, dir = dir)
+  }
+  invisible(dir)
+}
+
+# Universes that are planned but not yet built.
 check_planned <- function(universe, source) {
-  if (source == "nccs")
-    stop("source = \"nccs\" (live NCCS downloads) is not available yet; ",
-         "it is planned for Phase 4 of DEV-PLAN.md. Use source = \"archive\".",
-         call. = FALSE)
   if (universe != "filers")
     stop("universe = \"", universe, "\" is not available yet; the registered ",
          "and grassroots universes are planned for Phase 5 of DEV-PLAN.md.",

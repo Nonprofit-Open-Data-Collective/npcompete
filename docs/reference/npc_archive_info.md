@@ -1,6 +1,10 @@
-# Describe the local archive
+# Describe the local archive or a live NCCS build
 
-Describe the local archive
+Works for both the SOI panel archive
+([`npc_build_archive()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_build_archive.md))
+and a live build
+([`npc_build_nccs()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_build_nccs.md)),
+which share a layout.
 
 ## Usage
 
@@ -12,8 +16,7 @@ npc_archive_info(dir = npc_archive_dir())
 
 - dir:
 
-  Archive directory; see
-  [`npc_archive_dir()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_archive_dir.md).
+  Archive or cache directory.
 
 ## Value
 

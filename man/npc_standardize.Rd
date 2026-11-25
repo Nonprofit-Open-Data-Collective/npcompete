@@ -4,14 +4,18 @@
 \alias{npc_standardize}
 \title{Convert an organization panel to the canonical npcompete schema}
 \usage{
-npc_standardize(df, source = "soi_panel")
+npc_standardize(df, source = c("soi_panel", "nccs_core"), bmf = NULL)
 }
 \arguments{
 \item{df}{A data frame from the source panel.}
 
-\item{source}{Which source layout \code{df} follows. Currently only
-\code{"soi_panel"}, the NCCS SOI panel sample frame of Form 990 and 990-EZ
-filers.}
+\item{source}{Which source layout \code{df} follows: \code{"soi_panel"}, the NCCS
+SOI panel sample frame of Form 990 and 990-EZ filers, or \code{"nccs_core"},
+rows of the NCCS CORE 990combined files (see \code{\link[=npc_build_nccs]{npc_build_nccs()}}).}
+
+\item{bmf}{For \code{source = "nccs_core"}: the unified geocoded BMF, with at
+least \code{EIN2}, \code{geo_county}, \code{geo_state_abbr}, \code{nteev2} and
+\code{ruling_date}. It supplies county, NTEEV2 and ruling year.}
 }
 \value{
 A data frame with one row per organization-year and columns:
@@ -43,6 +47,23 @@ have no financial data}
 Maps the columns of a source panel onto the organization-year schema that
 the archive and \code{\link[=npc_build_metrics]{npc_build_metrics()}} use, so that every data source ends
 up in the same layout.
+}
+\details{
+Both layouts are reduced to one row per EIN and tax year. The SOI panel
+repeats about 0.3\% of EIN-years, mostly short-period returns after an
+accounting-period change; the row kept is a real filing over an imputed
+gap row, then the one from the latest source file (\code{SOURCE}), then the
+latest period end. This is the filing the NCCS CORE files keep.
+
+For \code{"nccs_core"}, the tax year is the year the fiscal period began (a
+December year end in \code{Y} is tax year \code{Y}, any other year end is \code{Y - 1}),
+matching the SOI panel. Duplicate filings for an EIN and tax year are
+reduced to one: the latest extract, then the latest period end. For
+990-EZ filers \code{NETASS} is total assets less total liabilities, as in the
+SOI panel, since the reported Part I figure often disagrees. CORE
+files have no fundraising fee or revocation fields, so \code{FNDFEE},
+\code{REVOKED}, \code{REVOCATION_YEAR} and \code{REINSTATEMENT_YEAR} are \code{NA}, and
+\code{CBSA_FIPS_GEOCODE} is \code{NA} (CBSAs come from the county crosswalk).
 }
 \examples{
 raw <- data.frame(

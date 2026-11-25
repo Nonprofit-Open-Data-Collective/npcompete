@@ -30,6 +30,10 @@ up in the same layout."></head><body>
     <li><a class="dropdown-item" href="../articles/gini.html">Gini coefficient</a></li>
     <li><a class="dropdown-item" href="../articles/density.html">Scale-free nonprofit density</a></li>
     <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Building metrics</h6></li>
+    <li><a class="dropdown-item" href="../articles/build-from-archive.html">Building metrics from an archived panel</a></li>
+    <li><a class="dropdown-item" href="../articles/build-from-nccs.html">Building metrics from fresh NCCS downloads</a></li>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Comparing metrics</h6></li>
     <li><a class="dropdown-item" href="../articles/metric-correlations.html">How the metrics relate: correlation, PCA and factor analysis</a></li>
   </ul></li>
@@ -64,7 +68,7 @@ up in the same layout.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">npc_standardize</span><span class="op">(</span><span class="va">df</span>, source <span class="op">=</span> <span class="st">"soi_panel"</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">npc_standardize</span><span class="op">(</span><span class="va">df</span>, source <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"soi_panel"</span>, <span class="st">"nccs_core"</span><span class="op">)</span>, bmf <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -76,9 +80,15 @@ up in the same layout.</p>
 
 
 <dt id="arg-source">source<a class="anchor" aria-label="anchor" href="#arg-source"></a></dt>
-<dd><p>Which source layout <code>df</code> follows. Currently only
-<code>"soi_panel"</code>, the NCCS SOI panel sample frame of Form 990 and 990-EZ
-filers.</p></dd>
+<dd><p>Which source layout <code>df</code> follows: <code>"soi_panel"</code>, the NCCS
+SOI panel sample frame of Form 990 and 990-EZ filers, or <code>"nccs_core"</code>,
+rows of the NCCS CORE 990combined files (see <code><a href="npc_build_nccs.html">npc_build_nccs()</a></code>).</p></dd>
+
+
+<dt id="arg-bmf">bmf<a class="anchor" aria-label="anchor" href="#arg-bmf"></a></dt>
+<dd><p>For <code>source = "nccs_core"</code>: the unified geocoded BMF, with at
+least <code>EIN2</code>, <code>geo_county</code>, <code>geo_state_abbr</code>, <code>nteev2</code> and
+<code>ruling_date</code>. It supplies county, NTEEV2 and ruling year.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -138,6 +148,23 @@ have no financial data</p></dd>
 
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Both layouts are reduced to one row per EIN and tax year. The SOI panel
+repeats about 0.3% of EIN-years, mostly short-period returns after an
+accounting-period change; the row kept is a real filing over an imputed
+gap row, then the one from the latest source file (<code>SOURCE</code>), then the
+latest period end. This is the filing the NCCS CORE files keep.</p>
+<p>For <code>"nccs_core"</code>, the tax year is the year the fiscal period began (a
+December year end in <code>Y</code> is tax year <code>Y</code>, any other year end is <code>Y - 1</code>),
+matching the SOI panel. Duplicate filings for an EIN and tax year are
+reduced to one: the latest extract, then the latest period end. For
+990-EZ filers <code>NETASS</code> is total assets less total liabilities, as in the
+SOI panel, since the reported Part I figure often disagrees. CORE
+files have no fundraising fee or revocation fields, so <code>FNDFEE</code>,
+<code>REVOKED</code>, <code>REVOCATION_YEAR</code> and <code>REINSTATEMENT_YEAR</code> are <code>NA</code>, and
+<code>CBSA_FIPS_GEOCODE</code> is <code>NA</code> (CBSAs come from the county crosswalk).</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>

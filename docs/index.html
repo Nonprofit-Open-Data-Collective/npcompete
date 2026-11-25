@@ -46,6 +46,10 @@
     <li><a class="dropdown-item" href="articles/gini.html">Gini coefficient</a></li>
     <li><a class="dropdown-item" href="articles/density.html">Scale-free nonprofit density</a></li>
     <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Building metrics</h6></li>
+    <li><a class="dropdown-item" href="articles/build-from-archive.html">Building metrics from an archived panel</a></li>
+    <li><a class="dropdown-item" href="articles/build-from-nccs.html">Building metrics from fresh NCCS downloads</a></li>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Comparing metrics</h6></li>
     <li><a class="dropdown-item" href="articles/metric-correlations.html">How the metrics relate: correlation, PCA and factor analysis</a></li>
   </ul>
@@ -486,7 +490,7 @@
 <div class="section level2">
 <h2 id="building-metrics-for-many-years">Building metrics for many years<a class="anchor" aria-label="anchor" href="#building-metrics-for-many-years"></a>
 </h2>
-<p>For national builds across years, npcompete reads from a local archive: the NCCS SOI panel sample frame (about 2 GB as CSV) converted once to a Parquet dataset partitioned by year. This needs the <strong>arrow</strong> and <strong>data.table</strong> packages.</p>
+<p>For national builds across years, npcompete reads from a local archive: the NCCS SOI panel sample frame (about 2 GB as CSV) converted once to a Parquet dataset partitioned by year. This needs the <strong>arrow</strong> and <strong>data.table</strong> packages. The article <a href="https://nonprofit-open-data-collective.github.io/npcompete/articles/build-from-archive.html">Building metrics from an archived panel</a> walks through the steps.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># where the archive lives (or set the NPCOMPETE_ARCHIVE environment variable)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span> npcompete.archive_dir <span class="op">=</span> <span class="st">"D:/data/npcompete-archive"</span> <span class="op">)</span></span>
@@ -505,14 +509,24 @@
 <span><span class="co"># or the wide tables, written to disk with a manifest of the build</span></span>
 <span><span class="fu"><a href="reference/npc_build_metrics.html">npc_build_metrics</a></span><span class="op">(</span> <span class="fl">2012</span><span class="op">:</span><span class="fl">2022</span>, format <span class="op">=</span> <span class="st">"wide"</span>, out_dir <span class="op">=</span> <span class="st">"metrics"</span> <span class="op">)</span></span></code></pre></div>
 <p><code><a href="reference/npc_build_metrics.html">npc_build_metrics()</a></code> attaches populations from <code>pop_county</code> and <code>pop_cbsa</code> at the market level, so markets with no organizations in a subsector are still part of the density models.</p>
+<div class="section level3">
+<h3 id="without-a-local-archive-nccs-downloads">Without a local archive: NCCS downloads<a class="anchor" aria-label="anchor" href="#without-a-local-archive-nccs-downloads"></a>
+</h3>
+<p>With <code>source = "nccs"</code>, npcompete downloads the NCCS CORE 990combined files and the unified geocoded BMF, harmonizes them to the same layout as the archive, and caches the result (under <code><a href="reference/npc_cache_dir.html">npc_cache_dir()</a></code>, or set <code>NPCOMPETE_CACHE</code>). The first build downloads about 0.7 GB for the BMF plus about 50 MB per year; later builds reuse the cache. Live builds cover tax years 2010 onward. See <a href="https://nonprofit-open-data-collective.github.io/npcompete/articles/build-from-nccs.html">Building metrics from fresh NCCS downloads</a>.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/npc_build_metrics.html">npc_build_metrics</a></span><span class="op">(</span> <span class="fl">2015</span><span class="op">:</span><span class="fl">2022</span>, geo <span class="op">=</span> <span class="st">"cbsa"</span>, source <span class="op">=</span> <span class="st">"nccs"</span> <span class="op">)</span></span>
+<span></span>
+<span><span class="co"># or build the organization table first and inspect it</span></span>
+<span><span class="fu"><a href="reference/npc_build_nccs.html">npc_build_nccs</a></span><span class="op">(</span> <span class="fl">2015</span><span class="op">:</span><span class="fl">2022</span> <span class="op">)</span></span>
+<span><span class="fu"><a href="reference/npc_archive_info.html">npc_archive_info</a></span><span class="op">(</span> <span class="fu"><a href="reference/npc_cache_dir.html">npc_cache_dir</a></span><span class="op">(</span><span class="op">)</span> <span class="op">)</span>   <span class="co"># rows per year, files and BMF used</span></span></code></pre></div>
+<p>For 2018 and 2019, live builds hold the same 501(c)(3) filers as the SOI panel archive (all but 3 or 4 EINs a year), with revenue, expenses and assets identical for virtually every organization and net assets for 99.9%. Counties differ for about 4% of organizations, because live builds place each organization at its current BMF address in every year. <code><a href="reference/npc_compare_sources.html">npc_compare_sources()</a></code> repeats this comparison for any years.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="status-and-roadmap">Status and roadmap<a class="anchor" aria-label="anchor" href="#status-and-roadmap"></a>
 </h2>
-<p>The metric functions and the archive builder are stable and tested. Planned work, described in <a href="dev/DEV-PLAN.html"><code>dev/DEV-PLAN.md</code></a>:</p>
+<p>The metric functions, the archive builder and the live NCCS source are stable and tested. Planned work, described in <a href="dev/DEV-PLAN.html"><code>dev/DEV-PLAN.md</code></a>:</p>
 <ul>
-<li>
-<strong>Live NCCS source</strong> (<code>source = "nccs"</code>): build metrics from NCCS downloads instead of a local archive.</li>
 <li>
 <strong>Registered and grassroots universes</strong> (<code>universe = "registered"</code>, <code>"grassroots"</code>): include organizations that file a 990-N or do not file, for count-based metrics.</li>
 <li>

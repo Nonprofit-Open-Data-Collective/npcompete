@@ -1,0 +1,223 @@
+---
+title: "Building metrics from an archived panel"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Building metrics from an archived panel}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+has_arrow <- requireNamespace( "arrow", quietly = TRUE ) &&
+             requireNamespace( "data.table", quietly = TRUE )
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>",
+  eval     = has_arrow
+)
+```
+
+npcompete can build every metric for any set of years from a local
+**archive**: a panel of Form 990 and 990-EZ filers stored as Parquet files,
+one folder per tax year. The archive is built once from the NCCS SOI panel
+sample frame (about 2 GB as CSV, 7 million organization-years). After that,
+a build only reads the years it needs.
+
+This article walks through the steps on a small stand-in for the full
+panel: the Vermont 501(c)(3) filers in `npo_panel_sample` (2015-2019),
+written out in the SOI panel layout. With the real file, the steps and
+function calls are the same, but builds take minutes instead of seconds.
+
+The archive needs the **arrow** and **data.table** packages.
+
+```{r setup}
+library( npcompete )
+```
+
+## 1. Set where the archive lives
+
+The archive should live outside the package and outside any synced folder
+that might hold files online only. Point npcompete at it once per session,
+or set the `NPCOMPETE_ARCHIVE` environment variable in `.Renviron`.
+
+```{r, eval = FALSE}
+options( npcompete.archive_dir = "D:/data/npcompete-archive" )
+```
+
+Here we use a temporary folder.
+
+```{r}
+arch <- file.path( tempdir(), "npcompete-archive" )
+options( npcompete.archive_dir = arch )
+```
+
+## 2. Build the archive
+
+`npc_build_archive()` reads the SOI panel CSV, maps its columns to the
+package's standard layout with `npc_standardize()`, and writes one Parquet
+file per tax year. With the full panel you would run:
+
+```{r, eval = FALSE}
+npc_build_archive( "SOI-PANEL-SAMPLE-FRAME-COLUMNS-AUGMENTED-W-POP.CSV" )
+```
+
+`npo_panel_sample` lacks a few columns of the full panel (source file,
+e-file flag, fiscal year end, revocation dates), so for this example we
+add them before writing the CSV.
+
+```{r}
+soi <- npo_panel_sample
+soi$SOURCE  <- ifelse( is.na( soi$TOTREV ), "", paste0( "SOI_", soi$TAXYEAR + 1, "_PC" ) )
+soi$EFILE_X <- "EFILE"
+soi$revocation_date <- ""
+soi$exemption_reinstatement_date <- ""
+soi$TOTLIA  <- NA
+soi$REVINVE <- NA
+soi$FISYEAR <- soi$TAXYEAR
+soi$FISMO   <- 12
+
+csv <- file.path( tempdir(), "soi-panel-vermont.csv" )
+data.table::fwrite( soi, csv )
+
+npc_build_archive( csv, overwrite = TRUE )
+```
+
+The archive records what it holds. `npc_archive_info()` returns the build
+manifest and the rows per tax year, with a flag for years that look
+incomplete. In the full panel, the most recent tax year is always partial,
+because many organizations have not yet filed. `npc_build_metrics()` drops
+flagged years unless you ask it not to.
+
+```{r}
+info <- npc_archive_info()
+info$year_counts
+```
+
+Each organization appears once per tax year. Where the source panel repeats
+an organization within a year (a short-period return after a change of
+accounting period, or the same return in two extracts), `npc_standardize()`
+keeps one filing: the latest extract, then the latest period end.
+
+## 3. Read organizations for some years
+
+`npc_get_orgs()` reads only the requested years. It keeps 501(c)(3)
+organizations by default (`subsection = 3`). It also adds `CBSA_FIPS` from
+the county-to-CBSA crosswalk (2023 delineation), so every year uses the
+same metro boundaries.
+
+```{r}
+orgs <- npc_get_orgs( 2018:2019 )
+dim( orgs )
+head( orgs[ c( "EIN2", "YEAR", "COUNTY_FIPS", "CBSA_FIPS", "NTEEV2",
+               "FILER_TYPE", "TOTREV" ) ] )
+```
+
+Rows marked `IMPUTED` fill a gap year between two filings: the organization
+existed but did not file that year. They count toward organization counts
+but carry no financial data. Drop them with `include_imputed = FALSE`.
+
+## 4. Build metrics
+
+`npc_build_metrics()` reads the years, attaches market populations from
+`pop_county` and `pop_cbsa`, and computes each requested metric for each
+market (CBSA or county), subsector (NTEE major group) and year. It also
+reports `SUB = "ALL"` and `GEO = "ALL"` rollups. `npc_metrics()` lists
+every metric.
+
+```{r}
+npc_metrics()[ c( "id", "family", "by_resource" ) ]
+```
+
+The default output is one long table, with one row per market, subsector,
+year, resource and metric:
+
+```{r}
+m <- npc_build_metrics( 2016:2019, geo = "county",
+                        resources = c( "TOTREV", "NETASS" ),
+                        metrics = c( "HHI", "CR4", "GINI", "DENSITY_PER_100K",
+                                     "DENSITY_PCTL_N" ) )
+vt <- substr( m$GEO, 1, 2 ) == "50"     # every US county is in the frame; show Vermont
+head( m[ vt, ] )
+```
+
+Metrics that do not depend on a resource, such as density, appear once with
+`RESOURCE = NA`.
+
+Here is concentration of revenue in Chittenden County (Burlington) across
+all subsectors:
+
+```{r}
+subset( m, GEO == "50007" & SUB == "ALL" & METRIC %in% c( "HHI", "CR4" ) &
+           RESOURCE == "TOTREV" )
+```
+
+### Wide tables
+
+`format = "wide"` returns one table per geography and resource, with
+metrics as columns. This is the layout of `get_all_metrics()` and of the
+files the dashboard reads.
+
+```{r}
+w <- npc_build_metrics( 2019, geo = "cbsa", resources = "TOTREV",
+                        metrics = c( "HHI", "NHHI", "KWOKA", "DENSITY_PCTL_N" ),
+                        format = "wide" )
+names( w )
+t <- w$cbsa_TOTREV
+subset( t, SUB == "ALL" & N > 0 )
+```
+
+In this sample `DENSITY_PCTL_N` sits at its cap of 2 for every Vermont
+metro. The density model compares each market with every other market in
+the country, and in this sample only Vermont has any organizations. With
+the full panel, values spread around 0.
+
+### Pooled windows for small markets
+
+Small markets have few organizations, so their metrics jump from year to
+year. `window = 3` pools three years for each reported year:
+
+- each organization's financial values are averaged over the years it
+  appears;
+- its location and subsector come from its latest year;
+- population is the three-year average.
+
+Reported years without a full window of data are dropped.
+
+```{r}
+w3 <- npc_build_metrics( 2017:2019, geo = "county", window = 3,
+                         metrics = c( "DENSITY_PER_100K", "MEDIAN_AGE" ),
+                         format = "wide" )
+subset( w3$county, SUB == "ALL" & substr( GEO, 1, 2 ) == "50" & YEAR == 2019 )
+```
+
+### Writing results with a manifest
+
+With `out_dir`, the results are written as CSV along with `manifest.csv`.
+The manifest records the archive used, the years, metrics, options and
+package version, so the build can be reproduced or compared with a later
+one.
+
+```{r}
+out <- file.path( tempdir(), "metrics" )
+res <- npc_build_metrics( 2018:2019, geo = "cbsa", resources = "TOTREV",
+                          metrics = c( "HHI", "GINI" ), format = "wide",
+                          out_dir = out )
+list.files( out )
+head( attr( res, "manifest" ), 12 )
+```
+
+## Choices that change the results
+
+- **`cbsa`**: `"crosswalk"` (default) assigns CBSAs from each county under
+  the 2023 delineation, the same boundaries as the population data.
+  `"geocode"` uses the CBSA assigned when the address was geocoded, which
+  reproduces tables built before this option existed.
+- **`subsection`**: 501(c)(3) only by default; `NULL` keeps every
+  subsection.
+- **`density_model`**: the count model behind `DENSITY_PCTL_N`, negative
+  binomial by default (see `vignette("density")`).
+- **`drop_incomplete_years`**: keep partial years only when you know why
+  you want them.
+
+To build the same metrics without the SOI panel, from public NCCS files,
+see `vignette("build-from-nccs")`.

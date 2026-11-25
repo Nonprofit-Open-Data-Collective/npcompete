@@ -13,6 +13,13 @@
 - [Scale-free nonprofit
   density](https://nonprofit-open-data-collective.github.io/npcompete/articles/density.md):
 
+### Building metrics
+
+- [Building metrics from an archived
+  panel](https://nonprofit-open-data-collective.github.io/npcompete/articles/build-from-archive.md):
+- [Building metrics from fresh NCCS
+  downloads](https://nonprofit-open-data-collective.github.io/npcompete/articles/build-from-nccs.md):
+
 ### Comparing metrics
 
 - [How the metrics relate: correlation, PCA and factor

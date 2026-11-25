@@ -19,10 +19,8 @@ returns the index along with the shares of the three largest
 organizations (`top1` to `top3`).
 
 ``` r
-
 library( npcompete )
 library( ggplot2 )
-#> Warning: package 'ggplot2' was built under R version 4.4.3
 
 # NTMAJ12 labels for the NTEEV2 major groups
 ntmaj12 <- c( ART = "Arts",           EDU = "Education",
@@ -39,7 +37,6 @@ Two markets with nearly the same HHI: a duopoly of equals, and one
 leader with three small followers.
 
 ``` r
-
 GEO    <- rep( c( "duopoly", "leader" ), c( 2, 4 ) )
 TOTREV <- c( 50, 50,   70, 10, 10, 10 )
 
@@ -67,7 +64,6 @@ between the leader and everyone else.
 2019, one row per organization-year. Here the market is the county.
 
 ``` r
-
 vt <- get_kwoka( npo_panel_sample, geography = "COUNTY_FIPS" )
 
 # all subsectors combined, one row per county
@@ -98,7 +94,6 @@ vt19[ order( vt19$KWOKA ), ] |> knitr::kable( digits = 3, row.names = FALSE )
 (CBSA) in 2019, by NTEE major group, measured on total revenue.
 
 ``` r
-
 metros <- cbsa_metrics
 metros$NTMAJ12 <- factor( ntmaj12[ metros$SUB ], levels = ntmaj12 )
 
@@ -109,7 +104,6 @@ markets <- subset( metros, SUB != "ALL" & N > 0 & !is.na( KWOKA ) )
 ### Descriptive statistics by subsector
 
 ``` r
-
 markets |>
   dplyr::group_by( NTMAJ12 ) |>
   dplyr::summarize(
@@ -148,7 +142,6 @@ between successive organizations. Single-organization markets (a spike
 at 1) are left out.
 
 ``` r
-
 ggplot( subset( markets, N > 1 ), aes( KWOKA ) ) +
   geom_density( fill = "#3266ad", colour = NA, alpha = 0.8 ) +
   facet_wrap( ~ NTMAJ12, ncol = 4 ) +
@@ -167,7 +160,6 @@ ggplot( subset( markets, N > 1 ), aes( KWOKA ) ) +
 All subsectors combined, one point per metro, with a loess smooth:
 
 ``` r
-
 all_subs <- subset( metros, SUB == "ALL" & !is.na( POP ) )
 
 ggplot( all_subs, aes( POP, KWOKA ) ) +
@@ -184,7 +176,6 @@ ggplot( all_subs, aes( POP, KWOKA ) ) +
 By subsector:
 
 ``` r
-
 ggplot( subset( markets, !is.na( POP ) ), aes( POP, KWOKA ) ) +
   geom_point( colour = "grey60", alpha = 0.25, size = 0.6 ) +
   geom_smooth( method = "loess", formula = y ~ x, se = FALSE,
@@ -205,7 +196,6 @@ organization, dominates the sum. The leader’s lead can be read off the
 concentration ratios: $`s_{(1)} - s_{(2)} = 2\,CR1 - CR2`$.
 
 ``` r
-
 markets$LEAD <- 2 * markets$CR1 - markets$CR2
 
 ggplot( subset( markets, N > 1 ), aes( LEAD^2, KWOKA ) ) +
@@ -225,7 +215,6 @@ Against HHI, the Kwoka index sits below it and fans out: markets with
 the same HHI can have very different dominance.
 
 ``` r
-
 ggplot( subset( markets, N > 1 ), aes( HHI, KWOKA ) ) +
   geom_abline( colour = "grey70" ) +
   geom_point( colour = "grey45", alpha = 0.25, size = 0.8 ) +

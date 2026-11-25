@@ -7,10 +7,8 @@ the metrics across US metro areas and then reduces them with principal
 components and factor analysis.
 
 ``` r
-
 library( npcompete )
 library( ggplot2 )
-#> Warning: package 'ggplot2' was built under R version 4.4.3
 
 # NTMAJ12 labels for the NTEEV2 major groups
 ntmaj12 <- c( ART = "Arts",           EDU = "Education",
@@ -31,7 +29,6 @@ organizations are dropped because their metrics are pinned at the bounds
 build correlation in mechanically.
 
 ``` r
-
 metrics <- c( "HHI", "NHHI", "CR1", "CR4", "CR8", "KWOKA", "GINI",
               "DENSITY_PCTL_N", "DENSITY_PCTL_R" )
 
@@ -49,7 +46,6 @@ Spearman (rank) correlations, which are not driven by the long tails of
 the concentration measures:
 
 ``` r
-
 r <- cor( X, method = "spearman" )
 round( r, 2 ) |> knitr::kable()
 ```
@@ -69,7 +65,6 @@ round( r, 2 ) |> knitr::kable()
 As a heat map, with variables ordered by hierarchical clustering:
 
 ``` r
-
 ord <- hclust( as.dist( 1 - abs( r ) ) )$order
 
 r_long <- as.data.frame( as.table( r[ ord, ord ] ) )
@@ -104,7 +99,6 @@ Three groups stand out:
 A few of the pairs plotted:
 
 ``` r
-
 pairs( X[ c( "HHI", "CR4", "KWOKA", "GINI", "DENSITY_PCTL_N" ) ],
        pch = 19, cex = 0.3, col = grDevices::adjustcolor( "grey30", 0.3 ),
        gap = 0.3 )
@@ -119,7 +113,6 @@ combination of the metrics, chosen to capture as much of the remaining
 variance as possible.
 
 ``` r
-
 pca <- prcomp( X, scale. = TRUE )
 
 var_share <- pca$sdev^2 / sum( pca$sdev^2 )
@@ -148,7 +141,6 @@ eigenvalue-above-one rule, two components are worth keeping; together
 they hold about 80% of the variance.
 
 ``` r
-
 scree <- data.frame( k = seq_along( var_share ), share = var_share )
 
 ggplot( scree, aes( k, share ) ) +
@@ -166,7 +158,6 @@ ggplot( scree, aes( k, share ) ) +
 Loadings on the first three components:
 
 ``` r
-
 round( pca$rotation[ , 1:3 ], 2 ) |> knitr::kable()
 ```
 
@@ -188,7 +179,6 @@ higher PC1 score means a less concentrated market); the Gini and the two
 density indices carry PC2.
 
 ``` r
-
 L <- data.frame( metric = rownames( pca$rotation ), pca$rotation[ , 1:2 ] )
 L <- tidyr::pivot_longer( L, c( PC1, PC2 ), names_to = "component",
                           values_to = "loading" )
@@ -211,7 +201,6 @@ Metro scores on the first two components, against population. The sign
 of a component is arbitrary; read it from the loadings.
 
 ``` r
-
 scores <- data.frame( POP = metros$POP, pca$x[ , 1:2 ] )
 scores <- tidyr::pivot_longer( scores, c( PC1, PC2 ),
                                names_to = "component", values_to = "score" )
@@ -241,7 +230,6 @@ left out. The concentration measures are strongly skewed, so the model
 is fit to the Spearman correlation matrix rather than the raw data.
 
 ``` r
-
 fa_vars <- c( "HHI", "CR4", "CR8", "KWOKA", "GINI",
               "DENSITY_PCTL_N", "DENSITY_PCTL_R" )
 
@@ -255,7 +243,6 @@ Loadings (blank below 0.3) and uniqueness, the share of each metric’s
 variance that the factors do not explain:
 
 ``` r
-
 loading_table <- function( fa ) {
   ld <- unclass( fa$loadings )
   ld[ abs( ld ) < 0.3 ] <- NA
@@ -287,7 +274,6 @@ showed: dominance by the leader (HHI, Kwoka) versus the weight of the
 top tier as a whole (CR4, CR8).
 
 ``` r
-
 fa3 <- factanal( covmat = r_fa, factors = 3, n.obs = nrow( X ),
                  rotation = "varimax" )
 
@@ -314,7 +300,6 @@ The same correlations inside each subsector, for subsector markets with
 ten or more organizations:
 
 ``` r
-
 subs <- subset( cbsa_metrics, SUB != "ALL" & N >= 10 )
 subs$NTMAJ12 <- factor( ntmaj12[ subs$SUB ], levels = ntmaj12 )
 

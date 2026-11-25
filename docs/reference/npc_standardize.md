@@ -8,7 +8,7 @@ use, so that every data source ends up in the same layout.
 ## Usage
 
 ``` r
-npc_standardize(df, source = "soi_panel")
+npc_standardize(df, source = c("soi_panel", "nccs_core"), bmf = NULL)
 ```
 
 ## Arguments
@@ -19,8 +19,16 @@ npc_standardize(df, source = "soi_panel")
 
 - source:
 
-  Which source layout `df` follows. Currently only `"soi_panel"`, the
-  NCCS SOI panel sample frame of Form 990 and 990-EZ filers.
+  Which source layout `df` follows: `"soi_panel"`, the NCCS SOI panel
+  sample frame of Form 990 and 990-EZ filers, or `"nccs_core"`, rows of
+  the NCCS CORE 990combined files (see
+  [`npc_build_nccs()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_build_nccs.md)).
+
+- bmf:
+
+  For `source = "nccs_core"`: the unified geocoded BMF, with at least
+  `EIN2`, `geo_county`, `geo_state_abbr`, `nteev2` and `ruling_date`. It
+  supplies county, NTEEV2 and ruling year.
 
 ## Value
 
@@ -93,6 +101,24 @@ A data frame with one row per organization-year and columns:
 - SOURCE:
 
   The source file the row came from
+
+## Details
+
+Both layouts are reduced to one row per EIN and tax year. The SOI panel
+repeats about 0.3% of EIN-years, mostly short-period returns after an
+accounting-period change; the row kept is a real filing over an imputed
+gap row, then the one from the latest source file (`SOURCE`), then the
+latest period end. This is the filing the NCCS CORE files keep.
+
+For `"nccs_core"`, the tax year is the year the fiscal period began (a
+December year end in `Y` is tax year `Y`, any other year end is
+`Y - 1`), matching the SOI panel. Duplicate filings for an EIN and tax
+year are reduced to one: the latest extract, then the latest period end.
+For 990-EZ filers `NETASS` is total assets less total liabilities, as in
+the SOI panel, since the reported Part I figure often disagrees. CORE
+files have no fundraising fee or revocation fields, so `FNDFEE`,
+`REVOKED`, `REVOCATION_YEAR` and `REINSTATEMENT_YEAR` are `NA`, and
+`CBSA_FIPS_GEOCODE` is `NA` (CBSAs come from the county crosswalk).
 
 ## Examples
 
