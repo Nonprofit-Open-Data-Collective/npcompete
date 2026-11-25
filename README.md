@@ -220,29 +220,47 @@ assets identical for virtually every organization and net assets for
 builds place each organization at its current BMF address in every year.
 `npc_compare_sources()` repeats this comparison for any years.
 
-## Status and roadmap
+## Universes and dynamics
 
-The metric functions, the archive builder and the live NCCS source are
-stable and tested.
-
-**In development:**
-
-- **Registered and grassroots universes** (`universe = "registered"` or
-  `"grassroots"`): every organization on the IRS registry, including
-  those that file a 990-N or file nothing, with the `GRASSROOTS_SHARE`
-  metric. Financial metrics stay limited to filers.
-- **Dynamics**: entry, exit, net growth and churn rates by market for
-  any universe, and graduation and downgrade rates between grassroots
-  and filer status for the registered universe (`get_dynamics()`).
+Beyond Form 990 filers, `universe = "registered"` counts every
+organization on the IRS registry, including those that file a 990-N or
+file nothing, and `"grassroots"` counts only those. Count, density and
+age metrics work for every universe; financial metrics stay limited to
+filers. Dynamics metrics give entry, exit, net growth and churn rates by
+market, and, for the registered universe, graduation and downgrade rates
+between grassroots and filer status.
 
 ``` r
-npc_build_metrics( 2019, geo = "cbsa", universe = "registered", source = "nccs",
+npc_build_metrics( 2015:2021, geo = "cbsa", universe = "registered", source = "nccs",
                    metrics = c( "DENSITY_PER_100K", "GRASSROOTS_SHARE",
                                 "ENTRY_RATE", "EXIT_RATE", "GRADUATION_RATE" ) )
 ```
 
-See [`dev/DEV-PLAN.md`](dev/DEV-PLAN.md) for definitions and what is
-next.
+The article [Universes, entries and
+exits](https://nonprofit-open-data-collective.github.io/npcompete/articles/dynamics.html)
+explains the methods and shows national and metro patterns.
+
+## Dashboard
+
+`npc_dashboard()` opens an interactive app on any `npc_build_metrics()`
+output. Choose a universe, geography, metric, subsector, year and
+market, then compare the market with all others, over time and across
+subsectors, and download the table. It needs the **shiny** and **bslib**
+packages.
+
+``` r
+npc_dashboard()                       # bundled 2019 CBSA metrics
+
+f <- npc_build_metrics( 2015:2021, source = "nccs", metrics = "all", resources = "TOTREV" )
+r <- npc_build_metrics( 2015:2021, source = "nccs", metrics = "all", universe = "registered" )
+npc_dashboard( rbind( f, r ) )        # with a universe toggle
+```
+
+## Status
+
+The metric functions, archive and live NCCS sources, universes, dynamics
+and dashboard are tested. Remaining plans are in
+[`dev/DEV-PLAN.md`](dev/DEV-PLAN.md).
 
 ### Legacy functions
 

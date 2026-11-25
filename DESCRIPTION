@@ -27,11 +27,13 @@ Imports:
     utils
 Suggests:
     arrow,
+    bslib,
     devtools,
     ggplot2,
     knitr,
     rmarkdown,
     scales,
+    shiny,
     testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Config/testthat/edition: 3

@@ -61,6 +61,11 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="npcompete-development-version">npcompete (development version)<a class="anchor" aria-label="anchor" href="#npcompete-development-version"></a></h2>
 <div class="section level3">
+<h3 id="dashboard-phase-development-version">Dashboard (Phase 6)<a class="anchor" aria-label="anchor" href="#dashboard-phase-development-version"></a></h3>
+<ul><li>
+<code><a href="../reference/npc_dashboard.html">npc_dashboard()</a></code> opens a Shiny app on any output of <code><a href="../reference/npc_build_metrics.html">npc_build_metrics()</a></code> (long, wide, a folder written with <code>out_dir</code>, or several universes combined). It has toggles for universe, geography, metric, resource, subsector, year and market, and tabs for the distribution across markets, change over time, a two-metric comparison, subsectors, and a downloadable table. With no data it shows the bundled 2019 <code>cbsa_metrics</code>. Needs the shiny, bslib and ggplot2 packages. It replaces the 2023 app in <code>data-raw/shiny-dashboard/</code>, which read the old 1990-2019 dataset.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="registered-and-grassroots-universes-phase-in-progress-development-version">Registered and grassroots universes (Phase 5, in progress)<a class="anchor" aria-label="anchor" href="#registered-and-grassroots-universes-phase-in-progress-development-version"></a></h3>
 <ul><li>
 <code><a href="../reference/npc_get_orgs.html">npc_get_orgs()</a></code> and <code><a href="../reference/npc_build_metrics.html">npc_build_metrics()</a></code> accept <code>universe =   "registered"</code> (every organization on the IRS registry that year) and <code>"grassroots"</code> (registered organizations that file a 990-N or do not file). <code><a href="../reference/npc_build_registered.html">npc_build_registered()</a></code> builds them from the unified BMF, the IRS automatic revocation list and the 990-N e-postcard file, with filers from the archive or a live NCCS build. <code><a href="../reference/npc_registry_spans.html">npc_registry_spans()</a></code> gives each organization’s registration years.</li>
