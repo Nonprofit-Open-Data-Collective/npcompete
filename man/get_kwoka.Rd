@@ -43,8 +43,8 @@ geographies (\code{GEO = "ALL"}).
 three organizations, each rescaled by their combined share.
 }
 \examples{
-\dontrun{
-get_kwoka( df, resource = "TOTREV" )
-}
+toy <- data.frame( GEO = "A", SUB = "ART", YEAR = 2020,
+                   TOTREV = c( 50, 30, 10, 10 ) )
+get_kwoka( toy, geography = "GEO", subsector = "SUB", year = "YEAR" )
 
 }

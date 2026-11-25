@@ -13,5 +13,6 @@ utils::globalVariables( c(
   "sorted", "total", "cr_list", "data", "model_n", "model_r",
   "model_results_n", "model_results_r", "geo", "subsector", "resource",
   "countypop", "geopop", "commercialperc", "resource_total",
-  "fundraisingexp", "n_commercial", "county_population", "FIPS", "n"
+  "fundraisingexp", "n_commercial", "county_population", "FIPS", "n",
+  "LOG_NPO", "LOG_POP", "DENSITY_PCTL_N", "DENSITY_PCTL_R"
 ) )

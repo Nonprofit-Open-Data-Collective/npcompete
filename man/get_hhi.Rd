@@ -29,22 +29,22 @@ zero.}
 }
 \value{
 A tibble with \code{GEO}, \code{SUB}, \code{YEAR} (unless \code{year = NULL}), \code{N}, the
-summed resource and \code{HHI}.
+summed resource and \code{HHI}. Markets whose resource total is zero get
+\code{HHI = NA}.
 }
 \description{
-Market concentration in each geography, subsector and year.
+Market concentration in each geography, subsector and year, with rollups
+for all subsectors (\code{SUB = "ALL"}) and all geographies (\code{GEO = "ALL"}).
 }
 \details{
-The Herfindahl–Hirschman Index(HHI) is a measure of market concentration that is used to understand market competitiveness,
-competitive behavior and performance in markets. The index could be calculated as the sum of the squared market share of each firm
-competing in a market (Thornton & Belski, 2010).In the nonprofit sector, market share is determined by the ratio of a nonprofit's
-total revenue to the aggregate revenue for the organization’s market. The formula used here is \eqn{{\sigma \frac{resource}{Total resource}}^2}
-The calculated values range from 1/N to 1, where N is the number of organizations in a market. A market with an HHI of 1 is considered as a monopoly.
-In contrast, a market with an HHI close to 0 would be viewed as a nearly competition one.
+HHI is the sum of squared market shares, where an organization's
+share is its resource divided by the market total (Thornton & Belski,
+2010). It ranges from 1/N to 1; a market with an HHI of 1 is a monopoly
+and values near 0 indicate many similar-sized competitors.
 }
 \examples{
-\dontrun{
-get_hhi( df, resource = "TOTREV" )
-}
+toy <- data.frame( GEO = c( "A", "A", "B" ), SUB = "ART", YEAR = 2020,
+                   TOTREV = c( 75, 25, 10 ) )
+get_hhi( toy, geography = "GEO", subsector = "SUB", year = "YEAR" )
 
 }

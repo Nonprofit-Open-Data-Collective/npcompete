@@ -18,91 +18,29 @@
 #'   three organizations, each rescaled by their combined share.
 #'
 #' @examples
-#' \dontrun{
-#' get_kwoka( df, resource = "TOTREV" )
-#' }
+#' toy <- data.frame( GEO = "A", SUB = "ART", YEAR = 2020,
+#'                    TOTREV = c( 50, 30, 10, 10 ) )
+#' get_kwoka( toy, geography = "GEO", subsector = "SUB", year = "YEAR" )
 #'
 #' @export
-get_kwoka <- function(df, geography="CENSUS_CBSA_FIPS", subsector="NTEEV2", resource="TOTREV", year="TAXYEAR"){
+get_kwoka <- function(df, geography = "CENSUS_CBSA_FIPS", subsector = "NTEEV2",
+                      resource = "TOTREV", year = "TAXYEAR") {
 
-  GEO <- df[[geography]] |> factor( exclude = NULL )
-  RES <- df[[resource]]  |> as.numeric() |> suppressWarnings()
-  if( subsector == "NTEEV2" )
-  { SUB <- df[[subsector]] |> substr(1,3) |> factor( exclude = NULL ) } else
-  { SUB <- df[[subsector]] |> factor( exclude = NULL ) }
-
-  RES <- bottomcode(RES)
-
-  YEAR <- df[[year]] |> factor() 
-
-  dat.k1 <- 
-    data.frame(GEO,SUB,YEAR,RES) %>%
-    stats::na.omit() %>%
-    dplyr::filter(!is.na(RES)) %>%
-    dplyr::group_by(GEO, SUB, YEAR) %>%
-    dplyr::mutate(share = RES / sum(RES, na.rm = TRUE)) %>%  # normalize to shares
-    dplyr::arrange(desc(share)) %>%
-    dplyr::summarize(
-      N = dplyr::n(),
-      top1 = dplyr::nth(share, 1),
-      top2 = dplyr::nth(share, 2),
-      top3 = dplyr::nth(share, 3),
-      total_top3 = sum(c(top1, top2, top3), na.rm = TRUE),
-      KWOKA = sum((c(top1, top2, top3) / total_top3)^2, na.rm = TRUE),
-      .groups = "drop"
-    )
-
-  dat.k1$KWOKA[dat.k1$N < 3] <- 1
-
-  dat.k2 <- 
-    data.frame(GEO,YEAR,RES) %>%
-    stats::na.omit() %>%
-    dplyr::filter(!is.na(RES)) %>%
-    dplyr::group_by(GEO, YEAR) %>%
-    dplyr::mutate(share = RES / sum(RES, na.rm = TRUE)) %>%  # normalize to shares
-    dplyr::arrange(desc(share)) %>%
-    dplyr::summarize(
-      N = dplyr::n(),
-      top1 = dplyr::nth(share, 1),
-      top2 = dplyr::nth(share, 2),
-      top3 = dplyr::nth(share, 3),
-      total_top3 = sum(c(top1, top2, top3), na.rm = TRUE),
-      KWOKA = sum((c(top1, top2, top3) / total_top3)^2, na.rm = TRUE),
-      .groups = "drop"
-    )
-    
-    dat.k2$SUB <- "ALL"
-    dat.k2$KWOKA[dat.k2$N < 3] <- 1
-    
-  dat.k3 <- 
-    data.frame(SUB,YEAR,RES) %>%
-    stats::na.omit() %>%
-    dplyr::filter(!is.na(RES)) %>%
-    dplyr::group_by(SUB, YEAR) %>%
-    dplyr::mutate(share = RES / sum(RES, na.rm = TRUE)) %>%  # normalize to shares
-    dplyr::arrange(desc(share)) %>%
-    dplyr::summarize(
-      N = dplyr::n(),
-      top1 = dplyr::nth(share, 1),
-      top2 = dplyr::nth(share, 2),
-      top3 = dplyr::nth(share, 3),
-      total_top3 = sum(c(top1, top2, top3), na.rm = TRUE),
-      KWOKA = sum((c(top1, top2, top3) / total_top3)^2, na.rm = TRUE),
-      .groups = "drop"
-    )
-    
-    dat.k3$GEO <- "ALL"
-    dat.k3$KWOKA[dat.k3$N < 3] <- 1
-
-    dat.k <- bind_rows( dat.k1, dat.k2, dat.k3 )
-    dat.k <- arrange( dat.k, GEO, SUB, YEAR )
-    
-  return(dat.k)
+  dat <- prep_market_data(df, geography, subsector, resource, year)
+  summarize_levels(dat, kwoka_kernel)
 }
 
-
-# k <- get_kwoka_index(df)
-
+# Per-market Kwoka index from the top three shares.
+kwoka_kernel <- function(x) {
+  n <- length(x)
+  share <- sort(x / sum(x), decreasing = TRUE)
+  top <- share[1:3]                     # NA when fewer than three orgs
+  total_top3 <- sum(top, na.rm = TRUE)
+  k <- sum((top / total_top3)^2, na.rm = TRUE)
+  if (n < 3) k <- 1
+  data.frame(N = n, top1 = top[1], top2 = top[2], top3 = top[3],
+             total_top3 = total_top3, KWOKA = k)
+}
 
 #' Compute the Kwoka Index of Market Concentration
 #'

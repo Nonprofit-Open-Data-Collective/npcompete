@@ -25,8 +25,12 @@
 #' get_density( nonprofit_sample, 'MSA_NECH', 'NTMAJ12', 'FIPS', 2009 )
 #' }
 #'
+#' @section Deprecated:
+#' This function uses the legacy NCCS core-file layout and is deprecated.
+#'
 #' @export
 get_density <- function(df, geo, subsector, fips, year){
+  legacy_warning("get_density")
 
   core <- select( df, {{geo}}, {{subsector}}, {{fips}})
   core <- core %>% rename(geo = {{geo}},
@@ -87,8 +91,12 @@ get_density <- function(df, geo, subsector, fips, year){
 #'                    2009, 'TOTREV', 100000 )
 #' }
 #'
+#' @section Deprecated:
+#' This function uses the legacy NCCS core-file layout and is deprecated.
+#'
 #' @export
 get_density_small <- function(df, geo, subsector, fips, year, resource, smaller.than){
+  legacy_warning("get_density_small")
 
   core <- select( df, {{geo}}, {{subsector}}, {{fips}}, {{resource}})
   core <- core %>% rename(geo = {{geo}},
@@ -152,8 +160,12 @@ get_density_small <- function(df, geo, subsector, fips, year, resource, smaller.
 #'                  2009, 'TOTREV', 100000 )
 #' }
 #'
+#' @section Deprecated:
+#' This function uses the legacy NCCS core-file layout and is deprecated.
+#'
 #' @export
 get_density_big <- function(df, geo, subsector, fips, year, resource, greater.than){
+  legacy_warning("get_density_big")
 
   core <- select( df, {{geo}}, {{subsector}}, {{fips}}, {{resource}})
   core <- core %>% rename(geo = {{geo}},
@@ -214,8 +226,12 @@ get_density_big <- function(df, geo, subsector, fips, year, resource, greater.th
 #'                         'TOTREV', c( 'PROGREV', 'INVINC' ) )
 #' }
 #'
+#' @section Deprecated:
+#' This function uses the legacy NCCS core-file layout and is deprecated.
+#'
 #' @export
 get_density_commercial <- function(df, geo, subsector, resource, list.of.cols){
+  legacy_warning("get_density_commercial")
 
   df <- df %>%
         rename(geo = {{geo}},

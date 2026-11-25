@@ -25,8 +25,12 @@
 #'                             'CONT', c( 'FUNDFEES', 'SOLICIT' ) )
 #' }
 #'
+#' @section Deprecated:
+#' This function uses the legacy NCCS core-file layout and is deprecated.
+#'
 #' @export
 get_fundraising_efficiency <- function(df, geo, subsector, resource, list.of.cols){
+  legacy_warning("get_fundraising_efficiency")
   
   df <- df %>%
     rename(geo = {{geo}},

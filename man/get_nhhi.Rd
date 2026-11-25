@@ -40,12 +40,12 @@ rollups for all subsectors (\code{SUB = "ALL"}) and all geographies
 }
 \details{
 \code{NHHI = (HHI - 1/N) / (1 - 1/N)}, where \code{N} is the number of
-organizations in the market. Markets with one organization get
-\code{NHHI = 0}.
+organizations in the market. Markets with one organization, or whose
+resource total is zero, get \code{NHHI = 0}.
 }
 \examples{
-\dontrun{
-get_nhhi( df, resource = "TOTREV" )
-}
+toy <- data.frame( GEO = c( "A", "A", "B" ), SUB = "ART", YEAR = 2020,
+                   TOTREV = c( 75, 25, 10 ) )
+get_nhhi( toy, geography = "GEO", subsector = "SUB", year = "YEAR" )
 
 }
