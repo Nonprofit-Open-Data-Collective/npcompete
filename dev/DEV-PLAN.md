@@ -289,7 +289,18 @@ Decisions (answers to open questions 2 and 3):
 
 Result, TY2019, 501(c)(3), filers from NCCS: 1.43M registered; 400k 990/990-EZ, 111k 990-PF, 575k 990-N, 341k non-filers (260k churches). Grassroots share 64% nationally. New metric `GRASSROOTS_SHARE` (registered universe).
 
-Remaining: `R/dynamics.R` (entry, exit, churn, graduation, censoring, 2010–2012 auto-revocation flag); small-org density for registered; vignette on universes (Phase 6).
+**Dynamics done (2026-11-25).** `R/dynamics.R`, `get_dynamics()`.
+
+- Presence-based for every universe. Entries in *t*: present in *t*, absent in *t*−1. Exits in *t*: present in *t*−1, then absent ≥ `absent_years` (default 2 for filers, 1 for registered). Shorter gaps are filled with the prior year's attributes, so they produce neither an exit nor a re-entry. Rates divide by the *t*−1 stock (gaps filled). Movers between markets count as neither entry nor exit; `NET_GROWTH` includes them.
+- Censoring: exits in the last `absent_years − 1` observed years are `NA`. `npc_build_metrics()` reads `absent_years` years before and `absent_years − 1` after the requested years when available (complete years only), so short gaps at the start are filled.
+- PPA: exits in 2010–2012 that coincide with a revocation year count in `EXITS_PPA`; `drop_ppa_revocations = TRUE` removes them from `EXITS`.
+- Graduation / downgrade: grassroots (990N, NONFILER) in *t*−1 → 990/990EZ in *t*, and the reverse; foundations count in neither. Registered universe only.
+- Dynamics metrics are not in `metrics = "default"` (they read extra years) and need `window = 1`.
+- **Found:** the NCCS 990combined files for 2010 and 2011 are from the legacy pipeline. They have no `source_form`, so the form is now inferred from the 990-EZ limits (right for 89% of 2012–2013 returns). They also hold fewer returns: 419k (TY2010) and 469k (TY2011) against 508k (TY2012); the archive has 518k for TY2011. Counts and transitions across 2011–2012 from live builds are affected, and `npc_build_nccs()` says so.
+
+Real data, 501(c)(3), live NCCS: filers enter at 6.0–6.7% and exit (from filing) at 5.7–6.4% a year in 2018–2020, churn 12%. Registered: exits 5.4% in 2011 (38k PPA revocations), 2.9% in 2012 (24k), 4.0% in 2013; graduation 2.3% and downgrade 6.9% in 2013.
+
+Remaining: small-org density for the registered universe; the optional versioned output tables; vignette on universes (Phase 6).
 
 ### Phase 6: Docs and dashboard (1–2 days)
 

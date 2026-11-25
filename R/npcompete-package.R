@@ -16,7 +16,7 @@ utils::globalVariables( c(
   "fundraisingexp", "n_commercial", "county_population", "FIPS", "n",
   "LOG_NPO", "LOG_POP", "DENSITY_PCTL_N", "DENSITY_PCTL_R",
   "EXPECTED_N", "EXPECTED_RES", "SUBSECTION", "IMPUTED", "EIN2", ".N", ".SD",
-  "FILER_TYPE", "CHURCH"
+  "FILER_TYPE", "CHURCH", "NEXT", "PREV_Y", "NEXT_FT", "Y", "FT", "ID"
 ) )
 
 # Tell data.table that this package uses data.table syntax.

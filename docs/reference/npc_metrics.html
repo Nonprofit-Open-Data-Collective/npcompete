@@ -84,6 +84,8 @@ valid for, and whether it needs financial data.</p>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A data frame with <code>id</code>, <code>family</code>, <code>financial</code> (needs Form 990 or
 990-EZ financial data), <code>by_resource</code> (depends on the resource column),
+<code>default</code> (included in <code>metrics = "default"</code>; dynamics metrics are not,
+since they read extra years),
 <code>universes</code> and <code>description</code>.</p>
     </div>
     <div class="section level2">
@@ -100,86 +102,123 @@ or assets.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1        DENSITY_PER_100K       count     FALSE       FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2          DENSITY_PCTL_N       scale     FALSE       FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3              MEDIAN_AGE         age     FALSE       FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4  SMALL_DENSITY_PER_100K        size      TRUE        TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5  LARGE_DENSITY_PER_100K        size      TRUE        TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6             SMALL_SHARE        size      TRUE        TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7             LARGE_SHARE        size      TRUE        TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8          DENSITY_PCTL_R       scale      TRUE        TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9                     HHI         hhi      TRUE        TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10                   NHHI         hhi      TRUE        TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11                    CR1          cr      TRUE        TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12                    CR2          cr      TRUE        TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13                    CR3          cr      TRUE        TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14                    CR4          cr      TRUE        TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15                    CR5          cr      TRUE        TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16                    CR6          cr      TRUE        TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17                    CR7          cr      TRUE        TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18                    CR8          cr      TRUE        TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19                  KWOKA       kwoka      TRUE        TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20                   GINI        gini      TRUE        TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21       COMMERCIAL_SHARE  commercial      TRUE       FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 22  PROGRAM_REVENUE_SHARE  commercial      TRUE       FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 23       FUNDRAISER_SHARE fundraising      TRUE       FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 24      FUNDRAISING_RATIO fundraising      TRUE       FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                       universes</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1  filers,registered,grassroots</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2  filers,registered,grassroots</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3  filers,registered,grassroots</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4                        filers</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5                        filers</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6                        filers</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7                        filers</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8                        filers</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9                        filers</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10                       filers</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11                       filers</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12                       filers</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13                       filers</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14                       filers</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15                       filers</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16                       filers</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17                       filers</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18                       filers</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19                       filers</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20                       filers</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21                       filers</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 22                       filers</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 23                       filers</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 24                       filers</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4        GRASSROOTS_SHARE  grassroots     FALSE       FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  SMALL_DENSITY_PER_100K        size      TRUE        TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  LARGE_DENSITY_PER_100K        size      TRUE        TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7             SMALL_SHARE        size      TRUE        TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8             LARGE_SHARE        size      TRUE        TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9          DENSITY_PCTL_R       scale      TRUE        TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10                    HHI         hhi      TRUE        TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11                   NHHI         hhi      TRUE        TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12                    CR1          cr      TRUE        TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13                    CR2          cr      TRUE        TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14                    CR3          cr      TRUE        TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15                    CR4          cr      TRUE        TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16                    CR5          cr      TRUE        TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17                    CR6          cr      TRUE        TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18                    CR7          cr      TRUE        TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19                    CR8          cr      TRUE        TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20                  KWOKA       kwoka      TRUE        TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21                   GINI        gini      TRUE        TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22       COMMERCIAL_SHARE  commercial      TRUE       FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23  PROGRAM_REVENUE_SHARE  commercial      TRUE       FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 24       FUNDRAISER_SHARE fundraising      TRUE       FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 25      FUNDRAISING_RATIO fundraising      TRUE       FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 26             ENTRY_RATE    dynamics     FALSE       FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 27              EXIT_RATE    dynamics     FALSE       FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 28             NET_GROWTH    dynamics     FALSE       FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 29             CHURN_RATE    dynamics     FALSE       FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 30        GRADUATION_RATE    dynamics     FALSE       FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 31         DOWNGRADE_RATE    dynamics     FALSE       FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                       universes default</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  filers,registered,grassroots    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  filers,registered,grassroots    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  filers,registered,grassroots    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4                    registered    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5                        filers    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6                        filers    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7                        filers    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8                        filers    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9                        filers    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10                       filers    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11                       filers    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12                       filers    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13                       filers    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14                       filers    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15                       filers    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16                       filers    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17                       filers    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18                       filers    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19                       filers    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20                       filers    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21                       filers    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22                       filers    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23                       filers    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 24                       filers    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 25                       filers    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 26 filers,registered,grassroots   FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 27 filers,registered,grassroots   FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 28 filers,registered,grassroots   FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 29 filers,registered,grassroots   FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 30                   registered   FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 31                   registered   FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                      description</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1                                            Organizations per 100,000 residents</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2  Organization count relative to the count expected for the market's population</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3                                         Median years since the IRS ruling year</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4           Small organizations (resource below small_max) per 100,000 residents</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5     Large organizations (resource at or above large_min) per 100,000 residents</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6                                          Share of organizations that are small</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7                                          Share of organizations that are large</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8      Resource total relative to the total expected for the market's population</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9                                  Herfindahl-Hirschman Index of resource shares</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10                         HHI normalized to 0-1 for the number of organizations</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11                      Share of the resource held by the 1 largest organization</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12                     Share of the resource held by the 2 largest organizations</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13                     Share of the resource held by the 3 largest organizations</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14                     Share of the resource held by the 4 largest organizations</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15                     Share of the resource held by the 5 largest organizations</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16                     Share of the resource held by the 6 largest organizations</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17                     Share of the resource held by the 7 largest organizations</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18                     Share of the resource held by the 8 largest organizations</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19                                                         Kwoka dominance index</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20                                              Gini coefficient of the resource</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21       Share of organizations with program revenue above half of total revenue</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 22                           Program service revenue as a share of total revenue</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 23                      Share of Form 990 filers paying professional fundraisers</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 24                     Contributions per dollar of professional fundraising fees</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4             Share of registered organizations that file a 990-N or do not file</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5           Small organizations (resource below small_max) per 100,000 residents</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6     Large organizations (resource at or above large_min) per 100,000 residents</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7                                          Share of organizations that are small</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8                                          Share of organizations that are large</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9      Resource total relative to the total expected for the market's population</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10                                 Herfindahl-Hirschman Index of resource shares</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11                         HHI normalized to 0-1 for the number of organizations</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12                      Share of the resource held by the 1 largest organization</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13                     Share of the resource held by the 2 largest organizations</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14                     Share of the resource held by the 3 largest organizations</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15                     Share of the resource held by the 4 largest organizations</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16                     Share of the resource held by the 5 largest organizations</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17                     Share of the resource held by the 6 largest organizations</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18                     Share of the resource held by the 7 largest organizations</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19                     Share of the resource held by the 8 largest organizations</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20                                                         Kwoka dominance index</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21                                              Gini coefficient of the resource</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22       Share of organizations with program revenue above half of total revenue</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23                           Program service revenue as a share of total revenue</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 24                      Share of Form 990 filers paying professional fundraisers</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 25                     Contributions per dollar of professional fundraising fees</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 26                         Organizations entering in t per organization in t - 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 27                   Organizations exiting after t - 1 per organization in t - 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 28                 Change in the number of organizations since t - 1, as a share</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 29                                  Entries plus exits per organization in t - 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 30  Share of 990-N filers and non-filers in t - 1 that file a 990 or 990-EZ in t</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 31 Share of 990 and 990-EZ filers in t - 1 that file a 990-N or do not file in t</span>
 <span class="r-in"><span><span class="fu">npc_metrics</span><span class="op">(</span> <span class="st">"grassroots"</span> <span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 id family financial by_resource                    universes</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 DENSITY_PER_100K  count     FALSE       FALSE filers,registered,grassroots</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   DENSITY_PCTL_N  scale     FALSE       FALSE filers,registered,grassroots</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3       MEDIAN_AGE    age     FALSE       FALSE filers,registered,grassroots</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 id   family financial by_resource                    universes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 DENSITY_PER_100K    count     FALSE       FALSE filers,registered,grassroots</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   DENSITY_PCTL_N    scale     FALSE       FALSE filers,registered,grassroots</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3       MEDIAN_AGE      age     FALSE       FALSE filers,registered,grassroots</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4       ENTRY_RATE dynamics     FALSE       FALSE filers,registered,grassroots</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5        EXIT_RATE dynamics     FALSE       FALSE filers,registered,grassroots</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6       NET_GROWTH dynamics     FALSE       FALSE filers,registered,grassroots</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7       CHURN_RATE dynamics     FALSE       FALSE filers,registered,grassroots</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   default</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5   FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6   FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7   FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                     description</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1                                           Organizations per 100,000 residents</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2 Organization count relative to the count expected for the market's population</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3                                        Median years since the IRS ruling year</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4                         Organizations entering in t per organization in t - 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5                   Organizations exiting after t - 1 per organization in t - 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6                 Change in the number of organizations since t - 1, as a share</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7                                  Entries plus exits per organization in t - 1</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

@@ -88,6 +88,8 @@ and can write the results with a manifest of what was used.</p>
 <span>  small_max <span class="op">=</span> <span class="fl">1e+05</span>,</span>
 <span>  large_min <span class="op">=</span> <span class="fl">1e+07</span>,</span>
 <span>  drop_incomplete_years <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  absent_years <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  drop_ppa_revocations <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"long"</span>, <span class="st">"wide"</span><span class="op">)</span>,</span>
 <span>  out_dir <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -197,6 +199,21 @@ passed to <code><a href="get_scale_free_density.html">get_scale_free_density()</
 <dd><p>Drop reported years whose data (including
 the earlier years of a window) hold a partial panel, judged against the
 year counts of the whole archive or live build (see <code><a href="npc_archive_info.html">npc_archive_info()</a></code>).</p></dd>
+
+
+<dt id="arg-absent-years">absent_years<a class="anchor" aria-label="anchor" href="#arg-absent-years"></a></dt>
+<dd><p>For the dynamics metrics (<code>ENTRY_RATE</code>, <code>EXIT_RATE</code>,
+<code>NET_GROWTH</code>, <code>CHURN_RATE</code>, <code>GRADUATION_RATE</code>, <code>DOWNGRADE_RATE</code>; see
+<code><a href="get_dynamics.html">get_dynamics()</a></code>): years of absence that confirm an exit. Defaults to 2
+for filers and 1 for the registered and grassroots universes. Dynamics
+read <code>absent_years</code> years before the first reported year and <code>absent_years - 1</code>
+years after the last, when available, and are not part of
+<code>metrics = "default"</code>.</p></dd>
+
+
+<dt id="arg-drop-ppa-revocations">drop_ppa_revocations<a class="anchor" aria-label="anchor" href="#arg-drop-ppa-revocations"></a></dt>
+<dd><p>Leave the mass revocations of 2010-2012 out of
+exits; see <code><a href="get_dynamics.html">get_dynamics()</a></code>.</p></dd>
 
 
 <dt id="arg-format">format<a class="anchor" aria-label="anchor" href="#arg-format"></a></dt>

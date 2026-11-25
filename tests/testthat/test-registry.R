@@ -69,7 +69,9 @@ test_that("financial metrics are refused for non-filer universes", {
                "HHI requires financial data; grassroots organizations")
   expect_error(resolve_metrics(c("HHI", "GINI"), "registered"), "require financial data")
   expect_error(resolve_metrics("NOPE"), "Unknown metric")
-  expect_equal(resolve_metrics("default", "grassroots"), npc_metrics("grassroots")$id)
+  g <- npc_metrics("grassroots")
+  expect_equal(resolve_metrics("default", "grassroots"), g$id[g$default])
+  expect_equal(resolve_metrics("all", "grassroots"), g$id)
 })
 
 test_that("npc_compute_metrics runs only the requested families", {

@@ -20,7 +20,13 @@ npc_compute_metrics(
   ruling = "RULING_YEAR",
   program = "REVPROG",
   contributions = "REVCONT",
-  fees = "FNDFEE"
+  fees = "FNDFEE",
+  years = NULL,
+  id = "EIN2",
+  filer_type = "FILER_TYPE",
+  absent_years = 2,
+  observed_years = NULL,
+  drop_ppa_revocations = FALSE
 )
 }
 \arguments{
@@ -63,6 +69,24 @@ passed to \code{\link[=get_scale_free_density]{get_scale_free_density()}} as \co
 \item{ruling, program, contributions, fees}{Columns for the ruling year,
 program service revenue, contributions and professional fundraising
 fees.}
+
+\item{years}{Years to report. \code{df} may hold more years, which only the
+dynamics metrics use (to look back to \code{t - 1} and ahead to confirm
+exits). Defaults to every year in \code{df}.}
+
+\item{id, filer_type}{Organization id and filer type columns, for the
+dynamics metrics.}
+
+\item{absent_years}{Years of absence that confirm an exit. Use 2 or more
+for filers, whose filings can lapse a year; 1 for the registered
+universe, where absence is observed directly.}
+
+\item{observed_years}{The years \code{df} covers, which must be consecutive.
+Defaults to the years present in \code{df}. Pass it when some observed years
+are not reported, so that their absences still count.}
+
+\item{drop_ppa_revocations}{Leave revocation exits of 2010-2012 out of
+\code{EXITS} and the rates.}
 }
 \value{
 A tibble with \code{GEO}, \code{SUB}, \code{YEAR}, \code{N} (all organizations), \code{POP}

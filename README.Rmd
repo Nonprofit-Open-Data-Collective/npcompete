@@ -197,19 +197,23 @@ place each organization at its current BMF address in every year.
 The metric functions, the archive builder and the live NCCS source are
 stable and tested.
 
-**In development:** the registered and grassroots universes
-(`universe = "registered"` or `"grassroots"`). These count every
-organization on the IRS registry, including those that file a 990-N or file
-nothing, and add the `GRASSROOTS_SHARE` metric. Financial metrics stay
-limited to filers.
+**In development:**
+
+* **Registered and grassroots universes** (`universe = "registered"` or
+  `"grassroots"`): every organization on the IRS registry, including those
+  that file a 990-N or file nothing, with the `GRASSROOTS_SHARE` metric.
+  Financial metrics stay limited to filers.
+* **Dynamics**: entry, exit, net growth and churn rates by market for any
+  universe, and graduation and downgrade rates between grassroots and
+  filer status for the registered universe (`get_dynamics()`).
 
 ```{r, eval = FALSE}
 npc_build_metrics( 2019, geo = "cbsa", universe = "registered", source = "nccs",
-                   metrics = c( "DENSITY_PER_100K", "GRASSROOTS_SHARE" ) )
+                   metrics = c( "DENSITY_PER_100K", "GRASSROOTS_SHARE",
+                                "ENTRY_RATE", "EXIT_RATE", "GRADUATION_RATE" ) )
 ```
 
-Planned next, described in [`dev/DEV-PLAN.md`](dev/DEV-PLAN.md): entry,
-exit, churn and graduation rates by market.
+See [`dev/DEV-PLAN.md`](dev/DEV-PLAN.md) for definitions and what is next.
 
 ### Legacy functions
 

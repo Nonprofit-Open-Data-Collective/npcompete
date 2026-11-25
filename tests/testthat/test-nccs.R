@@ -111,3 +111,13 @@ test_that("npc_compare_sources reports agreement between sources", {
                     names(cmp$ein_match)))
   expect_true(all(cmp$markets$GEO_LEVEL == "county"))
 })
+
+test_that("legacy CORE files without a form type get one from the 990-EZ limits", {
+  core <- fake_core(2011)
+  core$source_form <- NULL
+  core$total_revenue <- c(1e5, 1e5, 1e5, 3e5, 1e5, 1e5, 1e5)
+  core$total_assets_eoy <- c(1e5, 1e5, 1e5, 1e5, 6e5, 1e5, 1e5)
+  s <- npc_standardize(core, source = "nccs_core", bmf = fake_bmf())
+  ft <- s$FILER_TYPE[match(sprintf("EIN-00-%07d", c(1, 3, 4)), s$EIN2)]
+  expect_equal(ft, c("990EZ", "990", "990"))     # small; revenue over 200k; assets over 500k
+})

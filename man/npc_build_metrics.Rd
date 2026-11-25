@@ -21,6 +21,8 @@ npc_build_metrics(
   small_max = 1e+05,
   large_min = 1e+07,
   drop_incomplete_years = TRUE,
+  absent_years = NULL,
+  drop_ppa_revocations = FALSE,
   format = c("long", "wide"),
   out_dir = NULL
 )
@@ -91,6 +93,17 @@ passed to \code{\link[=get_scale_free_density]{get_scale_free_density()}} as \co
 \item{drop_incomplete_years}{Drop reported years whose data (including
 the earlier years of a window) hold a partial panel, judged against the
 year counts of the whole archive or live build (see \code{\link[=npc_archive_info]{npc_archive_info()}}).}
+
+\item{absent_years}{For the dynamics metrics (\code{ENTRY_RATE}, \code{EXIT_RATE},
+\code{NET_GROWTH}, \code{CHURN_RATE}, \code{GRADUATION_RATE}, \code{DOWNGRADE_RATE}; see
+\code{\link[=get_dynamics]{get_dynamics()}}): years of absence that confirm an exit. Defaults to 2
+for filers and 1 for the registered and grassroots universes. Dynamics
+read \code{absent_years} years before the first reported year and \code{absent_years - 1}
+years after the last, when available, and are not part of
+\code{metrics = "default"}.}
+
+\item{drop_ppa_revocations}{Leave the mass revocations of 2010-2012 out of
+exits; see \code{\link[=get_dynamics]{get_dynamics()}}.}
 
 \item{format}{\code{"long"} (one row per market, metric and resource) or
 \code{"wide"} (a named list of tables, one per geography and resource).}

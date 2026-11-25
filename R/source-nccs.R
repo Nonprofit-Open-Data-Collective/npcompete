@@ -187,6 +187,10 @@ npc_build_nccs <- function(years, dir = npc_cache_dir(), refresh = FALSE,
          "years 2010 onward. Requested: ", paste(years[years < 2010], collapse = ", "),
          ".", call. = FALSE)
   dir.create(dir, showWarnings = FALSE, recursive = TRUE)
+  if (any(years <= 2011))
+    message("Tax years 2010-2011 come from NCCS legacy CORE files, which hold ",
+            "fewer returns than later years and no form type (inferred from the ",
+            "990-EZ limits). Counts, and dynamics across 2011-2012, are affected.")
 
   # --- BMF: geography, subsector, ruling year -------------------------------
   bmf_path <- npc_nccs_download(nccs_bmf_key, dir, refresh = refresh)
@@ -214,7 +218,7 @@ npc_build_nccs <- function(years, dir = npc_cache_dir(), refresh = FALSE,
     core[[i]] <- x
     if (!keep_raw) unlink(path)
   }
-  core <- do.call(rbind, core)
+  core <- as.data.frame(data.table::rbindlist(core, use.names = TRUE, fill = TRUE))
 
   message("Harmonizing ", format(nrow(core), big.mark = ","), " CORE rows ...")
   dat <- npc_standardize(core, source = "nccs_core", bmf = bmf)
@@ -271,7 +275,7 @@ standardize_nccs_core <- function(df, bmf) {
   if (is.null(bmf))
     stop("`bmf` is needed to standardize NCCS CORE files: it supplies ",
          "county, NTEEV2 and ruling year.", call. = FALSE)
-  need <- c("ein", "tax_year", "subsection_cd", "source_form", unname(nccs_core_map))
+  need <- c("ein", "tax_year", "subsection_cd", unname(nccs_core_map))
   missing_cols <- setdiff(need, names(df))
   if (length(missing_cols) > 0)
     stop("Not an NCCS CORE 990combined layout; missing columns: ",
@@ -295,7 +299,14 @@ standardize_nccs_core <- function(df, bmf) {
   ein <- toupper(as.character(df$ein))
   ein2 <- ifelse(grepl("^EIN-", ein), ein, paste0("EIN-", ein))
 
-  form <- tolower(as.character(df$source_form))
+  # The legacy files behind tax years 2010-2011 have no form type; infer it
+  # from the 990-EZ limits, using revenue for gross receipts (under $200k,
+  # with assets under $500k); this matches the reported form for 89% of
+  # 2012-2013 returns.
+  form <- tolower(as.character(col("source_form")))
+  infer <- is.na(form) | form == ""
+  small <- num(df$total_revenue) < 2e5 & num(df$total_assets_eoy) < 5e5
+  form[infer] <- ifelse(small[infer] %in% TRUE, "990ez", "990")
   filer <- ifelse(form == "990", "990", ifelse(form == "990ez", "990EZ", NA_character_))
   ef <- col("efile_indicator")
   efile <- ifelse(is.na(ef), NA_character_,

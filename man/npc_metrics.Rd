@@ -13,6 +13,8 @@ npc_metrics(universe = NULL)
 \value{
 A data frame with \code{id}, \code{family}, \code{financial} (needs Form 990 or
 990-EZ financial data), \code{by_resource} (depends on the resource column),
+\code{default} (included in \code{metrics = "default"}; dynamics metrics are not,
+since they read extra years),
 \code{universes} and \code{description}.
 }
 \description{

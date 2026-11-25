@@ -64,6 +64,10 @@ reference:
   - npc_build_registered
   - npc_registry_spans
   - get_grassroots_share
+- title: Dynamics
+  desc: Entry, exit, churn, graduation and downgrade rates by market.
+  contents:
+  - get_dynamics
 - title: Concentration
   desc: How resources are shared among the organizations in a market.
   contents:

@@ -526,11 +526,18 @@
 <h2 id="status-and-roadmap">Status and roadmap<a class="anchor" aria-label="anchor" href="#status-and-roadmap"></a>
 </h2>
 <p>The metric functions, the archive builder and the live NCCS source are stable and tested.</p>
-<p><strong>In development:</strong> the registered and grassroots universes (<code>universe = "registered"</code> or <code>"grassroots"</code>). These count every organization on the IRS registry, including those that file a 990-N or file nothing, and add the <code>GRASSROOTS_SHARE</code> metric. Financial metrics stay limited to filers.</p>
+<p><strong>In development:</strong></p>
+<ul>
+<li>
+<strong>Registered and grassroots universes</strong> (<code>universe = "registered"</code> or <code>"grassroots"</code>): every organization on the IRS registry, including those that file a 990-N or file nothing, with the <code>GRASSROOTS_SHARE</code> metric. Financial metrics stay limited to filers.</li>
+<li>
+<strong>Dynamics</strong>: entry, exit, net growth and churn rates by market for any universe, and graduation and downgrade rates between grassroots and filer status for the registered universe (<code><a href="reference/get_dynamics.html">get_dynamics()</a></code>).</li>
+</ul>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/npc_build_metrics.html">npc_build_metrics</a></span><span class="op">(</span> <span class="fl">2019</span>, geo <span class="op">=</span> <span class="st">"cbsa"</span>, universe <span class="op">=</span> <span class="st">"registered"</span>, source <span class="op">=</span> <span class="st">"nccs"</span>,</span>
-<span>                   metrics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span> <span class="st">"DENSITY_PER_100K"</span>, <span class="st">"GRASSROOTS_SHARE"</span> <span class="op">)</span> <span class="op">)</span></span></code></pre></div>
-<p>Planned next, described in <a href="dev/DEV-PLAN.html"><code>dev/DEV-PLAN.md</code></a>: entry, exit, churn and graduation rates by market.</p>
+<span>                   metrics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span> <span class="st">"DENSITY_PER_100K"</span>, <span class="st">"GRASSROOTS_SHARE"</span>,</span>
+<span>                                <span class="st">"ENTRY_RATE"</span>, <span class="st">"EXIT_RATE"</span>, <span class="st">"GRADUATION_RATE"</span> <span class="op">)</span> <span class="op">)</span></span></code></pre></div>
+<p>See <a href="dev/DEV-PLAN.html"><code>dev/DEV-PLAN.md</code></a> for definitions and what is next.</p>
 <div class="section level3">
 <h3 id="legacy-functions">Legacy functions<a class="anchor" aria-label="anchor" href="#legacy-functions"></a>
 </h3>

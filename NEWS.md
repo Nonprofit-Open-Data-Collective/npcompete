@@ -16,6 +16,19 @@
   unless `exclude_churches = TRUE`.
 * New metric `GRASSROOTS_SHARE` (`get_grassroots_share()`), for the
   registered universe.
+* Dynamics: `get_dynamics()` and the metrics `ENTRY_RATE`, `EXIT_RATE`,
+  `NET_GROWTH`, `CHURN_RATE` (every universe) and `GRADUATION_RATE`,
+  `DOWNGRADE_RATE` (registered). Rates use the stock in *t* - 1; absences
+  shorter than `absent_years` (2 for filers, 1 for registered) are filled;
+  exits that cannot be confirmed yet are `NA`. Exits in 2010-2012 that
+  coincide with an automatic revocation are counted in `EXITS_PPA` and can
+  be dropped with `drop_ppa_revocations = TRUE`. `npc_build_metrics()`
+  reads the extra years these need. Dynamics metrics are not part of
+  `metrics = "default"`; use `"all"` or name them.
+* `npc_metrics()` gains a `default` column.
+* Live builds read the legacy NCCS CORE files for tax years 2010-2011,
+  which have no form type: `FILER_TYPE` is inferred from the 990-EZ limits
+  there, and a message notes their lower coverage.
 
 ## Documentation
 
