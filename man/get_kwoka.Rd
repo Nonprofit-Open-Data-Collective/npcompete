@@ -2,7 +2,7 @@
 % Please edit documentation in R/kwoka-index.R
 \name{get_kwoka}
 \alias{get_kwoka}
-\title{Kwoka index}
+\title{Kwoka dominance index}
 \usage{
 get_kwoka(
   df,
@@ -30,21 +30,30 @@ zero.}
 }
 \value{
 A tibble with \code{GEO}, \code{SUB}, \code{YEAR}, \code{N}, the shares of the three
-largest organizations (\code{top1}, \code{top2}, \code{top3}, \code{total_top3}) and \code{KWOKA}.
-Markets with fewer than three organizations get \code{KWOKA = 1}.
+largest organizations (\code{top1}, \code{top2}, \code{top3}; \code{NA} when the market has
+fewer organizations) and \code{KWOKA}.
 }
 \description{
-Concentration among the three largest organizations in each geography,
-subsector and year, with rollups for all subsectors (\code{SUB = "ALL"}) and all
-geographies (\code{GEO = "ALL"}).
+Kwoka's (1977) dominance index for each geography, subsector and year,
+with rollups for all subsectors (\code{SUB = "ALL"}) and all geographies
+(\code{GEO = "ALL"}). It measures how far the largest organizations pull ahead
+of the next ones.
 }
 \details{
-\code{KWOKA} is computed as the sum of the squared shares of the top
-three organizations, each rescaled by their combined share.
+With market shares sorted from largest to smallest,
+\deqn{KWOKA = \sum_{i=1}^{N-1} (s_i - s_{i+1})^2}
+The index is 0 when all organizations have equal shares and approaches
+1 as one organization dominates. A market with a single organization
+gets \code{KWOKA = 1}; a market whose resource total is zero gets \code{NA}.
 }
 \examples{
 toy <- data.frame( GEO = "A", SUB = "ART", YEAR = 2020,
                    TOTREV = c( 50, 30, 10, 10 ) )
 get_kwoka( toy, geography = "GEO", subsector = "SUB", year = "YEAR" )
 
+}
+\references{
+Kwoka, J. E. (1977). Large firm dominance and price-cost
+margins in manufacturing industries. \emph{Southern Economic Journal}, 44(1),
+183-189.
 }

@@ -9,8 +9,9 @@ test_that("HHI and NHHI match hand calculations", {
   expect_equal(cell(out, "A", "EDU")$NHHI, 0)
   expect_equal(cell(out, "A", "ALL")$HHI, 0.24)
   expect_equal(cell(out, "B", "ART")$HHI, 1)
-  expect_equal(cell(out, "B", "ART")$NHHI, 0)       # single-org convention
+  expect_equal(cell(out, "B", "ART")$NHHI, 1)       # single org = monopoly
   expect_true(is.na(cell(out, "C", "EDU")$HHI))     # all-zero market
+  expect_true(is.na(cell(out, "C", "EDU")$NHHI))
   expect_equal(cell(out, "A", "ART", 2021)$HHI, 0.68)
 })
 
@@ -48,13 +49,17 @@ test_that("concentration ratios match hand calculations", {
   expect_equal(cell(single, "A", "ART")$CR2, 0.9)
 })
 
-test_that("Kwoka index matches hand calculations", {
+test_that("Kwoka dominance index matches hand calculations", {
   out <- run_toy(get_kwoka)
-  expect_equal(cell(out, "A", "ART")$KWOKA, 0.46)
+  # shares .6, .3, .1 -> gaps .3, .2
+  expect_equal(cell(out, "A", "ART")$KWOKA, 0.3^2 + 0.2^2)
   expect_equal(cell(out, "A", "ART")$top1, 0.6)
-  expect_equal(cell(out, "A", "EDU")$KWOKA, 1)      # fewer than 3 orgs
-  # A / ALL: top three shares .30, .25, .25 of total 200
-  expect_equal(cell(out, "A", "ALL")$KWOKA, sum((c(.3, .25, .25) / .8)^2))
+  expect_equal(cell(out, "A", "EDU")$KWOKA, 0)      # equal shares
+  expect_true(is.na(cell(out, "A", "EDU")$top3))    # fewer than 3 orgs
+  expect_equal(cell(out, "B", "ART")$KWOKA, 1)      # single org
+  expect_true(is.na(cell(out, "C", "EDU")$KWOKA))   # all-zero market
+  # A / ALL: shares .30, .25, .25, .15, .05 -> gaps .05, 0, .10, .10
+  expect_equal(cell(out, "A", "ALL")$KWOKA, 0.05^2 + 0.1^2 + 0.1^2)
 })
 
 test_that("Gini matches hand calculations", {

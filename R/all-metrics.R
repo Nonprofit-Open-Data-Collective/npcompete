@@ -11,6 +11,7 @@
 #' @inheritParams npcompete-params
 #' @inheritParams get_scale_free_density
 #' @param cr_n Integer vector of concentration ratio levels to compute.
+#' @param density_model Passed to [get_scale_free_density()] as `model`.
 #' @param drop_incomplete_years If `TRUE` (the default), years flagged by
 #'   [check_year_completeness()] are dropped with a message before any metric
 #'   is computed.
@@ -37,7 +38,10 @@ get_all_metrics <- function(df,
                             year       = "TAXYEAR",
                             cr_n       = 1:8,
                             pop_table  = NULL,
+                            density_model = c("negbin", "poisson", "loglinear"),
                             drop_incomplete_years = TRUE) {
+
+  density_model <- match.arg(density_model)
 
   # --- Drop partial years --------------------------------------------------
   if (drop_incomplete_years) {
@@ -65,8 +69,10 @@ get_all_metrics <- function(df,
 
   message("Calculating nonprofit density...")
   dat_den   <- get_scale_free_density(df, geography, population, subsector,
-                                      year, resource, pop_table = pop_table)
-  dat_den   <- dplyr::select(dat_den, -model_n, -model_r, -N, -dplyr::all_of(resource))
+                                      year, resource, pop_table = pop_table,
+                                      model = density_model)
+  dat_den   <- dplyr::select(dat_den, -model_n, -model_r, -N, -dplyr::all_of(resource),
+                             -dplyr::starts_with("EXPECTED_"))
 
   # --- Merge all results ---------------------------------------------------
   # Joins use every shared column (GEO, SUB, YEAR, and N / resource where

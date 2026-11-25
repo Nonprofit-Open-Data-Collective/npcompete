@@ -1,21 +1,29 @@
 ###---------------------------------------------------
-###   Kwoka Index
+###   Kwoka Dominance Index
 ###---------------------------------------------------
 
-#' Kwoka index
+#' Kwoka dominance index
 #'
-#' Concentration among the three largest organizations in each geography,
-#' subsector and year, with rollups for all subsectors (`SUB = "ALL"`) and all
-#' geographies (`GEO = "ALL"`).
+#' Kwoka's (1977) dominance index for each geography, subsector and year,
+#' with rollups for all subsectors (`SUB = "ALL"`) and all geographies
+#' (`GEO = "ALL"`). It measures how far the largest organizations pull ahead
+#' of the next ones.
 #'
 #' @inheritParams npcompete-params
 #'
 #' @return A tibble with `GEO`, `SUB`, `YEAR`, `N`, the shares of the three
-#'   largest organizations (`top1`, `top2`, `top3`, `total_top3`) and `KWOKA`.
-#'   Markets with fewer than three organizations get `KWOKA = 1`.
+#'   largest organizations (`top1`, `top2`, `top3`; `NA` when the market has
+#'   fewer organizations) and `KWOKA`.
 #'
-#' @details `KWOKA` is computed as the sum of the squared shares of the top
-#'   three organizations, each rescaled by their combined share.
+#' @details With market shares sorted from largest to smallest,
+#'   \deqn{KWOKA = \sum_{i=1}^{N-1} (s_i - s_{i+1})^2}
+#'   The index is 0 when all organizations have equal shares and approaches
+#'   1 as one organization dominates. A market with a single organization
+#'   gets `KWOKA = 1`; a market whose resource total is zero gets `NA`.
+#'
+#' @references Kwoka, J. E. (1977). Large firm dominance and price-cost
+#'   margins in manufacturing industries. *Southern Economic Journal*, 44(1),
+#'   183-189.
 #'
 #' @examples
 #' toy <- data.frame( GEO = "A", SUB = "ART", YEAR = 2020,
@@ -30,62 +38,18 @@ get_kwoka <- function(df, geography = "CENSUS_CBSA_FIPS", subsector = "NTEEV2",
   summarize_levels(dat, kwoka_kernel)
 }
 
-# Per-market Kwoka index from the top three shares.
+# Per-market Kwoka dominance index: sum of squared gaps between successive
+# sorted shares.
 kwoka_kernel <- function(x) {
   n <- length(x)
-  share <- sort(x / sum(x), decreasing = TRUE)
+  total <- sum(x)
+  if (total > 0) {
+    share <- sort(x / total, decreasing = TRUE)
+    k <- if (n == 1) 1 else sum(diff(share)^2)
+  } else {
+    share <- rep(NA_real_, n)
+    k <- NA_real_
+  }
   top <- share[1:3]                     # NA when fewer than three orgs
-  total_top3 <- sum(top, na.rm = TRUE)
-  k <- sum((top / total_top3)^2, na.rm = TRUE)
-  if (n < 3) k <- 1
-  data.frame(N = n, top1 = top[1], top2 = top[2], top3 = top[3],
-             total_top3 = total_top3, KWOKA = k)
-}
-
-#' Compute the Kwoka Index of Market Concentration
-#'
-#' The Kwoka index measures the inequality of market shares among
-#' the top `k` firms (or organizations) in a market or region.
-#' It equals 1 when one firm dominates and 1/k when the top k firms
-#' have equal shares of their combined total.
-#'
-#' @param data A data frame containing at least the grouping variables and `share_var`.
-#' @param share_var A string giving the name of the variable representing market shares
-#'   or raw quantities (e.g., revenues). If raw quantities are provided, they are
-#'   automatically normalized within each group.
-#' @param group_vars Character vector of grouping variables (e.g., `c("GEO", "SUB", "YEAR")`).
-#' @param k Integer specifying how many top firms to include (default = 3).
-#'
-#' @return A data frame with one observation per group containing:
-#' \describe{
-#'   \item{n}{Number of firms in the group}
-#'   \item{kwoka}{The computed Kwoka index}
-#'   \item{top_k_share}{Combined share of the top k firms}
-#' }
-#'
-#' @examples
-#' \dontrun{
-#' get_kwoka_k( df, "RES", c("GEO", "SUB", "YEAR"), k = 3 )
-#' }
-#'
-#' @export
-get_kwoka_k <- function(data, share_var, group_vars, k = 3) {
-
-  share_sym <- rlang::sym(share_var)
-
-  data %>%
-    dplyr::filter(!is.na(!!share_sym)) %>%
-    dplyr::group_by(dplyr::across(dplyr::all_of(group_vars))) %>%
-    dplyr::mutate(share = !!share_sym / sum(!!share_sym, na.rm = TRUE)) %>%
-    dplyr::arrange(dplyr::desc(share), .by_group = TRUE) %>%
-    dplyr::summarize(
-      n = dplyr::n(),
-      top_k = list(utils::head(share, k)),
-      top_k_share = sum(utils::head(share, k), na.rm = TRUE),
-      kwoka = {
-        topk <- utils::head(share, k)
-        sum((topk / sum(topk, na.rm = TRUE))^2, na.rm = TRUE)
-      },
-      .groups = "drop"
-    )
+  data.frame(N = n, top1 = top[1], top2 = top[2], top3 = top[3], KWOKA = k)
 }

@@ -48,8 +48,10 @@ get_hhi <- function(df, geography = "CENSUS_CBSA_FIPS", subsector = "NTEEV2",
 #'   and `NHHI`.
 #'
 #' @details `NHHI = (HHI - 1/N) / (1 - 1/N)`, where `N` is the number of
-#'   organizations in the market. Markets with one organization, or whose
-#'   resource total is zero, get `NHHI = 0`.
+#'   organizations in the market. The formula is undefined for a single
+#'   organization; such markets are monopolies and get `NHHI = 1`, consistent
+#'   with `HHI`, `CR1` and `KWOKA`. Markets whose resource total is zero get
+#'   `NA`. Filter on `N` to exclude single-organization markets.
 #'
 #' @examples
 #' toy <- data.frame( GEO = c( "A", "A", "B" ), SUB = "ART", YEAR = 2020,
@@ -62,7 +64,6 @@ get_nhhi <- function(df, geography = "CENSUS_CBSA_FIPS", subsector = "NTEEV2",
 
   dat <- prep_market_data(df, geography, subsector, resource, year)
   out <- summarize_levels(dat, hhi_kernel)
-  out$NHHI[is.na(out$NHHI)] <- 0
   name_total(out, resource)
 }
 
@@ -74,11 +75,13 @@ hhi_kernel <- function(x) {
   data.frame(N = length(x), TOTAL = total, HHI = hhi, NHHI = calc_nhhi(x))
 }
 
-# Normalized HHI for a vector of resource values.
+# Normalized HHI for a vector of resource values: 1 for a single
+# organization (monopoly), NA when the resource total is zero.
 calc_nhhi <- function(x) {
   n <- length(x)
-  s <- x / sum(x)
-  hhi <- sum(s^2)
-  nhhi <- (hhi - 1/n) / (1 - 1/n)
-  return(nhhi)
+  total <- sum(x)
+  if (total <= 0) return(NA_real_)
+  if (n == 1) return(1)
+  hhi <- sum((x / total)^2)
+  (hhi - 1/n) / (1 - 1/n)
 }

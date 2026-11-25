@@ -40,8 +40,10 @@ rollups for all subsectors (\code{SUB = "ALL"}) and all geographies
 }
 \details{
 \code{NHHI = (HHI - 1/N) / (1 - 1/N)}, where \code{N} is the number of
-organizations in the market. Markets with one organization, or whose
-resource total is zero, get \code{NHHI = 0}.
+organizations in the market. The formula is undefined for a single
+organization; such markets are monopolies and get \code{NHHI = 1}, consistent
+with \code{HHI}, \code{CR1} and \code{KWOKA}. Markets whose resource total is zero get
+\code{NA}. Filter on \code{N} to exclude single-organization markets.
 }
 \examples{
 toy <- data.frame( GEO = c( "A", "A", "B" ), SUB = "ART", YEAR = 2020,

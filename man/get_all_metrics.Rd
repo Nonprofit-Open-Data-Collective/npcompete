@@ -13,6 +13,7 @@ get_all_metrics(
   year = "TAXYEAR",
   cr_n = 1:8,
   pop_table = NULL,
+  density_model = c("negbin", "poisson", "loglinear"),
   drop_incomplete_years = TRUE
 )
 }
@@ -42,6 +43,8 @@ zero.}
 at all are still included. When \code{NULL}, market populations are taken from
 the \code{population} column of \code{df}, so only markets with at least one
 organization (in any subsector) are included.}
+
+\item{density_model}{Passed to \code{\link[=get_scale_free_density]{get_scale_free_density()}} as \code{model}.}
 
 \item{drop_incomplete_years}{If \code{TRUE} (the default), years flagged by
 \code{\link[=check_year_completeness]{check_year_completeness()}} are dropped with a message before any metric
