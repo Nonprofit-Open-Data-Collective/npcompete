@@ -26,6 +26,9 @@
   reads the extra years these need. Dynamics metrics are not part of
   `metrics = "default"`; use `"all"` or name them.
 * `npc_metrics()` gains a `default` column.
+* New article "Universes, entries and exits": how the universes and
+  dynamics are built, and national, subsector and metro patterns of entry,
+  exit and graduation for 501(c)(3)s.
 * Live builds read the legacy NCCS CORE files for tax years 2010-2011,
   which have no form type: `FILER_TYPE` is inferred from the 990-EZ limits
   there, and a message notes their lower coverage.

@@ -30,6 +30,9 @@
     <li><a class="dropdown-item" href="../articles/build-from-archive.html">Building metrics from an archived panel</a></li>
     <li><a class="dropdown-item" href="../articles/build-from-nccs.html">Building metrics from fresh NCCS downloads</a></li>
     <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Universes and dynamics</h6></li>
+    <li><a class="dropdown-item" href="../articles/dynamics.html">Universes, entries and exits</a></li>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Comparing metrics</h6></li>
     <li><a class="dropdown-item" href="../articles/metric-correlations.html">How the metrics relate: correlation, PCA and factor analysis</a></li>
   </ul></li>
@@ -66,6 +69,7 @@
 <li>Dynamics: <code><a href="../reference/get_dynamics.html">get_dynamics()</a></code> and the metrics <code>ENTRY_RATE</code>, <code>EXIT_RATE</code>, <code>NET_GROWTH</code>, <code>CHURN_RATE</code> (every universe) and <code>GRADUATION_RATE</code>, <code>DOWNGRADE_RATE</code> (registered). Rates use the stock in <em>t</em> - 1; absences shorter than <code>absent_years</code> (2 for filers, 1 for registered) are filled; exits that cannot be confirmed yet are <code>NA</code>. Exits in 2010-2012 that coincide with an automatic revocation are counted in <code>EXITS_PPA</code> and can be dropped with <code>drop_ppa_revocations = TRUE</code>. <code><a href="../reference/npc_build_metrics.html">npc_build_metrics()</a></code> reads the extra years these need. Dynamics metrics are not part of <code>metrics = "default"</code>; use <code>"all"</code> or name them.</li>
 <li>
 <code><a href="../reference/npc_metrics.html">npc_metrics()</a></code> gains a <code>default</code> column.</li>
+<li>New article “Universes, entries and exits”: how the universes and dynamics are built, and national, subsector and metro patterns of entry, exit and graduation for 501(c)(3)s.</li>
 <li>Live builds read the legacy NCCS CORE files for tax years 2010-2011, which have no form type: <code>FILER_TYPE</code> is inferred from the 990-EZ limits there, and a message notes their lower coverage.</li>
 </ul></div>
 <div class="section level3">

@@ -28,6 +28,10 @@ articles:
   contents:
   - build-from-archive
   - build-from-nccs
+- title: Universes and dynamics
+  navbar: Universes and dynamics
+  contents:
+  - dynamics
 - title: Comparing metrics
   navbar: Comparing metrics
   contents:

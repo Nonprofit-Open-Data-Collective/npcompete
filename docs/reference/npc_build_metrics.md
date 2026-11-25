@@ -19,12 +19,15 @@ npc_build_metrics(
   dir = NULL,
   subsection = 3,
   include_imputed = TRUE,
+  exclude_churches = FALSE,
   cbsa = c("crosswalk", "geocode"),
   window = 1,
   density_model = c("negbin", "poisson", "loglinear"),
   small_max = 1e+05,
   large_min = 1e+07,
   drop_incomplete_years = TRUE,
+  absent_years = NULL,
+  drop_ppa_revocations = FALSE,
   format = c("long", "wide"),
   out_dir = NULL
 )
@@ -53,8 +56,29 @@ npc_build_metrics(
 
 - universe:
 
-  Which organizations: `"filers"` (Form 990 and 990-EZ filers). The
-  registered and grassroots universes are planned.
+  Which organizations:
+
+  `"filers"`
+
+  :   Form 990 and 990-EZ filers, with financial data.
+
+  `"registered"`
+
+  :   Every organization on the IRS registry that year, with
+      `FILER_TYPE` `"990"`, `"990EZ"`, `"990PF"`, `"990N"` or
+      `"NONFILER"` (see
+      [`npc_build_registered()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_build_registered.md)).
+      Financial columns are filled for filers only.
+
+  `"grassroots"`
+
+  :   Registered organizations that did not file a 990 or 990-EZ:
+      `FILER_TYPE` `"990N"` or `"NONFILER"`.
+
+  The registered and grassroots universes add `FILING_REQ_CODE`,
+  `FOUNDATION` and `CHURCH`, and are built on first use under
+  [`npc_cache_dir()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_cache_dir.md),
+  with the filers taken from `source`.
 
 - source:
 
@@ -77,7 +101,13 @@ npc_build_metrics(
 - include_imputed:
 
   Keep rows that fill gap years between filings. They have no financial
-  data but mark years when the organization existed.
+  data but mark years when the organization existed. Filers universe
+  only.
+
+- exclude_churches:
+
+  Drop churches that are not required to file (BMF filing requirement
+  code 6). Registered and grassroots universes only.
 
 - cbsa:
 
@@ -85,7 +115,7 @@ npc_build_metrics(
   CBSA under the 2023 delineation
   ([cbsa_county_xwalk](https://nonprofit-open-data-collective.github.io/npcompete/reference/cbsa_county_xwalk.md)),
   matching the population data; `"geocode"` uses the CBSA assigned when
-  the address was geocoded (archive only).
+  the address was geocoded (archive filers only).
 
 - window:
 
@@ -118,6 +148,22 @@ npc_build_metrics(
   window) hold a partial panel, judged against the year counts of the
   whole archive or live build (see
   [`npc_archive_info()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_archive_info.md)).
+
+- absent_years:
+
+  For the dynamics metrics (`ENTRY_RATE`, `EXIT_RATE`, `NET_GROWTH`,
+  `CHURN_RATE`, `GRADUATION_RATE`, `DOWNGRADE_RATE`; see
+  [`get_dynamics()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/get_dynamics.md)):
+  years of absence that confirm an exit. Defaults to 2 for filers and 1
+  for the registered and grassroots universes. Dynamics read
+  `absent_years` years before the first reported year and
+  `absent_years - 1` years after the last, when available, and are not
+  part of `metrics = "default"`.
+
+- drop_ppa_revocations:
+
+  Leave the mass revocations of 2010-2012 out of exits; see
+  [`get_dynamics()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/get_dynamics.md).
 
 - format:
 

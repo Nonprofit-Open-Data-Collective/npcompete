@@ -20,6 +20,11 @@
 - [Building metrics from fresh NCCS
   downloads](https://nonprofit-open-data-collective.github.io/npcompete/articles/build-from-nccs.md):
 
+### Universes and dynamics
+
+- [Universes, entries and
+  exits](https://nonprofit-open-data-collective.github.io/npcompete/articles/dynamics.md):
+
 ### Comparing metrics
 
 - [How the metrics relate: correlation, PCA and factor

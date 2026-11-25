@@ -69,7 +69,7 @@ data.table::fwrite( soi, csv )
 npc_build_archive( csv, overwrite = TRUE )
 #> Reading soi-panel-vermont.csv ...
 #> Standardizing 9,165 rows ...
-#> Writing Parquet dataset to C:\Users\jlecy\AppData\Local\Temp\RtmpKECyeI/npcompete-archive/filers ...
+#> Writing Parquet dataset to C:\Users\jlecy\AppData\Local\Temp\RtmpOcTw4M/npcompete-archive/filers ...
 #> Done: 9,133 rows, years 2015-2019.
 ```
 
@@ -142,27 +142,34 @@ npc_metrics()[ c( "id", "family", "by_resource" ) ]
 #> 1        DENSITY_PER_100K       count       FALSE
 #> 2          DENSITY_PCTL_N       scale       FALSE
 #> 3              MEDIAN_AGE         age       FALSE
-#> 4  SMALL_DENSITY_PER_100K        size        TRUE
-#> 5  LARGE_DENSITY_PER_100K        size        TRUE
-#> 6             SMALL_SHARE        size        TRUE
-#> 7             LARGE_SHARE        size        TRUE
-#> 8          DENSITY_PCTL_R       scale        TRUE
-#> 9                     HHI         hhi        TRUE
-#> 10                   NHHI         hhi        TRUE
-#> 11                    CR1          cr        TRUE
-#> 12                    CR2          cr        TRUE
-#> 13                    CR3          cr        TRUE
-#> 14                    CR4          cr        TRUE
-#> 15                    CR5          cr        TRUE
-#> 16                    CR6          cr        TRUE
-#> 17                    CR7          cr        TRUE
-#> 18                    CR8          cr        TRUE
-#> 19                  KWOKA       kwoka        TRUE
-#> 20                   GINI        gini        TRUE
-#> 21       COMMERCIAL_SHARE  commercial       FALSE
-#> 22  PROGRAM_REVENUE_SHARE  commercial       FALSE
-#> 23       FUNDRAISER_SHARE fundraising       FALSE
-#> 24      FUNDRAISING_RATIO fundraising       FALSE
+#> 4        GRASSROOTS_SHARE  grassroots       FALSE
+#> 5  SMALL_DENSITY_PER_100K        size        TRUE
+#> 6  LARGE_DENSITY_PER_100K        size        TRUE
+#> 7             SMALL_SHARE        size        TRUE
+#> 8             LARGE_SHARE        size        TRUE
+#> 9          DENSITY_PCTL_R       scale        TRUE
+#> 10                    HHI         hhi        TRUE
+#> 11                   NHHI         hhi        TRUE
+#> 12                    CR1          cr        TRUE
+#> 13                    CR2          cr        TRUE
+#> 14                    CR3          cr        TRUE
+#> 15                    CR4          cr        TRUE
+#> 16                    CR5          cr        TRUE
+#> 17                    CR6          cr        TRUE
+#> 18                    CR7          cr        TRUE
+#> 19                    CR8          cr        TRUE
+#> 20                  KWOKA       kwoka        TRUE
+#> 21                   GINI        gini        TRUE
+#> 22       COMMERCIAL_SHARE  commercial       FALSE
+#> 23  PROGRAM_REVENUE_SHARE  commercial       FALSE
+#> 24       FUNDRAISER_SHARE fundraising       FALSE
+#> 25      FUNDRAISING_RATIO fundraising       FALSE
+#> 26             ENTRY_RATE    dynamics       FALSE
+#> 27              EXIT_RATE    dynamics       FALSE
+#> 28             NET_GROWTH    dynamics       FALSE
+#> 29             CHURN_RATE    dynamics       FALSE
+#> 30        GRADUATION_RATE    dynamics       FALSE
+#> 31         DOWNGRADE_RATE    dynamics       FALSE
 ```
 
 The default output is one long table, with one row per market,
@@ -298,7 +305,7 @@ res <- npc_build_metrics( 2018:2019, geo = "cbsa", resources = "TOTREV",
                           out_dir = out )
 #> Reading 2 year(s) from the archive ...
 #> Building cbsa metrics for TOTREV ...
-#> Wrote results to C:\Users\jlecy\AppData\Local\Temp\RtmpKECyeI/metrics
+#> Wrote results to C:\Users\jlecy\AppData\Local\Temp\RtmpOcTw4M/metrics
 list.files( out )
 #> [1] "manifest.csv"                        
 #> [2] "NPCOMPETE-METRICS-BY-CBSA-TOTREV.CSV"
@@ -315,10 +322,10 @@ head( attr( res, "manifest" ), 12 )
 #> 9           metrics
 #> 10       subsection
 #> 11  include_imputed
-#> 12             cbsa
+#> 12 exclude_churches
 #>                                                                 value
-#> 1  C:/Users/jlecy/AppData/Local/Temp/RtmpKECyeI/soi-panel-vermont.csv
-#> 2                                                 2026-11-24 23:11:28
+#> 1  C:/Users/jlecy/AppData/Local/Temp/RtmpOcTw4M/soi-panel-vermont.csv
+#> 2                                                 2026-11-25 00:41:16
 #> 3                                                              filers
 #> 4                                                             archive
 #> 5                                                           2018,2019
@@ -328,7 +335,7 @@ head( attr( res, "manifest" ), 12 )
 #> 9                                                            HHI,GINI
 #> 10                                                                  3
 #> 11                                                               TRUE
-#> 12                                                          crosswalk
+#> 12                                                              FALSE
 ```
 
 ## Choices that change the results

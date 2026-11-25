@@ -23,7 +23,13 @@ npc_compute_metrics(
   ruling = "RULING_YEAR",
   program = "REVPROG",
   contributions = "REVCONT",
-  fees = "FNDFEE"
+  fees = "FNDFEE",
+  years = NULL,
+  id = "EIN2",
+  filer_type = "FILER_TYPE",
+  absent_years = 2,
+  observed_years = NULL,
+  drop_ppa_revocations = FALSE
 )
 ```
 
@@ -95,6 +101,32 @@ npc_compute_metrics(
 
   Columns for the ruling year, program service revenue, contributions
   and professional fundraising fees.
+
+- years:
+
+  Years to report. `df` may hold more years, which only the dynamics
+  metrics use (to look back to `t - 1` and ahead to confirm exits).
+  Defaults to every year in `df`.
+
+- id, filer_type:
+
+  Organization id and filer type columns, for the dynamics metrics.
+
+- absent_years:
+
+  Years of absence that confirm an exit. Use 2 or more for filers, whose
+  filings can lapse a year; 1 for the registered universe, where absence
+  is observed directly.
+
+- observed_years:
+
+  The years `df` covers, which must be consecutive. Defaults to the
+  years present in `df`. Pass it when some observed years are not
+  reported, so that their absences still count.
+
+- drop_ppa_revocations:
+
+  Leave revocation exits of 2010-2012 out of `EXITS` and the rates.
 
 ## Value
 

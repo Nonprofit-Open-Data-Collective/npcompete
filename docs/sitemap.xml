@@ -4,6 +4,7 @@
 <url><loc>https://nonprofit-open-data-collective.github.io/npcompete/articles/build-from-nccs.html</loc></url>
 <url><loc>https://nonprofit-open-data-collective.github.io/npcompete/articles/concentration-ratios.html</loc></url>
 <url><loc>https://nonprofit-open-data-collective.github.io/npcompete/articles/density.html</loc></url>
+<url><loc>https://nonprofit-open-data-collective.github.io/npcompete/articles/dynamics.html</loc></url>
 <url><loc>https://nonprofit-open-data-collective.github.io/npcompete/articles/gini.html</loc></url>
 <url><loc>https://nonprofit-open-data-collective.github.io/npcompete/articles/hhi.html</loc></url>
 <url><loc>https://nonprofit-open-data-collective.github.io/npcompete/articles/index.html</loc></url>
@@ -27,9 +28,11 @@
 <url><loc>https://nonprofit-open-data-collective.github.io/npcompete/reference/get_density_commercial.html</loc></url>
 <url><loc>https://nonprofit-open-data-collective.github.io/npcompete/reference/get_density_per_capita.html</loc></url>
 <url><loc>https://nonprofit-open-data-collective.github.io/npcompete/reference/get_density_small.html</loc></url>
+<url><loc>https://nonprofit-open-data-collective.github.io/npcompete/reference/get_dynamics.html</loc></url>
 <url><loc>https://nonprofit-open-data-collective.github.io/npcompete/reference/get_fundraising_efficiency.html</loc></url>
 <url><loc>https://nonprofit-open-data-collective.github.io/npcompete/reference/get_fundraising_ratio.html</loc></url>
 <url><loc>https://nonprofit-open-data-collective.github.io/npcompete/reference/get_gini.html</loc></url>
+<url><loc>https://nonprofit-open-data-collective.github.io/npcompete/reference/get_grassroots_share.html</loc></url>
 <url><loc>https://nonprofit-open-data-collective.github.io/npcompete/reference/get_hhi.html</loc></url>
 <url><loc>https://nonprofit-open-data-collective.github.io/npcompete/reference/get_kwoka.html</loc></url>
 <url><loc>https://nonprofit-open-data-collective.github.io/npcompete/reference/get_median_age.html</loc></url>
@@ -44,6 +47,7 @@
 <url><loc>https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_build_archive.html</loc></url>
 <url><loc>https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_build_metrics.html</loc></url>
 <url><loc>https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_build_nccs.html</loc></url>
+<url><loc>https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_build_registered.html</loc></url>
 <url><loc>https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_cache_dir.html</loc></url>
 <url><loc>https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_compare_sources.html</loc></url>
 <url><loc>https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_compute_metrics.html</loc></url>
@@ -52,6 +56,7 @@
 <url><loc>https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_match_county.html</loc></url>
 <url><loc>https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_metrics.html</loc></url>
 <url><loc>https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_nccs_download.html</loc></url>
+<url><loc>https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_registry_spans.html</loc></url>
 <url><loc>https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_standardize.html</loc></url>
 <url><loc>https://nonprofit-open-data-collective.github.io/npcompete/reference/npo_panel_sample.html</loc></url>
 <url><loc>https://nonprofit-open-data-collective.github.io/npcompete/reference/pop_cbsa.html</loc></url>
