@@ -9,8 +9,8 @@
   distribution across markets, change over time, a two-metric comparison,
   subsectors, and a downloadable table. With no data it shows the bundled
   2019 `cbsa_metrics`. Needs the shiny, bslib and ggplot2 packages. It
-  replaces the 2023 app in `data-raw/shiny-dashboard/`, which read the old
-  1990-2019 dataset.
+  replaces the 2023 app formerly in `data-raw/shiny-dashboard/` (removed;
+  it read the old 1990-2019 dataset, still in `data-share/np-compete.csv`).
 
 ## Registered and grassroots universes (Phase 5, in progress)
 
