@@ -260,6 +260,16 @@ Output is long by default, with columns `GEO, GEO_LEVEL, SUB, YEAR, UNIVERSE, RE
 - Geocode with the unified BMF (county FIPS), then apply the CBSA crosswalk.
 - **Validation:** for overlapping years, compare live filers against archive filers (counts by market, totals by resource) and report the differences.
 
+**Status (2026-11-24): done.** `R/source-nccs.R`, `data-raw/validate-nccs-source.R`.
+
+- Source used: the harmonized panel `processed_merged/core/{Y}/990combined/core_{Y}_990combined.parquet` (2010–2024, 990 + 990-EZ, all subsections, about 50 MB a year). It already resolves the CORE schema drift, so no per-era crosswalk was needed. Geography, NTEEV2 and ruling year come from `geocoding/unified-bmf/latest/bmf_unified_geocoded.parquet`.
+- The BMF has no county FIPS, only geocoded county and state names; `npc_match_county()` matches them to `pop_county`; 0.18% of filers end up with no county.
+- Tax year = year the fiscal period began (as in the SOI panel), so tax year *t* needs CORE files *t* and *t*+1.
+- Validation, TY2018–2019, 501(c)(3): EIN sets identical except 3–4 archive-only EINs a year; TOTREV/TOTEXP/TOTASS equal for 100% of matched orgs (all but one in 2019), NETASS 99.9% (after using assets − liabilities for 990-EZ); national totals agree to within $1–2 million out of $2.4–2.5 trillion. Market counts correlate at 0.9999 (median absolute difference 2.2% for counties, 1.7% for CBSAs), mostly because live builds use each org's current BMF address.
+- This answers open question 1 in practice: the SOI panel frame is the population of 990/990-EZ filers and matches the public NCCS files.
+- **Found and fixed in the archive:** about 1,100–1,400 duplicate EIN-year rows per year (mostly short-period returns after accounting-period changes, some exact repeats), which inflated archive counts by about 0.3% and counted those orgs twice in concentration metrics. `npc_standardize()` and `npc_get_orgs()` now keep one row per EIN-year: a real filing over an imputed row, then the latest source file, then the latest period end. This picks the same filing as NCCS for all 2,966 duplicated EIN-years in TY2018–2019.
+- Not covered: fundraising fees (no field in 990combined), revocations and e-postcards (Phase 5).
+
 ### Phase 5: Registered and grassroots universes plus dynamics (3–4 days)
 
 - Build an annual registered universe from the BMF snapshots, with the revocation-list fallback.

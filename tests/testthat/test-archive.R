@@ -1,56 +1,3 @@
-# A tiny SOI-panel-layout table: Vermont counties, 2018-2020, with an
-# imputed gap row, a revocation, a 501(c)(4) and a partial year (2021).
-soi_raw <- function() {
-  set.seed(1)
-  counties <- c("50007", "50021", "50023", "50025", "50027")  # 50007/50021/50023 in CBSAs
-  n <- 60
-  d <- data.frame(
-    EIN2 = sprintf("EIN-00-%07d", rep(1:20, each = 3)),
-    TAXYEAR = rep(2018:2020, times = 20),
-    COUNTY_FIPS = as.integer(rep(sample(counties, 20, replace = TRUE), each = 3)),
-    CENSUS_CBSA_FIPS = NA,
-    NTEEV2 = rep(sample(c("ART-A20-RG", "HMS-P20-RG", "EDU-B20-RG"), 20, TRUE), each = 3),
-    V501C = 3,
-    SOURCE = sample(c("SOI_2020_PC", "SOI_2020_EZ"), n, TRUE),
-    EFILE_X = "EFILE",
-    ORG_RULING_YEAR = 1995,
-    REVOKED_YEAR_X = 0,
-    revocation_date = "",
-    exemption_reinstatement_date = "",
-    TOTREV = round(stats::rlnorm(n, 11, 1.5)),
-    TOTEXP = round(stats::rlnorm(n, 11, 1.5)),
-    NETASS = round(stats::rnorm(n, 1e5, 5e4)),
-    TOTASS = 2e5, TOTLIA = 1e5, REVPROG = 10, REVCONT = 100, REVINVE = 1,
-    FNDFEE = NA, FISYEAR = rep(2018:2020, times = 20), FISMO = 12,
-    MISSING_YEAR = 0,
-    stringsAsFactors = FALSE
-  )
-  d[5, c("SOURCE", "TOTREV", "TOTEXP", "NETASS", "MISSING_YEAR")] <- list("", NA, NA, NA, 1)
-  d[9, c("REVOKED_YEAR_X", "revocation_date")] <- list(1, "15-MAY-2020")
-  d$V501C[58:60] <- 4
-  d$CENSUS_CBSA_FIPS[d$COUNTY_FIPS == 50007] <- 15540
-  extra <- d[1:2, ]; extra$TAXYEAR <- 2021; extra$FISYEAR <- 2021
-  rbind(d, extra)
-}
-
-build_tmp_archive <- function() {
-  skip_if_not_installed("arrow")
-  skip_if_not_installed("data.table")
-  tmp <- withr_tempdir()
-  csv <- file.path(tmp, "soi.csv")
-  data.table::fwrite(soi_raw(), csv)
-  arch <- file.path(tmp, "archive")
-  suppressMessages(npc_build_archive(csv, dir = arch))
-  arch
-}
-
-withr_tempdir <- function() {
-  d <- tempfile("npc-")
-  dir.create(d)
-  d
-}
-
-
 test_that("npc_standardize maps the SOI panel to the canonical schema", {
   s <- npc_standardize(soi_raw())
   expect_named(s, npcompete:::canonical_cols)
@@ -62,6 +9,32 @@ test_that("npc_standardize maps the SOI panel to the canonical schema", {
   expect_equal(s$REVOCATION_YEAR[9], 2020L)
   expect_type(s$YEAR, "integer")
   expect_error(npc_standardize(data.frame(x = 1)), "missing columns")
+})
+
+test_that("duplicate EIN-years keep the filing NCCS keeps", {
+  raw <- soi_raw()
+  base <- raw[raw$EIN2 == "EIN-00-0000001" & raw$TAXYEAR == 2019, ]
+  short <- base; short$SOURCE <- "SOI_2021_PC"; short$FISMO <- 6; short$TOTREV <- 111
+  early <- base; early$SOURCE <- "SOI_2021_PC"; early$FISMO <- 3; early$TOTREV <- 222
+  imp <- base; imp$SOURCE <- "SOI_2022_PC"; imp$MISSING_YEAR <- 1; imp$TOTREV <- NA
+  s <- npc_standardize(rbind(raw, short, early, imp, base))
+  expect_equal(anyDuplicated(s[c("EIN2", "YEAR")]), 0L)
+  expect_equal(nrow(s), nrow(unique(raw[c("EIN2", "TAXYEAR")])))
+  # latest source file, then latest period end; imputed rows lose
+  expect_equal(s$TOTREV[s$EIN2 == "EIN-00-0000001" & s$YEAR == 2019], 111)
+
+  # an archive written with duplicates is deduplicated when read
+  skip_if_not_installed("arrow")
+  arch <- withr_tempdir()
+  d <- rbind(s, transform(s[1, ], SOURCE = "SOI_2019_PC", TOTREV = -1))
+  arrow::write_dataset(d, file.path(arch, "filers"), partitioning = "YEAR")
+  utils::write.csv(data.frame(key = "source", value = "soi_panel"),
+                   file.path(arch, "manifest.csv"), row.names = FALSE)
+  utils::write.csv(data.frame(YEAR = 2018:2021, N = c(20, 20, 20, 2)),
+                   file.path(arch, "year-counts.csv"), row.names = FALSE)
+  o <- npc_get_orgs(s$YEAR[1], dir = arch, subsection = NULL)
+  expect_equal(anyDuplicated(o[c("EIN2", "YEAR")]), 0L)
+  expect_false(-1 %in% o$TOTREV)
 })
 
 test_that("archive round trip returns the requested years only", {
@@ -96,7 +69,8 @@ test_that("CBSA comes from the crosswalk or the geocode", {
 
 test_that("planned universes and sources give clear errors", {
   expect_error(npc_get_orgs(2019, universe = "registered", dir = "."), "Phase 5")
-  expect_error(npc_get_orgs(2019, source = "nccs", dir = "."), "Phase 4")
+  expect_error(npc_get_orgs(2019, source = "nccs", cbsa = "geocode", dir = "."),
+               "no geocoded CBSA")
 })
 
 test_that("npc_get_population returns GEO / YEAR / POP", {

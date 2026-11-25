@@ -11,7 +11,7 @@ npc_build_metrics(
   metrics = "default",
   universe = c("filers", "registered", "grassroots"),
   source = c("archive", "nccs"),
-  dir = npc_archive_dir(),
+  dir = NULL,
   subsection = 3,
   include_imputed = TRUE,
   cbsa = c("crosswalk", "geocode"),
@@ -38,10 +38,13 @@ metric valid for \code{universe}.}
 \item{universe}{Which organizations: \code{"filers"} (Form 990 and 990-EZ
 filers). The registered and grassroots universes are planned.}
 
-\item{source}{\code{"archive"} reads the local Parquet archive. Downloading from
-NCCS (\code{"nccs"}) is planned.}
+\item{source}{\code{"archive"} reads the local Parquet archive built from the
+SOI panel. \code{"nccs"} reads a live build from NCCS downloads (see
+\code{\link[=npc_build_nccs]{npc_build_nccs()}}), downloading and building any missing years first.}
 
-\item{dir}{Archive directory; see \code{\link[=npc_archive_dir]{npc_archive_dir()}}.}
+\item{dir}{Archive directory for \code{source = "archive"} (default
+\code{\link[=npc_archive_dir]{npc_archive_dir()}}) or cache directory for \code{source = "nccs"} (default
+\code{\link[=npc_cache_dir]{npc_cache_dir()}}).}
 
 \item{subsection}{501(c) subsections to keep, or \code{NULL} for all.}
 
@@ -52,7 +55,7 @@ existed.}
 \item{cbsa}{How to assign CBSAs: \code{"crosswalk"} (default) maps each county
 to its CBSA under the 2023 delineation (\link{cbsa_county_xwalk}), matching
 the population data; \code{"geocode"} uses the CBSA assigned when the
-address was geocoded.}
+address was geocoded (archive only).}
 
 \item{window}{Number of years pooled for each reported year. With
 \code{window = 3}, the value for 2020 uses 2018-2020: each organization's
@@ -72,7 +75,7 @@ passed to \code{\link[=get_scale_free_density]{get_scale_free_density()}} as \co
 
 \item{drop_incomplete_years}{Drop reported years whose data (including
 the earlier years of a window) hold a partial panel, judged against the
-year counts of the whole archive (see \code{\link[=npc_archive_info]{npc_archive_info()}}).}
+year counts of the whole archive or live build (see \code{\link[=npc_archive_info]{npc_archive_info()}}).}
 
 \item{format}{\code{"long"} (one row per market, metric and resource) or
 \code{"wide"} (a named list of tables, one per geography and resource).}
@@ -108,5 +111,9 @@ subset( m, GEO == "35620" & SUB == "ALL" & METRIC == "HHI" )
 # Density and age only, three-year windows, county level
 npc_build_metrics( 2014:2022, geo = "county", window = 3,
                    metrics = c( "DENSITY_PER_100K", "MEDIAN_AGE" ) )
+
+# Live build from NCCS downloads (cached under npc_cache_dir())
+npc_build_metrics( 2019:2021, geo = "cbsa", resources = "TOTREV",
+                   source = "nccs" )
 }
 }

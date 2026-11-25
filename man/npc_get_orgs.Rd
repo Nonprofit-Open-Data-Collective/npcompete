@@ -8,7 +8,7 @@ npc_get_orgs(
   years,
   universe = c("filers", "registered", "grassroots"),
   source = c("archive", "nccs"),
-  dir = npc_archive_dir(),
+  dir = NULL,
   subsection = 3,
   include_imputed = TRUE,
   cbsa = c("crosswalk", "geocode"),
@@ -21,10 +21,13 @@ npc_get_orgs(
 \item{universe}{Which organizations: \code{"filers"} (Form 990 and 990-EZ
 filers). The registered and grassroots universes are planned.}
 
-\item{source}{\code{"archive"} reads the local Parquet archive. Downloading from
-NCCS (\code{"nccs"}) is planned.}
+\item{source}{\code{"archive"} reads the local Parquet archive built from the
+SOI panel. \code{"nccs"} reads a live build from NCCS downloads (see
+\code{\link[=npc_build_nccs]{npc_build_nccs()}}), downloading and building any missing years first.}
 
-\item{dir}{Archive directory; see \code{\link[=npc_archive_dir]{npc_archive_dir()}}.}
+\item{dir}{Archive directory for \code{source = "archive"} (default
+\code{\link[=npc_archive_dir]{npc_archive_dir()}}) or cache directory for \code{source = "nccs"} (default
+\code{\link[=npc_cache_dir]{npc_cache_dir()}}).}
 
 \item{subsection}{501(c) subsections to keep, or \code{NULL} for all.}
 
@@ -35,7 +38,7 @@ existed.}
 \item{cbsa}{How to assign CBSAs: \code{"crosswalk"} (default) maps each county
 to its CBSA under the 2023 delineation (\link{cbsa_county_xwalk}), matching
 the population data; \code{"geocode"} uses the CBSA assigned when the
-address was geocoded.}
+address was geocoded (archive only).}
 
 \item{columns}{Optional character vector of columns to return.}
 }
@@ -44,7 +47,9 @@ A data frame of organization-years.
 }
 \description{
 Returns organizations in the canonical schema (see \code{\link[=npc_standardize]{npc_standardize()}})
-for the requested years, with \code{CBSA_FIPS} attached.
+for the requested years, with \code{CBSA_FIPS} attached, and one row per EIN
+and tax year. Archives built before duplicates were removed in
+\code{\link[=npc_standardize]{npc_standardize()}} are deduplicated the same way when read.
 }
 \examples{
 \dontrun{

@@ -23,7 +23,7 @@
 #'   in the window. Use it to steady metrics for small markets.
 #' @param drop_incomplete_years Drop reported years whose data (including
 #'   the earlier years of a window) hold a partial panel, judged against the
-#'   year counts of the whole archive (see [npc_archive_info()]).
+#'   year counts of the whole archive or live build (see [npc_archive_info()]).
 #' @param format `"long"` (one row per market, metric and resource) or
 #'   `"wide"` (a named list of tables, one per geography and resource).
 #' @param out_dir Optional directory. When set, results are written there as
@@ -52,6 +52,10 @@
 #' # Density and age only, three-year windows, county level
 #' npc_build_metrics( 2014:2022, geo = "county", window = 3,
 #'                    metrics = c( "DENSITY_PER_100K", "MEDIAN_AGE" ) )
+#'
+#' # Live build from NCCS downloads (cached under npc_cache_dir())
+#' npc_build_metrics( 2019:2021, geo = "cbsa", resources = "TOTREV",
+#'                    source = "nccs" )
 #' }
 #' @export
 npc_build_metrics <- function(years,
@@ -60,7 +64,7 @@ npc_build_metrics <- function(years,
                               metrics = "default",
                               universe = c("filers", "registered", "grassroots"),
                               source = c("archive", "nccs"),
-                              dir = npc_archive_dir(),
+                              dir = NULL,
                               subsection = 3,
                               include_imputed = TRUE,
                               cbsa = c("crosswalk", "geocode"),
@@ -91,9 +95,14 @@ npc_build_metrics <- function(years,
 
   # --- Years ---------------------------------------------------------------
   years <- sort(unique(as.integer(years)))
+  span <- function(t) (t - window + 1):t
+  dir <- resolve_data_dir(source, dir)
+  if (source == "nccs") {
+    need <- unique(unlist(lapply(years, span)))
+    ensure_nccs_years(need[need >= 2010], dir)
+  }
   info <- npc_archive_info(dir)
   yc <- info$year_counts
-  span <- function(t) (t - window + 1):t
   usable <- vapply(years, function(t) {
     s <- span(t)
     all(s %in% yc$YEAR) && (!drop_incomplete_years || !any(yc$INCOMPLETE[yc$YEAR %in% s]))
@@ -108,7 +117,7 @@ npc_build_metrics <- function(years,
   read_years <- sort(unique(unlist(lapply(years, span))))
 
   # --- Data ----------------------------------------------------------------
-  message("Reading ", length(read_years), " year(s) from the archive ...")
+  message("Reading ", length(read_years), " year(s) from ", if (source == "nccs") "the NCCS build" else "the archive", " ...")
   orgs <- npc_get_orgs(read_years, universe, source, dir, subsection,
                        include_imputed, cbsa)
   if (window > 1) orgs <- window_collapse(orgs, years, window)
@@ -151,7 +160,7 @@ npc_build_metrics <- function(years,
     small_max = small_max, large_min = large_min,
     npcompete_version = as.character(utils::packageVersion("npcompete")),
     built = format(Sys.time(), "%Y-%m-%d %H:%M:%S"))
-  names(manifest)[1:2] <- c("archive_source_file", "archive_built")
+  names(manifest)[1:2] <- c("data_source_file", "data_built")
   manifest <- data.frame(key = names(manifest), value = unname(manifest))
 
   out <- if (format == "wide") tables else metrics_to_long(tables, universe, by_res)

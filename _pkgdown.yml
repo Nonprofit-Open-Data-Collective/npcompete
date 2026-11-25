@@ -12,7 +12,7 @@ home:
 
 navbar:
   structure:
-    left: [intro, reference, articles]
+    left: [intro, reference, articles, news]
 
 articles:
 - title: Metrics
@@ -33,6 +33,26 @@ reference:
   desc: Compute every competition metric for each market in one call.
   contents:
   - get_all_metrics
+- title: Building from the local archive
+  desc: Convert the SOI panel to a Parquet archive and build metrics for any set of years.
+  contents:
+  - npc_build_metrics
+  - npc_compute_metrics
+  - npc_metrics
+  - npc_build_archive
+  - npc_archive_dir
+  - npc_archive_info
+  - npc_get_orgs
+  - npc_get_population
+  - npc_standardize
+- title: Building from NCCS downloads
+  desc: Download NCCS CORE and BMF files, harmonize them to the archive layout, and check them against the archive.
+  contents:
+  - npc_build_nccs
+  - npc_cache_dir
+  - npc_nccs_download
+  - npc_match_county
+  - npc_compare_sources
 - title: Concentration
   desc: How resources are shared among the organizations in a market.
   contents:
@@ -50,9 +70,12 @@ reference:
 - title: Efficiency
   contents:
   - get_fundraising_efficiency
+  - get_fundraising_ratio
+  - get_commercial_share
 - title: Utilities
   contents:
   - check_year_completeness
+  - get_median_age
 - title: Data
   desc: Sample organizations and population counts used by the examples.
   contents:

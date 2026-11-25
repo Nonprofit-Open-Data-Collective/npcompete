@@ -16,6 +16,20 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Metrics</h6></li>
+    <li><a class="dropdown-item" href="../articles/hhi.html">Herfindahl-Hirschman Index</a></li>
+    <li><a class="dropdown-item" href="../articles/concentration-ratios.html">Concentration ratios</a></li>
+    <li><a class="dropdown-item" href="../articles/kwoka.html">Kwoka dominance index</a></li>
+    <li><a class="dropdown-item" href="../articles/gini.html">Gini coefficient</a></li>
+    <li><a class="dropdown-item" href="../articles/density.html">Scale-free nonprofit density</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Comparing metrics</h6></li>
+    <li><a class="dropdown-item" href="../articles/metric-correlations.html">How the metrics relate: correlation, PCA and factor analysis</a></li>
+  </ul></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
 <li class="nav-item dropdown">
@@ -24,6 +38,7 @@
     <li><button class="dropdown-item" data-bs-theme-value="dark"><span class="fa fa-moon"></span> Dark</button></li>
     <li><button class="dropdown-item" data-bs-theme-value="auto"><span class="fa fa-adjust"></span> Auto</button></li>
   </ul></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/Nonprofit-Open-Data-Collective/npcompete/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul></div>
 
 
@@ -33,7 +48,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Sample data from NCCS data archive</h1>
-
+      <small class="dont-index">Source: <a href="https://github.com/Nonprofit-Open-Data-Collective/npcompete/blob/HEAD/R/nonprofit-sample-data.R" class="external-link"><code>R/nonprofit-sample-data.R</code></a></small>
       <div class="d-none name"><code>nonprofit_sample.Rd</code></div>
     </div>
 
@@ -60,7 +75,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by First Last.</p>
+  <p>Developed by Jesse Lecy.</p>
 </div>
 
 <div class="pkgdown-footer-right">

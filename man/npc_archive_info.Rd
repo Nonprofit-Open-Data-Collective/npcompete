@@ -2,17 +2,18 @@
 % Please edit documentation in R/archive.R
 \name{npc_archive_info}
 \alias{npc_archive_info}
-\title{Describe the local archive}
+\title{Describe the local archive or a live NCCS build}
 \usage{
 npc_archive_info(dir = npc_archive_dir())
 }
 \arguments{
-\item{dir}{Archive directory; see \code{\link[=npc_archive_dir]{npc_archive_dir()}}.}
+\item{dir}{Archive or cache directory.}
 }
 \value{
 A list with \code{manifest} (key/value data frame) and \code{year_counts}
 (rows per year with completeness flags from \code{\link[=check_year_completeness]{check_year_completeness()}}).
 }
 \description{
-Describe the local archive
+Works for both the SOI panel archive (\code{\link[=npc_build_archive]{npc_build_archive()}}) and a live
+build (\code{\link[=npc_build_nccs]{npc_build_nccs()}}), which share a layout.
 }
