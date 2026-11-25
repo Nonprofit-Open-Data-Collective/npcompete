@@ -10,7 +10,9 @@ get_scale_free_density(
   population = "POP_METRO",
   subsector = "NTEEV2",
   year = "TAXYEAR",
-  resource = "TOTREV"
+  resource = "TOTREV",
+  pop_table = NULL,
+  model = c("negbin", "poisson", "loglinear")
 )
 }
 \arguments{
@@ -31,32 +33,64 @@ is \code{"NTEEV2"}, the first three characters (the major group) are used.}
 \item{resource}{Name of the numeric column that measures organization size,
 such as \code{"TOTREV"}, \code{"TOTEXP"} or \code{"NETASS"}. Negative values are set to
 zero.}
+
+\item{pop_table}{Optional data frame of market populations with columns
+\code{GEO}, \code{YEAR} and \code{POP}. Supply it so that markets with no organizations
+at all are still included. When \code{NULL}, market populations are taken from
+the \code{population} column of \code{df}, so only markets with at least one
+organization (in any subsector) are included.}
+
+\item{model}{How the expected values are estimated:
+\itemize{
+\item \code{"negbin"} (default): negative binomial regression of the count on
+log population, which handles zero counts and overdispersion. Falls
+back to Poisson when the negative binomial fit fails.
+\item \code{"poisson"}: Poisson regression of the count on log population.
+\item \code{"loglinear"}: least squares regression of \code{log(N + 1)} on
+\code{log(POP + 1)}, the original method.
+}
+
+For the resource total, both count options use Poisson pseudo-maximum
+likelihood (a quasi-Poisson GLM), which is suited to non-negative dollar
+amounts with many zeros.}
 }
 \value{
-A tibble with one row per \code{GEO}, \code{SUB} and \code{YEAR} (plus \code{ALL}
-rollups) containing \code{N}, \code{POP}, the summed resource, the logged values,
-\code{DENSITY_PCTL_N} and \code{DENSITY_PCTL_R} (both capped at 2), and the fitted
-models in the list columns \code{model_n} and \code{model_r}.
+A tibble with one row per \code{GEO}, \code{SUB} and \code{YEAR}, containing \code{N},
+\code{POP}, the summed resource, \code{LOG_NPO}, \code{LOG_POP}, \verb{LOG_<resource>},
+\code{EXPECTED_N}, \verb{EXPECTED_<resource>}, \code{DENSITY_PCTL_N}, \code{DENSITY_PCTL_R}
+(both capped at 2) and the fitted models in the list columns \code{model_n}
+and \code{model_r}. The model type is stored in the \code{"density_model"}
+attribute.
+
+Rows with \code{SUB = "ALL"} cover all subsectors in a market. Rows with
+\code{GEO = "ALL"} are national totals: their \code{POP} is the summed population
+of the markets, and their density values are \code{NA} because they are not
+part of the cross-market models.
 }
 \description{
 Measures whether a market has more or fewer nonprofits (and more or less of
 a resource) than expected for its population. Within each subsector and
-year, the logged count of nonprofits and the logged resource total are
-regressed on logged population. The residuals are converted back to a
-proportional difference from the expected value.
+year, the number of nonprofits and the resource total are modeled as a
+power function of population across markets, and each market's observed
+value is compared with the value expected for its size.
 }
 \details{
-A value of 0 means the market matches the expected density for
-its size; 0.5 means 50\% more than expected; -0.5 means 50\% fewer.
+The density index is \code{observed / expected - 1}: 0 means the
+market matches the expected density for its size, 0.5 means 50\% more
+than expected, and -1 means none at all. The \code{"loglinear"} model computes
+it as \code{exp(residual) - 1} on the \code{log(x + 1)} scale, which compresses
+differences among small markets.
 
-Known issues, scheduled for Phase 1 of \code{DEV-PLAN.md}: markets with no
-organizations in a subsector are left out of the regressions, and the
-national \code{GEO = "ALL"} rows are fitted along with the markets.
+Every market in the population frame appears in every subsector, with
+\code{N = 0} where it has no organizations, so the models are not limited
+to markets that happen to have an organization in that subsector.
+Organizations are counted whether or not their resource value is
+missing; the resource total ignores missing values.
 }
 \examples{
-\dontrun{
-get_scale_free_density( df, geography = "CENSUS_CBSA_FIPS",
-                        population = "POP_METRO", resource = "TOTREV" )
-}
+d <- get_scale_free_density( npo_panel_sample,
+                             geography = "COUNTY_FIPS",
+                             population = "POP_COUNTY" )
+head( d[ d$SUB == "ALL", c( "GEO", "YEAR", "N", "EXPECTED_N", "DENSITY_PCTL_N" ) ] )
 
 }

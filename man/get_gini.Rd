@@ -28,8 +28,9 @@ zero.}
 \item{year}{Name of the year column, or \code{NULL} to pool all years.}
 }
 \value{
-A new dataframe with the Gini Coefficient (\code{gini}),
-grouped by geographical level and sub sectors.
+A tibble with \code{GEO}, \code{SUB}, \code{YEAR} (unless \code{year = NULL}), \code{N}, the
+summed resource and \code{GINI}. Markets with a single organization get
+\code{GINI = 1}.
 }
 \description{
 Inequality of the resource distribution in each geography, subsector and
@@ -37,19 +38,16 @@ year, with rollups for all subsectors (\code{SUB = "ALL"}) and all geographies
 (\code{GEO = "ALL"}).
 }
 \details{
-The Gini coefficient has been widely used in economics as a measure of income inequality.
-Specifically, it measures income distribution among a population. In economics, there are multiple formulas
-used to calculate the coefficient (Dorfman, 1979). However, no matter which formula is selected, a low value
-of the coefficient indicates a high level of competition (less inequality); a high value represents a low
-level of competition (greater inequality). In nonprofit study, Seaman et al., (2014) supplemented HHI with
-the Gini coefficient to capture the concept of market competition and suggested that a market is considered
-as a reasonable level of equality if the coefficient is less than 0.5; a market is considered as a modest
-level of inequality if the coefficient is between 0.5 and 0.75; a market is considered as a high level of
-inequality if the coefficient is greater than .75.
+The Gini coefficient is a widely used measure of inequality
+(Dorfman, 1979). Low values indicate less inequality and more
+competition; high values indicate greater inequality. Seaman et al.
+(2014) used it alongside HHI and suggested reading values below 0.5 as
+reasonable equality, 0.5 to 0.75 as modest inequality, and above 0.75 as
+high inequality. Computed with \code{\link[DescTools:Gini]{DescTools::Gini()}}.
 }
 \examples{
-\dontrun{
-get_gini( df, resource = "TOTREV" )
-}
+toy <- data.frame( GEO = c( "A", "A", "A", "B" ), SUB = "ART", YEAR = 2020,
+                   TOTREV = c( 10, 20, 70, 5 ) )
+get_gini( toy, geography = "GEO", subsector = "SUB", year = "YEAR" )
 
 }

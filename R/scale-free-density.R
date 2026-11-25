@@ -6,117 +6,204 @@
 #'
 #' Measures whether a market has more or fewer nonprofits (and more or less of
 #' a resource) than expected for its population. Within each subsector and
-#' year, the logged count of nonprofits and the logged resource total are
-#' regressed on logged population. The residuals are converted back to a
-#' proportional difference from the expected value.
+#' year, the number of nonprofits and the resource total are modeled as a
+#' power function of population across markets, and each market's observed
+#' value is compared with the value expected for its size.
 #'
 #' @inheritParams npcompete-params
+#' @param pop_table Optional data frame of market populations with columns
+#'   `GEO`, `YEAR` and `POP`. Supply it so that markets with no organizations
+#'   at all are still included. When `NULL`, market populations are taken from
+#'   the `population` column of `df`, so only markets with at least one
+#'   organization (in any subsector) are included.
+#' @param model How the expected values are estimated:
+#'   * `"negbin"` (default): negative binomial regression of the count on
+#'     log population, which handles zero counts and overdispersion. Falls
+#'     back to Poisson when the negative binomial fit fails.
+#'   * `"poisson"`: Poisson regression of the count on log population.
+#'   * `"loglinear"`: least squares regression of `log(N + 1)` on
+#'     `log(POP + 1)`, the original method.
 #'
-#' @return A tibble with one row per `GEO`, `SUB` and `YEAR` (plus `ALL`
-#'   rollups) containing `N`, `POP`, the summed resource, the logged values,
-#'   `DENSITY_PCTL_N` and `DENSITY_PCTL_R` (both capped at 2), and the fitted
-#'   models in the list columns `model_n` and `model_r`.
+#'   For the resource total, both count options use Poisson pseudo-maximum
+#'   likelihood (a quasi-Poisson GLM), which is suited to non-negative dollar
+#'   amounts with many zeros.
 #'
-#' @details A value of 0 means the market matches the expected density for
-#'   its size; 0.5 means 50% more than expected; -0.5 means 50% fewer.
+#' @return A tibble with one row per `GEO`, `SUB` and `YEAR`, containing `N`,
+#'   `POP`, the summed resource, `LOG_NPO`, `LOG_POP`, `LOG_<resource>`,
+#'   `EXPECTED_N`, `EXPECTED_<resource>`, `DENSITY_PCTL_N`, `DENSITY_PCTL_R`
+#'   (both capped at 2) and the fitted models in the list columns `model_n`
+#'   and `model_r`. The model type is stored in the `"density_model"`
+#'   attribute.
 #'
-#'   Known issues, scheduled for Phase 1 of `DEV-PLAN.md`: markets with no
-#'   organizations in a subsector are left out of the regressions, and the
-#'   national `GEO = "ALL"` rows are fitted along with the markets.
+#'   Rows with `SUB = "ALL"` cover all subsectors in a market. Rows with
+#'   `GEO = "ALL"` are national totals: their `POP` is the summed population
+#'   of the markets, and their density values are `NA` because they are not
+#'   part of the cross-market models.
+#'
+#' @details The density index is `observed / expected - 1`: 0 means the
+#'   market matches the expected density for its size, 0.5 means 50% more
+#'   than expected, and -1 means none at all. The `"loglinear"` model computes
+#'   it as `exp(residual) - 1` on the `log(x + 1)` scale, which compresses
+#'   differences among small markets.
+#'
+#'   Every market in the population frame appears in every subsector, with
+#'   `N = 0` where it has no organizations, so the models are not limited
+#'   to markets that happen to have an organization in that subsector.
+#'   Organizations are counted whether or not their resource value is
+#'   missing; the resource total ignores missing values.
 #'
 #' @examples
-#' \dontrun{
-#' get_scale_free_density( df, geography = "CENSUS_CBSA_FIPS",
-#'                         population = "POP_METRO", resource = "TOTREV" )
-#' }
+#' d <- get_scale_free_density( npo_panel_sample,
+#'                              geography = "COUNTY_FIPS",
+#'                              population = "POP_COUNTY" )
+#' head( d[ d$SUB == "ALL", c( "GEO", "YEAR", "N", "EXPECTED_N", "DENSITY_PCTL_N" ) ] )
 #'
 #' @export
-get_scale_free_density <- function(df, geography="CENSUS_CBSA_FIPS", population="POP_METRO", subsector="NTEEV2", year="TAXYEAR", resource="TOTREV"){
+get_scale_free_density <- function(df, geography = "CENSUS_CBSA_FIPS",
+                                   population = "POP_METRO",
+                                   subsector = "NTEEV2", year = "TAXYEAR",
+                                   resource = "TOTREV", pop_table = NULL,
+                                   model = c("negbin", "poisson", "loglinear")) {
 
-  GEO <- df[[geography]] |> factor( exclude = NULL )
-  if( subsector == "NTEEV2" )
-  { SUB <- df[[subsector]] |> substr(1,3) |> factor( exclude = NULL ) } else
-  { SUB <- df[[subsector]] |> factor( exclude = NULL ) }
-  POP <- df[[population]]  |> as.numeric()
-  RES <- df[[resource]] |> as.numeric()
-  RES <- bottomcode(RES)
-  YEAR <- df[[year]] |> factor()
+  model <- match.arg(model)
 
-  log_resource <- paste0( "LOG_", resource )
+  dat <- prep_market_data(df, geography, subsector, resource, year,
+                          population, drop_missing_res = FALSE)
 
-    dd1 <-
-      data.frame(GEO,SUB,YEAR,POP,RES) %>%
-      stats::na.omit() %>%
-      dplyr::group_by( GEO, SUB, YEAR ) %>%
-      dplyr::summarize( N=dplyr::n(),
-                        POP2 = mean( POP, na.rm=TRUE ),
-                        RES2 = sum( RES, na.rm=TRUE ),
-                        LOG_NPO = log( N + 1 ),
-                        LOG_POP = log( POP2 + 1 ),
-                        LOG_RES = log( RES2 + 1 ),
-                        .groups = "drop" )
-
-    dd2 <-
-      data.frame(GEO,YEAR,POP,RES) %>%
-      stats::na.omit() %>%
-      dplyr::group_by( GEO, YEAR ) %>%
-      dplyr::summarize( N=dplyr::n(),
-                        POP2 = mean(POP, na.rm=TRUE),
-                        RES2 = sum(RES, na.rm=TRUE),
-                        LOG_NPO = log( N + 1 ),
-                        LOG_POP = log( POP2 + 1 ),
-                        LOG_RES = log( RES2 + 1 ),
-                        .groups = "drop" )
-    dd2$SUB <- "ALL"
-
-    dd3 <-
-      data.frame(SUB,YEAR,POP,RES) %>%
-      stats::na.omit() %>%
-      dplyr::group_by( SUB, YEAR ) %>%
-      dplyr::summarize( N=dplyr::n(),
-                        POP2 = mean(POP, na.rm=TRUE),
-                        RES2 = sum(RES, na.rm=TRUE),
-                        LOG_NPO = log( N + 1 ),
-                        LOG_POP = log( POP2 + 1 ),
-                        LOG_RES = log( RES2 + 1 ),
-                        .groups = "drop" )
-    dd3$GEO <- "ALL"
-
-    dd <- dplyr::bind_rows( dd1, dd2, dd3 )
-    dd <- dplyr::arrange( dd, GEO, SUB, YEAR )
-
-  get_density_pctl_n <- function(df) {
-    m <- stats::lm(LOG_NPO ~ LOG_POP, data = df)
-    logged_residuals <- stats::residuals(m)
-    DENSITY_PCTL_N <- exp(logged_residuals) - 1
-    DENSITY_PCTL_N[DENSITY_PCTL_N > 2] <- 2
-    return(list(model_n = m, DENSITY_PCTL_N = DENSITY_PCTL_N))
+  # --- Market frame: one row per GEO x YEAR with population ---------------
+  if (is.null(pop_table)) {
+    frame <- dat[!is.na(dat$GEO) & !is.na(dat$POP), c("GEO", "YEAR", "POP")] |>
+      dplyr::group_by(GEO, YEAR) |>
+      dplyr::summarize(POP = mean(POP), .groups = "drop")
+  } else {
+    if (!all(c("GEO", "YEAR", "POP") %in% names(pop_table)))
+      stop("pop_table must have columns GEO, YEAR and POP.", call. = FALSE)
+    frame <- data.frame(GEO = as.character(pop_table$GEO),
+                        YEAR = pop_table$YEAR,
+                        POP = as.numeric(pop_table$POP))
+    frame <- frame[!is.na(frame$POP), ]
+    frame$YEAR <- if (is.numeric(dat$YEAR)) as.numeric(frame$YEAR) else as.character(frame$YEAR)
   }
 
-  get_density_pctl_r <- function(df) {
-    m <- stats::lm(LOG_RES ~ LOG_POP, data = df)
-    logged_residuals <- stats::residuals(m)
-    DENSITY_PCTL_R <- exp(logged_residuals) - 1
-    DENSITY_PCTL_R[DENSITY_PCTL_R > 2] <- 2
-    return(list(model_r = m, DENSITY_PCTL_R = DENSITY_PCTL_R))
+  subs <- sort(unique(dat$SUB))
+
+  # --- Counts and totals per market cell, zero-filled ----------------------
+  count_cells <- function(d, keys) {
+    d |>
+      dplyr::group_by(dplyr::across(dplyr::all_of(keys))) |>
+      dplyr::summarize(N = dplyr::n(), RES2 = sum(RES, na.rm = TRUE),
+                       .groups = "drop")
+  }
+  markets <- dat[!is.na(dat$GEO), ]
+
+  cells_sub <- tidyr::expand_grid(frame, SUB = subs) |>
+    dplyr::left_join(count_cells(markets, c("GEO", "SUB", "YEAR")),
+                     by = c("GEO", "SUB", "YEAR"))
+  cells_all <- frame |>
+    dplyr::left_join(count_cells(markets, c("GEO", "YEAR")),
+                     by = c("GEO", "YEAR")) |>
+    dplyr::mutate(SUB = "ALL")
+
+  cells <- dplyr::bind_rows(cells_sub, cells_all) |>
+    dplyr::mutate(N = dplyr::coalesce(N, 0L),
+                  RES2 = dplyr::coalesce(RES2, 0),
+                  LOG_NPO = log(N + 1),
+                  LOG_POP = log(POP + 1),
+                  LOG_RES = log(RES2 + 1))
+
+  # --- Fit models across markets within SUB x YEAR -------------------------
+  fitted <- cells |>
+    dplyr::group_by(SUB, YEAR) |>
+    tidyr::nest() |>
+    dplyr::mutate(
+      model_n = purrr::map(data, \(d) fit_density_model(d, "N", model)),
+      model_r = purrr::map(data, \(d) fit_density_model(d, "RES2", model)),
+      data = purrr::pmap(list(data, model_n, model_r), \(d, mn, mr) {
+        en <- expected_value(mn, nrow(d))
+        er <- expected_value(mr, nrow(d))
+        dplyr::mutate(d,
+                      EXPECTED_N = en,
+                      EXPECTED_RES = er,
+                      DENSITY_PCTL_N = density_index(mn, d$N, en),
+                      DENSITY_PCTL_R = density_index(mr, d$RES2, er))
+      })
+    ) |>
+    tidyr::unnest(data) |>
+    dplyr::ungroup()
+
+  # --- National rows (GEO = "ALL"), not part of the models -----------------
+  national <- dat |>
+    dplyr::group_by(SUB, YEAR) |>
+    dplyr::summarize(N = dplyr::n(), RES2 = sum(RES, na.rm = TRUE),
+                     .groups = "drop") |>
+    dplyr::left_join(
+      frame |> dplyr::group_by(YEAR) |>
+        dplyr::summarize(POP = sum(POP), .groups = "drop"),
+      by = "YEAR") |>
+    dplyr::mutate(GEO = "ALL",
+                  LOG_NPO = log(N + 1),
+                  LOG_POP = log(POP + 1),
+                  LOG_RES = log(RES2 + 1),
+                  EXPECTED_N = NA_real_,
+                  EXPECTED_RES = NA_real_,
+                  DENSITY_PCTL_N = NA_real_,
+                  DENSITY_PCTL_R = NA_real_)
+
+  log_resource <- paste0("LOG_", resource)
+  expected_resource <- paste0("EXPECTED_", resource)
+
+  out <- dplyr::bind_rows(fitted, national) |>
+    dplyr::select(GEO, SUB, YEAR, N, POP, RES2, LOG_NPO, LOG_POP, LOG_RES,
+                  EXPECTED_N, EXPECTED_RES, DENSITY_PCTL_N, DENSITY_PCTL_R,
+                  model_n, model_r) |>
+    dplyr::arrange(GEO, SUB, YEAR) |>
+    dplyr::rename({{resource}} := RES2, {{log_resource}} := LOG_RES,
+                  {{expected_resource}} := EXPECTED_RES)
+  attr(out, "density_model") <- model
+  out
+}
+
+# Fit the density model for one SUB x YEAR group. `outcome` is "N" (count)
+# or "RES2" (resource total). Returns NULL when there are too few markets
+# or no variation to fit.
+fit_density_model <- function(d, outcome, model) {
+  y <- d[[outcome]]
+  if (nrow(d) < 3 || stats::var(d$LOG_POP) == 0 || all(y == 0)) return(NULL)
+
+  if (model == "loglinear") {
+    d$Y <- log(y + 1)
+    return(stats::lm(Y ~ LOG_POP, data = d))
   }
 
-  df_density <- dd %>%
-    dplyr::group_by(SUB, YEAR) %>%
-    tidyr::nest() %>%
-    dplyr::mutate(
-      model_results_n = purrr::map(data, get_density_pctl_n),
-      model_n = purrr::map(model_results_n, "model_n"),
-      data = purrr::map2(data, model_results_n, \(d, res) dplyr::mutate(d, DENSITY_PCTL_N = res$DENSITY_PCTL_N))
-    ) %>%
-    dplyr::mutate(
-      model_results_r = purrr::map(data, get_density_pctl_r),
-      model_r = purrr::map(model_results_r, "model_r"),
-      data = purrr::map2(data, model_results_r, \(d, res) dplyr::mutate(d, DENSITY_PCTL_R = res$DENSITY_PCTL_R))
-    ) %>%
-    dplyr::select(-model_results_n,-model_results_r) %>%
-    tidyr::unnest(data) %>%
-    dplyr::rename( POP=POP2, {{resource}} := RES2, {{log_resource}} := LOG_RES )
+  d$Y <- y
+  if (outcome == "RES2") {
+    # Poisson pseudo-maximum likelihood for non-negative continuous totals
+    return(stats::glm(Y ~ LOG_POP, family = stats::quasipoisson(), data = d))
+  }
 
-  return( df_density )
+  if (model == "negbin") {
+    fit <- tryCatch(
+      suppressWarnings(MASS::glm.nb(Y ~ LOG_POP, data = d)),
+      error = function(e) NULL)
+    if (!is.null(fit) && is.finite(fit$theta)) return(fit)
+  }
+  suppressWarnings(stats::glm(Y ~ LOG_POP, family = stats::poisson(), data = d))
+}
+
+# Expected values on the original scale (counts or dollars).
+expected_value <- function(m, n) {
+  if (is.null(m)) return(rep(NA_real_, n))
+  if (inherits(m, "glm")) return(unname(stats::fitted(m)))
+  unname(exp(stats::fitted(m)) - 1)                 # loglinear: back-transform
+}
+
+# Density index: observed / expected - 1, capped at 2. The loglinear model
+# keeps its original definition, exp(residual) - 1 on the log(x + 1) scale.
+density_index <- function(m, observed, expected) {
+  if (is.null(m)) return(rep(NA_real_, length(observed)))
+  p <- if (inherits(m, "glm")) observed / expected - 1
+       else exp(stats::residuals(m)) - 1
+  p <- unname(p)
+  p[p > 2] <- 2
+  p
 }

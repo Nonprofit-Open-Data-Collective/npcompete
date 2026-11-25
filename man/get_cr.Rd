@@ -8,8 +8,8 @@ get_cr(
   df,
   geography = "CENSUS_CBSA_FIPS",
   subsector = "NTEEV2",
-  year = "TAXYEAR",
   resource = "TOTREV",
+  year = "TAXYEAR",
   number = 4
 )
 }
@@ -22,32 +22,26 @@ geography, such as \code{"CENSUS_CBSA_FIPS"} or \code{"COUNTY_FIPS"}.}
 \item{subsector}{Name of the column that identifies the subsector. When it
 is \code{"NTEEV2"}, the first three characters (the major group) are used.}
 
-\item{year}{Name of the column that identifies the year, such as
-\code{"TAXYEAR"}.}
-
 \item{resource}{Name of the numeric column that measures organization size,
 such as \code{"TOTREV"}, \code{"TOTEXP"} or \code{"NETASS"}. Negative values are set to
 zero.}
 
+\item{year}{Name of the column that identifies the year, such as
+\code{"TAXYEAR"}.}
+
 \item{number}{Number of top organizations to include, for example \code{4} for
-CR4. Values above 8 produce a warning.}
+CR4.}
 }
 \value{
-A tibble with one row per \code{GEO}, \code{SUB} and \code{YEAR}, containing \code{n}
-(number of organizations), \code{total}, \code{top_k_sum} and \verb{CR<number>}. Markets
-with \code{number} or fewer organizations get a ratio of 1.
+A tibble with \code{GEO}, \code{SUB}, \code{YEAR}, \code{N}, the summed resource and
+\verb{CR<number>}.
 }
 \description{
-Share of a market's total resource held by its \code{number} largest
-organizations, computed for each geography, subsector and year.
-}
-\details{
-CRk is the sum of the resource held by the k largest organizations
-divided by the market total.
+Convenience wrapper around \code{\link[=get_cr_all]{get_cr_all()}} for a single CR level.
 }
 \examples{
-\dontrun{
-get_cr( df, geography = "CENSUS_CBSA_FIPS", resource = "TOTREV", number = 4 )
-}
+toy <- data.frame( GEO = "A", SUB = "ART", YEAR = 2020,
+                   TOTREV = c( 50, 30, 10, 10 ) )
+get_cr( toy, geography = "GEO", subsector = "SUB", year = "YEAR", number = 2 )
 
 }

@@ -27,6 +27,11 @@ Calculate the commercial nonprofit density  a resource  and return a dataframe.
 The density metric is the number of nonprofits per-capita in a market. In this function, it is measured
 as the number of organizations per 1000 population and per 10,000 population.
 }
+\section{Deprecated}{
+
+This function uses the legacy NCCS core-file layout and is deprecated.
+}
+
 \examples{
 \dontrun{
 get_density_commercial( nonprofit_sample, 'MSA_NECH', 'NTMAJ12',

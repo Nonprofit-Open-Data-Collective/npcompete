@@ -1,153 +1,55 @@
 ###---------------------------------------------------
-###   Kwoka Index
+###   Kwoka Dominance Index
 ###---------------------------------------------------
 
-#' Kwoka index
+#' Kwoka dominance index
 #'
-#' Concentration among the three largest organizations in each geography,
-#' subsector and year, with rollups for all subsectors (`SUB = "ALL"`) and all
-#' geographies (`GEO = "ALL"`).
+#' Kwoka's (1977) dominance index for each geography, subsector and year,
+#' with rollups for all subsectors (`SUB = "ALL"`) and all geographies
+#' (`GEO = "ALL"`). It measures how far the largest organizations pull ahead
+#' of the next ones.
 #'
 #' @inheritParams npcompete-params
 #'
 #' @return A tibble with `GEO`, `SUB`, `YEAR`, `N`, the shares of the three
-#'   largest organizations (`top1`, `top2`, `top3`, `total_top3`) and `KWOKA`.
-#'   Markets with fewer than three organizations get `KWOKA = 1`.
+#'   largest organizations (`top1`, `top2`, `top3`; `NA` when the market has
+#'   fewer organizations) and `KWOKA`.
 #'
-#' @details `KWOKA` is computed as the sum of the squared shares of the top
-#'   three organizations, each rescaled by their combined share.
+#' @details With market shares sorted from largest to smallest,
+#'   \deqn{KWOKA = \sum_{i=1}^{N-1} (s_i - s_{i+1})^2}
+#'   The index is 0 when all organizations have equal shares and approaches
+#'   1 as one organization dominates. A market with a single organization
+#'   gets `KWOKA = 1`; a market whose resource total is zero gets `NA`.
+#'
+#' @references Kwoka, J. E. (1977). Large firm dominance and price-cost
+#'   margins in manufacturing industries. *Southern Economic Journal*, 44(1),
+#'   183-189.
 #'
 #' @examples
-#' \dontrun{
-#' get_kwoka( df, resource = "TOTREV" )
-#' }
+#' toy <- data.frame( GEO = "A", SUB = "ART", YEAR = 2020,
+#'                    TOTREV = c( 50, 30, 10, 10 ) )
+#' get_kwoka( toy, geography = "GEO", subsector = "SUB", year = "YEAR" )
 #'
 #' @export
-get_kwoka <- function(df, geography="CENSUS_CBSA_FIPS", subsector="NTEEV2", resource="TOTREV", year="TAXYEAR"){
+get_kwoka <- function(df, geography = "CENSUS_CBSA_FIPS", subsector = "NTEEV2",
+                      resource = "TOTREV", year = "TAXYEAR") {
 
-  GEO <- df[[geography]] |> factor( exclude = NULL )
-  RES <- df[[resource]]  |> as.numeric() |> suppressWarnings()
-  if( subsector == "NTEEV2" )
-  { SUB <- df[[subsector]] |> substr(1,3) |> factor( exclude = NULL ) } else
-  { SUB <- df[[subsector]] |> factor( exclude = NULL ) }
-
-  RES <- bottomcode(RES)
-
-  YEAR <- df[[year]] |> factor() 
-
-  dat.k1 <- 
-    data.frame(GEO,SUB,YEAR,RES) %>%
-    stats::na.omit() %>%
-    dplyr::filter(!is.na(RES)) %>%
-    dplyr::group_by(GEO, SUB, YEAR) %>%
-    dplyr::mutate(share = RES / sum(RES, na.rm = TRUE)) %>%  # normalize to shares
-    dplyr::arrange(desc(share)) %>%
-    dplyr::summarize(
-      N = dplyr::n(),
-      top1 = dplyr::nth(share, 1),
-      top2 = dplyr::nth(share, 2),
-      top3 = dplyr::nth(share, 3),
-      total_top3 = sum(c(top1, top2, top3), na.rm = TRUE),
-      KWOKA = sum((c(top1, top2, top3) / total_top3)^2, na.rm = TRUE),
-      .groups = "drop"
-    )
-
-  dat.k1$KWOKA[dat.k1$N < 3] <- 1
-
-  dat.k2 <- 
-    data.frame(GEO,YEAR,RES) %>%
-    stats::na.omit() %>%
-    dplyr::filter(!is.na(RES)) %>%
-    dplyr::group_by(GEO, YEAR) %>%
-    dplyr::mutate(share = RES / sum(RES, na.rm = TRUE)) %>%  # normalize to shares
-    dplyr::arrange(desc(share)) %>%
-    dplyr::summarize(
-      N = dplyr::n(),
-      top1 = dplyr::nth(share, 1),
-      top2 = dplyr::nth(share, 2),
-      top3 = dplyr::nth(share, 3),
-      total_top3 = sum(c(top1, top2, top3), na.rm = TRUE),
-      KWOKA = sum((c(top1, top2, top3) / total_top3)^2, na.rm = TRUE),
-      .groups = "drop"
-    )
-    
-    dat.k2$SUB <- "ALL"
-    dat.k2$KWOKA[dat.k2$N < 3] <- 1
-    
-  dat.k3 <- 
-    data.frame(SUB,YEAR,RES) %>%
-    stats::na.omit() %>%
-    dplyr::filter(!is.na(RES)) %>%
-    dplyr::group_by(SUB, YEAR) %>%
-    dplyr::mutate(share = RES / sum(RES, na.rm = TRUE)) %>%  # normalize to shares
-    dplyr::arrange(desc(share)) %>%
-    dplyr::summarize(
-      N = dplyr::n(),
-      top1 = dplyr::nth(share, 1),
-      top2 = dplyr::nth(share, 2),
-      top3 = dplyr::nth(share, 3),
-      total_top3 = sum(c(top1, top2, top3), na.rm = TRUE),
-      KWOKA = sum((c(top1, top2, top3) / total_top3)^2, na.rm = TRUE),
-      .groups = "drop"
-    )
-    
-    dat.k3$GEO <- "ALL"
-    dat.k3$KWOKA[dat.k3$N < 3] <- 1
-
-    dat.k <- bind_rows( dat.k1, dat.k2, dat.k3 )
-    dat.k <- arrange( dat.k, GEO, SUB, YEAR )
-    
-  return(dat.k)
+  dat <- prep_market_data(df, geography, subsector, resource, year)
+  summarize_levels(dat, kwoka_kernel)
 }
 
-
-# k <- get_kwoka_index(df)
-
-
-#' Compute the Kwoka Index of Market Concentration
-#'
-#' The Kwoka index measures the inequality of market shares among
-#' the top `k` firms (or organizations) in a market or region.
-#' It equals 1 when one firm dominates and 1/k when the top k firms
-#' have equal shares of their combined total.
-#'
-#' @param data A data frame containing at least the grouping variables and `share_var`.
-#' @param share_var A string giving the name of the variable representing market shares
-#'   or raw quantities (e.g., revenues). If raw quantities are provided, they are
-#'   automatically normalized within each group.
-#' @param group_vars Character vector of grouping variables (e.g., `c("GEO", "SUB", "YEAR")`).
-#' @param k Integer specifying how many top firms to include (default = 3).
-#'
-#' @return A data frame with one observation per group containing:
-#' \describe{
-#'   \item{n}{Number of firms in the group}
-#'   \item{kwoka}{The computed Kwoka index}
-#'   \item{top_k_share}{Combined share of the top k firms}
-#' }
-#'
-#' @examples
-#' \dontrun{
-#' get_kwoka_k( df, "RES", c("GEO", "SUB", "YEAR"), k = 3 )
-#' }
-#'
-#' @export
-get_kwoka_k <- function(data, share_var, group_vars, k = 3) {
-
-  share_sym <- rlang::sym(share_var)
-
-  data %>%
-    dplyr::filter(!is.na(!!share_sym)) %>%
-    dplyr::group_by(dplyr::across(dplyr::all_of(group_vars))) %>%
-    dplyr::mutate(share = !!share_sym / sum(!!share_sym, na.rm = TRUE)) %>%
-    dplyr::arrange(dplyr::desc(share), .by_group = TRUE) %>%
-    dplyr::summarize(
-      n = dplyr::n(),
-      top_k = list(utils::head(share, k)),
-      top_k_share = sum(utils::head(share, k), na.rm = TRUE),
-      kwoka = {
-        topk <- utils::head(share, k)
-        sum((topk / sum(topk, na.rm = TRUE))^2, na.rm = TRUE)
-      },
-      .groups = "drop"
-    )
+# Per-market Kwoka dominance index: sum of squared gaps between successive
+# sorted shares.
+kwoka_kernel <- function(x) {
+  n <- length(x)
+  total <- sum(x)
+  if (total > 0) {
+    share <- sort(x / total, decreasing = TRUE)
+    k <- if (n == 1) 1 else sum(diff(share)^2)
+  } else {
+    share <- rep(NA_real_, n)
+    k <- NA_real_
+  }
+  top <- share[1:3]                     # NA when fewer than three orgs
+  data.frame(N = n, top1 = top[1], top2 = top[2], top3 = top[3], KWOKA = k)
 }

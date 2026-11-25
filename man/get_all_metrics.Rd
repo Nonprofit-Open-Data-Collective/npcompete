@@ -11,7 +11,10 @@ get_all_metrics(
   subsector = "NTEEV2",
   resource = "TOTREV",
   year = "TAXYEAR",
-  cr_n = 1:8
+  cr_n = 1:8,
+  pop_table = NULL,
+  density_model = c("negbin", "poisson", "loglinear"),
+  drop_incomplete_years = TRUE
 )
 }
 \arguments{
@@ -34,11 +37,25 @@ zero.}
 \code{"TAXYEAR"}.}
 
 \item{cr_n}{Integer vector of concentration ratio levels to compute.}
+
+\item{pop_table}{Optional data frame of market populations with columns
+\code{GEO}, \code{YEAR} and \code{POP}. Supply it so that markets with no organizations
+at all are still included. When \code{NULL}, market populations are taken from
+the \code{population} column of \code{df}, so only markets with at least one
+organization (in any subsector) are included.}
+
+\item{density_model}{Passed to \code{\link[=get_scale_free_density]{get_scale_free_density()}} as \code{model}.}
+
+\item{drop_incomplete_years}{If \code{TRUE} (the default), years flagged by
+\code{\link[=check_year_completeness]{check_year_completeness()}} are dropped with a message before any metric
+is computed.}
 }
 \value{
 A tibble with \code{GEO}, \code{SUB}, \code{YEAR}, \code{N}, \code{POP}, the summed
 resource, \code{LOG_NPO}, \code{LOG_POP}, \verb{LOG_<resource>}, \code{DENSITY_PCTL_N},
 \code{DENSITY_PCTL_R}, \code{GINI}, \code{HHI}, \code{NHHI}, \code{KWOKA} and \code{CR1} to \code{CR8}.
+Market cells with no organizations (from the density frame) have
+\code{N = 0} and \code{NA} concentration metrics.
 }
 \description{
 Runs \code{\link[=get_gini]{get_gini()}}, \code{\link[=get_nhhi]{get_nhhi()}}, \code{\link[=get_kwoka]{get_kwoka()}}, \code{\link[=get_cr_all]{get_cr_all()}} and
@@ -46,9 +63,10 @@ Runs \code{\link[=get_gini]{get_gini()}}, \code{\link[=get_nhhi]{get_nhhi()}}, \
 subsector and year (plus \code{ALL} rollups).
 }
 \examples{
-\dontrun{
-get_all_metrics( df, geography = "CENSUS_CBSA_FIPS",
-                 population = "POP_METRO", resource = "TOTREV" )
-}
+m <- get_all_metrics( npo_panel_sample,
+                      geography = "COUNTY_FIPS",
+                      population = "POP_COUNTY",
+                      resource = "TOTREV" )
+head( m )
 
 }

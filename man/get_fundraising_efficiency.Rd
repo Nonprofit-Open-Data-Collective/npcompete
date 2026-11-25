@@ -28,6 +28,11 @@ Fundraising efficiency is the measure of the fundraising competition in a market
 to expenses on fundraising activities and indicates the amount of private donations raised for each dollar of fundraising expense incurred.
 Lower ratio indicates greater fundraising competition in a market.Fundraising efficiency be calculated as follows: Private donations divided by fundraising expenses
 }
+\section{Deprecated}{
+
+This function uses the legacy NCCS core-file layout and is deprecated.
+}
+
 \examples{
 \dontrun{
 get_fundraising_efficiency( nonprofit_sample, 'MSA_NECH', 'NTMAJ12',
