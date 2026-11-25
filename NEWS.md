@@ -1,5 +1,22 @@
 # npcompete (development version)
 
+## Registered and grassroots universes (Phase 5, in progress)
+
+* `npc_get_orgs()` and `npc_build_metrics()` accept `universe =
+  "registered"` (every organization on the IRS registry that year) and
+  `"grassroots"` (registered organizations that file a 990-N or do not
+  file). `npc_build_registered()` builds them from the unified BMF, the IRS
+  automatic revocation list and the 990-N e-postcard file, with filers from
+  the archive or a live NCCS build. `npc_registry_spans()` gives each
+  organization's registration years.
+* Each registered organization-year has a `FILER_TYPE`: `"990"`, `"990EZ"`,
+  `"990PF"` (private foundations), `"990N"` (an e-postcard for that year,
+  or a BMF filing requirement that allows the 990-N) or `"NONFILER"`. New
+  `CHURCH`, `FOUNDATION` and `FILING_REQ_CODE` columns; churches are kept
+  unless `exclude_churches = TRUE`.
+* New metric `GRASSROOTS_SHARE` (`get_grassroots_share()`), for the
+  registered universe.
+
 ## Documentation
 
 * New README with a metrics overview, quick start, market definitions and

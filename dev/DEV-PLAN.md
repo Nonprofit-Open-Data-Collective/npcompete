@@ -277,6 +277,20 @@ Output is long by default, with columns `GEO, GEO_LEVEL, SUB, YEAR, UNIVERSE, RE
 - `R/dynamics.R`: entry, exit, churn and graduation, with censoring and the 2010–2012 auto-revocation flag.
 - Optional: publish versioned output tables as GitHub release assets (not committed to the repo). `npc_load_metrics()` fetches them, which replaces the 1990–2019 `data-share/np-compete.csv`.
 
+**Status (2026-11-24): registered universe done; dynamics next.** `R/source-registered.R`.
+
+Decisions (answers to open questions 2 and 3):
+- **Registry source:** the unified BMF's first/last vintage per EIN, not yearly snapshots (about 1 GB each, some Decembers missing). Registered from ruling year (or first vintage, if earlier) through the last vintage. Revocation dates cut spans; revocation–reinstatement gaps are dropped. Exits in 2016–2022 without a revocation date are dated to the last vintage seen (NCCS kept only 2018-12, 2019-08 and 2020-04 there).
+- **990-N in past years:** inferred. An org-year is `990N` if the latest e-postcard is for that year or the BMF filing requirement code is 2; otherwise `NONFILER`.
+- **Churches** (filing requirement 6) are **included** by default; `exclude_churches = TRUE` drops them.
+- Added during the build: **private foundations** (PF filing requirement 1 or foundation code 2–4) get `FILER_TYPE = "990PF"` and are excluded from grassroots. Without this, about 110k foundations a year were counted as non-filers.
+- Filer classification uses the exact tax year (no ±1 slippage); archive imputed gap rows count as non-filings.
+- All registered rows take county, NTEEV2 and subsection from the BMF (from the filer panel only when the BMF lacks the EIN).
+
+Result, TY2019, 501(c)(3), filers from NCCS: 1.43M registered; 400k 990/990-EZ, 111k 990-PF, 575k 990-N, 341k non-filers (260k churches). Grassroots share 64% nationally. New metric `GRASSROOTS_SHARE` (registered universe).
+
+Remaining: `R/dynamics.R` (entry, exit, churn, graduation, censoring, 2010–2012 auto-revocation flag); small-org density for registered; vignette on universes (Phase 6).
+
 ### Phase 6: Docs and dashboard (1–2 days)
 
 - Write a vignette on universes, explaining which metrics are valid where and why exits from filing are not deaths.

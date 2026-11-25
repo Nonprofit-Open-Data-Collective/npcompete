@@ -135,3 +135,36 @@ fill_market_frame <- function(out, pop_table, subs, fill, year_values) {
   res <- dplyr::relocate(res, "GEO", "SUB", "YEAR", "POP")
   dplyr::arrange(res, GEO, SUB, YEAR)
 }
+
+
+#' Grassroots share of registered organizations
+#'
+#' The share of registered organizations in each market that file a Form
+#' 990-N postcard or do not file at all, rather than a Form 990 or 990-EZ.
+#' Use it with the registered universe (`npc_get_orgs(universe =
+#' "registered")`).
+#'
+#' @inheritParams npcompete-params
+#' @param filer_type Name of the filer type column, with values `"990"`,
+#'   `"990EZ"`, `"990N"` and `"NONFILER"`.
+#'
+#' @return A tibble with `GEO`, `SUB`, `YEAR`, `N_GRASSROOTS` (990-N filers
+#'   and non-filers) and `GRASSROOTS_SHARE`.
+#'
+#' @examples
+#' d <- data.frame( GEO = c( "A", "A", "A", "B" ), SUB = "ART", YEAR = 2020,
+#'                  FILER_TYPE = c( "990", "990N", "NONFILER", "990EZ" ) )
+#' get_grassroots_share( d, geography = "GEO", subsector = "SUB", year = "YEAR" )
+#'
+#' @export
+get_grassroots_share <- function(df, geography = "CBSA_FIPS",
+                                 subsector = "NTEEV2", year = "YEAR",
+                                 filer_type = "FILER_TYPE") {
+  if (!filer_type %in% names(df))
+    stop("Column not found in df: ", filer_type,
+         ". Grassroots share needs the registered universe.", call. = FALSE)
+  df$.npc_gr <- as.numeric(df[[filer_type]] %in% grassroots_types)
+  dat <- prep_market_data(df, geography, subsector, ".npc_gr", year)
+  summarize_levels(dat, function(x)
+    list(N_GRASSROOTS = sum(x), GRASSROOTS_SHARE = mean(x)))
+}

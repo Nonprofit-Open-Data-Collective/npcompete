@@ -58,6 +58,13 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="npcompete-development-version">npcompete (development version)<a class="anchor" aria-label="anchor" href="#npcompete-development-version"></a></h2>
 <div class="section level3">
+<h3 id="registered-and-grassroots-universes-phase-in-progress-development-version">Registered and grassroots universes (Phase 5, in progress)<a class="anchor" aria-label="anchor" href="#registered-and-grassroots-universes-phase-in-progress-development-version"></a></h3>
+<ul><li>
+<code><a href="../reference/npc_get_orgs.html">npc_get_orgs()</a></code> and <code><a href="../reference/npc_build_metrics.html">npc_build_metrics()</a></code> accept <code>universe =   "registered"</code> (every organization on the IRS registry that year) and <code>"grassroots"</code> (registered organizations that file a 990-N or do not file). <code><a href="../reference/npc_build_registered.html">npc_build_registered()</a></code> builds them from the unified BMF, the IRS automatic revocation list and the 990-N e-postcard file, with filers from the archive or a live NCCS build. <code><a href="../reference/npc_registry_spans.html">npc_registry_spans()</a></code> gives each organization’s registration years.</li>
+<li>Each registered organization-year has a <code>FILER_TYPE</code>: <code>"990"</code>, <code>"990EZ"</code>, <code>"990PF"</code> (private foundations), <code>"990N"</code> (an e-postcard for that year, or a BMF filing requirement that allows the 990-N) or <code>"NONFILER"</code>. New <code>CHURCH</code>, <code>FOUNDATION</code> and <code>FILING_REQ_CODE</code> columns; churches are kept unless <code>exclude_churches = TRUE</code>.</li>
+<li>New metric <code>GRASSROOTS_SHARE</code> (<code><a href="../reference/get_grassroots_share.html">get_grassroots_share()</a></code>), for the registered universe.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="documentation-development-version">Documentation<a class="anchor" aria-label="anchor" href="#documentation-development-version"></a></h3>
 <ul><li>New README with a metrics overview, quick start, market definitions and the data included.</li>
 <li>Articles for each metric (HHI and NHHI, concentration ratios, Kwoka, Gini, scale-free density), each with descriptive statistics and plots by NTEE major group and metro size, plus an article on how the metrics correlate, with principal components and factor analysis.</li>

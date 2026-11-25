@@ -11,6 +11,7 @@ npc_get_orgs(
   dir = NULL,
   subsection = 3,
   include_imputed = TRUE,
+  exclude_churches = FALSE,
   cbsa = c("crosswalk", "geocode"),
   columns = NULL
 )
@@ -18,8 +19,19 @@ npc_get_orgs(
 \arguments{
 \item{years}{Integer vector of tax years.}
 
-\item{universe}{Which organizations: \code{"filers"} (Form 990 and 990-EZ
-filers). The registered and grassroots universes are planned.}
+\item{universe}{Which organizations:
+\describe{
+\item{\code{"filers"}}{Form 990 and 990-EZ filers, with financial data.}
+\item{\code{"registered"}}{Every organization on the IRS registry that
+year, with \code{FILER_TYPE} \code{"990"}, \code{"990EZ"}, \code{"990PF"}, \code{"990N"} or
+\code{"NONFILER"} (see \code{\link[=npc_build_registered]{npc_build_registered()}}). Financial columns are
+filled for filers only.}
+\item{\code{"grassroots"}}{Registered organizations that did not file a
+990 or 990-EZ: \code{FILER_TYPE} \code{"990N"} or \code{"NONFILER"}.}
+}
+The registered and grassroots universes add \code{FILING_REQ_CODE}, \code{FOUNDATION} and
+\code{CHURCH}, and are built on first use under \code{\link[=npc_cache_dir]{npc_cache_dir()}}, with the
+filers taken from \code{source}.}
 
 \item{source}{\code{"archive"} reads the local Parquet archive built from the
 SOI panel. \code{"nccs"} reads a live build from NCCS downloads (see
@@ -33,12 +45,15 @@ SOI panel. \code{"nccs"} reads a live build from NCCS downloads (see
 
 \item{include_imputed}{Keep rows that fill gap years between filings.
 They have no financial data but mark years when the organization
-existed.}
+existed. Filers universe only.}
+
+\item{exclude_churches}{Drop churches that are not required to file (BMF
+filing requirement code 6). Registered and grassroots universes only.}
 
 \item{cbsa}{How to assign CBSAs: \code{"crosswalk"} (default) maps each county
 to its CBSA under the 2023 delineation (\link{cbsa_county_xwalk}), matching
 the population data; \code{"geocode"} uses the CBSA assigned when the
-address was geocoded (archive only).}
+address was geocoded (archive filers only).}
 
 \item{columns}{Optional character vector of columns to return.}
 }
@@ -54,5 +69,6 @@ and tax year. Archives built before duplicates were removed in
 \examples{
 \dontrun{
 orgs <- npc_get_orgs( 2018:2020 )
+grassroots <- npc_get_orgs( 2019, universe = "grassroots", source = "nccs" )
 }
 }

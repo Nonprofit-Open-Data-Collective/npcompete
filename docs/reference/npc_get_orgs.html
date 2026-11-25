@@ -78,6 +78,7 @@ and tax year. Archives built before duplicates were removed in
 <span>  dir <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  subsection <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  include_imputed <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  exclude_churches <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  cbsa <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"crosswalk"</span>, <span class="st">"geocode"</span><span class="op">)</span>,</span>
 <span>  columns <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -92,8 +93,23 @@ and tax year. Archives built before duplicates were removed in
 
 
 <dt id="arg-universe">universe<a class="anchor" aria-label="anchor" href="#arg-universe"></a></dt>
-<dd><p>Which organizations: <code>"filers"</code> (Form 990 and 990-EZ
-filers). The registered and grassroots universes are planned.</p></dd>
+<dd><p>Which organizations:</p><dl><dt><code>"filers"</code></dt>
+<dd><p>Form 990 and 990-EZ filers, with financial data.</p></dd>
+
+<dt><code>"registered"</code></dt>
+<dd><p>Every organization on the IRS registry that
+year, with <code>FILER_TYPE</code> <code>"990"</code>, <code>"990EZ"</code>, <code>"990PF"</code>, <code>"990N"</code> or
+<code>"NONFILER"</code> (see <code><a href="npc_build_registered.html">npc_build_registered()</a></code>). Financial columns are
+filled for filers only.</p></dd>
+
+<dt><code>"grassroots"</code></dt>
+<dd><p>Registered organizations that did not file a
+990 or 990-EZ: <code>FILER_TYPE</code> <code>"990N"</code> or <code>"NONFILER"</code>.</p></dd>
+
+
+</dl><p>The registered and grassroots universes add <code>FILING_REQ_CODE</code>, <code>FOUNDATION</code> and
+<code>CHURCH</code>, and are built on first use under <code><a href="npc_cache_dir.html">npc_cache_dir()</a></code>, with the
+filers taken from <code>source</code>.</p></dd>
 
 
 <dt id="arg-source">source<a class="anchor" aria-label="anchor" href="#arg-source"></a></dt>
@@ -115,14 +131,19 @@ SOI panel. <code>"nccs"</code> reads a live build from NCCS downloads (see
 <dt id="arg-include-imputed">include_imputed<a class="anchor" aria-label="anchor" href="#arg-include-imputed"></a></dt>
 <dd><p>Keep rows that fill gap years between filings.
 They have no financial data but mark years when the organization
-existed.</p></dd>
+existed. Filers universe only.</p></dd>
+
+
+<dt id="arg-exclude-churches">exclude_churches<a class="anchor" aria-label="anchor" href="#arg-exclude-churches"></a></dt>
+<dd><p>Drop churches that are not required to file (BMF
+filing requirement code 6). Registered and grassroots universes only.</p></dd>
 
 
 <dt id="arg-cbsa">cbsa<a class="anchor" aria-label="anchor" href="#arg-cbsa"></a></dt>
 <dd><p>How to assign CBSAs: <code>"crosswalk"</code> (default) maps each county
 to its CBSA under the 2023 delineation (<a href="cbsa_county_xwalk.html">cbsa_county_xwalk</a>), matching
 the population data; <code>"geocode"</code> uses the CBSA assigned when the
-address was geocoded (archive only).</p></dd>
+address was geocoded (archive filers only).</p></dd>
 
 
 <dt id="arg-columns">columns<a class="anchor" aria-label="anchor" href="#arg-columns"></a></dt>
@@ -138,6 +159,7 @@ address was geocoded (archive only).</p></dd>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="va">orgs</span> <span class="op">&lt;-</span> <span class="fu">npc_get_orgs</span><span class="op">(</span> <span class="fl">2018</span><span class="op">:</span><span class="fl">2020</span> <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">grassroots</span> <span class="op">&lt;-</span> <span class="fu">npc_get_orgs</span><span class="op">(</span> <span class="fl">2019</span>, universe <span class="op">=</span> <span class="st">"grassroots"</span>, source <span class="op">=</span> <span class="st">"nccs"</span> <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
     </div>

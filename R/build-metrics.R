@@ -67,6 +67,7 @@ npc_build_metrics <- function(years,
                               dir = NULL,
                               subsection = 3,
                               include_imputed = TRUE,
+                              exclude_churches = FALSE,
                               cbsa = c("crosswalk", "geocode"),
                               window = 1,
                               density_model = c("negbin", "poisson", "loglinear"),
@@ -84,7 +85,6 @@ npc_build_metrics <- function(years,
   resources <- match.arg(resources, c("TOTREV", "TOTEXP", "NETASS", "TOTASS"),
                          several.ok = TRUE)
   ids <- resolve_metrics(metrics, universe)
-  check_planned(universe, source)
   window <- as.integer(window)
   if (length(window) != 1 || is.na(window) || window < 1)
     stop("`window` must be a whole number of years, 1 or more.", call. = FALSE)
@@ -118,8 +118,9 @@ npc_build_metrics <- function(years,
 
   # --- Data ----------------------------------------------------------------
   message("Reading ", length(read_years), " year(s) from ", if (source == "nccs") "the NCCS build" else "the archive", " ...")
-  orgs <- npc_get_orgs(read_years, universe, source, dir, subsection,
-                       include_imputed, cbsa)
+  orgs <- npc_get_orgs(read_years, universe = universe, source = source, dir = dir,
+                       subsection = subsection, include_imputed = include_imputed,
+                       exclude_churches = exclude_churches, cbsa = cbsa)
   if (window > 1) orgs <- window_collapse(orgs, years, window)
   us_pop <- stats::aggregate(POP ~ YEAR, data = npcompete::pop_county, FUN = sum)
   us_pop <- window_population(us_pop, years, window)
@@ -155,7 +156,7 @@ npc_build_metrics <- function(years,
     resources = if (by_res) paste(resources, collapse = ",") else "",
     metrics = paste(ids, collapse = ","),
     subsection = paste(subsection, collapse = ","),
-    include_imputed = include_imputed, cbsa = cbsa,
+    include_imputed = include_imputed, exclude_churches = exclude_churches, cbsa = cbsa,
     cbsa_delineation = 2023, density_model = density_model,
     small_max = small_max, large_min = large_min,
     npcompete_version = as.character(utils::packageVersion("npcompete")),
@@ -211,7 +212,7 @@ window_population <- function(pop, years, window) {
 # Stack wide metric tables into one long table.
 metrics_to_long <- function(tables, universe, by_res = TRUE) {
   reg <- metric_registry()
-  indep <- c("N", "POP", "N_AGE", "N_COMM", "N_FEE",
+  indep <- c("N", "POP", "N_AGE", "N_COMM", "N_FEE", "N_GRASSROOTS",
              reg$id[!reg$by_resource])
   parts <- lapply(seq_along(tables), function(i) {
     nm <- names(tables)[i]

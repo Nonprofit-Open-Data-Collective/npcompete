@@ -22,6 +22,9 @@ metric_registry <- function() {
       "Organization count relative to the count expected for the market's population"),
     r("MEDIAN_AGE", "age", FALSE, FALSE,
       "Median years since the IRS ruling year"),
+    r("GRASSROOTS_SHARE", "grassroots", FALSE, FALSE,
+      "Share of registered organizations that file a 990-N or do not file",
+      universes = "registered"),
     r("SMALL_DENSITY_PER_100K", "size", TRUE, TRUE,
       "Small organizations (resource below small_max) per 100,000 residents"),
     r("LARGE_DENSITY_PER_100K", "size", TRUE, TRUE,
@@ -193,6 +196,9 @@ npc_compute_metrics <- function(df, geography = "CBSA_FIPS",
   }
   if ("age" %in% fam)
     out <- add(get_median_age(df, geography, subsector, year, ruling), c("N_AGE", "MEDIAN_AGE"))
+  if ("grassroots" %in% fam)
+    out <- add(get_grassroots_share(df, geography, subsector, year),
+               c("N_GRASSROOTS", "GRASSROOTS_SHARE"))
   if ("commercial" %in% fam)
     out <- add(get_commercial_share(df, geography, subsector, year, revenue = "TOTREV",
                                     program = program),
@@ -203,11 +209,11 @@ npc_compute_metrics <- function(df, geography = "CBSA_FIPS",
                c("N_FEE", intersect(c("FUNDRAISER_SHARE", "FUNDRAISING_RATIO"), ids)))
 
   # Supporting counts are 0, not NA, in markets with no organizations
-  for (v in intersect(c("N_AGE", "N_COMM", "N_FEE"), names(out)))
+  for (v in intersect(c("N_AGE", "N_COMM", "N_FEE", "N_GRASSROOTS"), names(out)))
     out[[v]][is.na(out[[v]])] <- 0L
 
   ordered <- c(key, "N", "POP", "N_RES", resource, "N_SMALL", "N_LARGE",
-               "N_AGE", "N_COMM", "N_FEE", reg$id[reg$id %in% ids])
+               "N_AGE", "N_GRASSROOTS", "N_COMM", "N_FEE", reg$id[reg$id %in% ids])
   out <- out[, intersect(ordered, names(out))]
   attr(out, "metrics") <- ids
   dplyr::as_tibble(out)
