@@ -28,6 +28,7 @@ Imports:
 Suggests:
     arrow,
     bslib,
+    jsonlite,
     devtools,
     ggplot2,
     knitr,

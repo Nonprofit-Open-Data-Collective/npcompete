@@ -61,6 +61,11 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="npcompete-development-version">npcompete (development version)<a class="anchor" aria-label="anchor" href="#npcompete-development-version"></a></h2>
 <div class="section level3">
+<h3 id="published-metric-tables-development-version">Published metric tables<a class="anchor" aria-label="anchor" href="#published-metric-tables-development-version"></a></h3>
+<ul><li>
+<code><a href="../reference/npc_load_metrics.html">npc_load_metrics()</a></code> downloads precomputed national metric tables from the package’s GitHub releases (tagged <code>metrics-YYYY.MM</code>) and caches them; <code><a href="../reference/npc_metric_vintages.html">npc_metric_vintages()</a></code> lists the releases. The tables cover 501(c)(3)s, tax years 2012-2022, CBSAs and counties, the filers (three resources), registered and grassroots universes, and every metric including dynamics. <code>data-raw/publish-metrics.R</code> builds them from public NCCS data. They replace <code>data-share/np-compete.csv</code> (1990-2019).</li>
+</ul></div>
+<div class="section level3">
 <h3 id="dashboard-phase-development-version">Dashboard (Phase 6)<a class="anchor" aria-label="anchor" href="#dashboard-phase-development-version"></a></h3>
 <ul><li>
 <code><a href="../reference/npc_dashboard.html">npc_dashboard()</a></code> opens a Shiny app on any output of <code><a href="../reference/npc_build_metrics.html">npc_build_metrics()</a></code> (long, wide, a folder written with <code>out_dir</code>, or several universes combined). It has toggles for universe, geography, metric, resource, subsector, year and market, and tabs for the distribution across markets, change over time, a two-metric comparison, subsectors, and a downloadable table. With no data it shows the bundled 2019 <code>cbsa_metrics</code>. Needs the shiny, bslib and ggplot2 packages. It replaces the 2023 app formerly in <code>data-raw/shiny-dashboard/</code> (removed; it read the old 1990-2019 dataset, still in <code>data-share/np-compete.csv</code>).</li>

@@ -300,7 +300,7 @@ Result, TY2019, 501(c)(3), filers from NCCS: 1.43M registered; 400k 990/990-EZ, 
 
 Real data, 501(c)(3), live NCCS: filers enter at 6.0–6.7% and exit (from filing) at 5.7–6.4% a year in 2018–2020, churn 12%. Registered: exits 5.4% in 2011 (38k PPA revocations), 2.9% in 2012 (24k), 4.0% in 2013; graduation 2.3% and downgrade 6.9% in 2013.
 
-Remaining: small-org density for the registered universe; the optional versioned output tables; vignette on universes (Phase 6).
+Remaining: small-org density for the registered universe. The versioned output tables were done afterwards (see "Published tables" below), and the universes vignette in Phase 6.
 
 ### Phase 6: Docs and dashboard (1–2 days)
 
@@ -332,3 +332,15 @@ Remaining: small-org density for the registered universe; the optional versioned
 - **CORE schema drift** across 1989–2022 is the largest effort risk in Phase 4. Limit live mode to 2010 onward at first.
 - **Data size:** the BMF archives and CORE run to several GB. Parquet with predicate pushdown (arrow) is required, and live mode should download only the requested years.
 - **Small-market noise:** subsector × county cells are often 0–3 orgs. Rolling windows and minimum-N flags (`N < 5` → flag) should ship together with the new count metrics.
+
+---
+
+## Published tables (2026-11-25)
+
+The optional Phase 5 item. `R/published.R`: `npc_load_metrics()` and `npc_metric_vintages()`; `data-raw/publish-metrics.R` builds the tables.
+
+- Built from live NCCS data, not the SOI panel archive, so anyone can rebuild them and nothing internal is redistributed.
+- Coverage: 501(c)(3)s, tax years 2012–2022 (2010–2011 legacy CORE files are thinner; 2023 is partial), CBSAs and counties, filers × TOTREV/TOTEXP/NETASS, registered, grassroots, every metric including dynamics.
+- One wide table per universe × geography (× resource), as Parquet and gzipped CSV, with `tables.csv`, `manifest.csv` and `README.md`, attached to a GitHub release tagged `metrics-YYYY.MM`. Releases, not the repo, hold the data.
+- `npc_load_metrics()` caches under `npc_cache_dir()/published/<vintage>/`, reads Parquet with arrow or CSV without it, and returns wide or long output (long feeds `npc_dashboard()`).
+- Still open: a hosted dashboard on these tables; republishing on a schedule (for example after each NCCS BMF update).
