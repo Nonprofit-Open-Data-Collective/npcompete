@@ -47,6 +47,25 @@ and check them against the archive.
 - [`npc_compare_sources()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_compare_sources.md)
   : Compare live NCCS filers with the local archive
 
+## Registered and grassroots universes
+
+Every organization on the IRS registry, including 990-N filers and
+non-filers.
+
+- [`npc_build_registered()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_build_registered.md)
+  : Build the registered universe of organizations
+- [`npc_registry_spans()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_registry_spans.md)
+  : Registration spans from the BMF and the revocation list
+- [`get_grassroots_share()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/get_grassroots_share.md)
+  : Grassroots share of registered organizations
+
+## Dynamics
+
+Entry, exit, churn, graduation and downgrade rates by market.
+
+- [`get_dynamics()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/get_dynamics.md)
+  : Entry, exit and churn rates by market
+
 ## Concentration
 
 How resources are shared among the organizations in a market.

@@ -24,6 +24,15 @@
 #' @param drop_incomplete_years Drop reported years whose data (including
 #'   the earlier years of a window) hold a partial panel, judged against the
 #'   year counts of the whole archive or live build (see [npc_archive_info()]).
+#' @param absent_years For the dynamics metrics (`ENTRY_RATE`, `EXIT_RATE`,
+#'   `NET_GROWTH`, `CHURN_RATE`, `GRADUATION_RATE`, `DOWNGRADE_RATE`; see
+#'   [get_dynamics()]): years of absence that confirm an exit. Defaults to 2
+#'   for filers and 1 for the registered and grassroots universes. Dynamics
+#'   read `absent_years` years before the first reported year and `absent_years - 1`
+#'   years after the last, when available, and are not part of
+#'   `metrics = "default"`.
+#' @param drop_ppa_revocations Leave the mass revocations of 2010-2012 out of
+#'   exits; see [get_dynamics()].
 #' @param format `"long"` (one row per market, metric and resource) or
 #'   `"wide"` (a named list of tables, one per geography and resource).
 #' @param out_dir Optional directory. When set, results are written there as
@@ -67,11 +76,14 @@ npc_build_metrics <- function(years,
                               dir = NULL,
                               subsection = 3,
                               include_imputed = TRUE,
+                              exclude_churches = FALSE,
                               cbsa = c("crosswalk", "geocode"),
                               window = 1,
                               density_model = c("negbin", "poisson", "loglinear"),
                               small_max = 1e5, large_min = 1e7,
                               drop_incomplete_years = TRUE,
+                              absent_years = NULL,
+                              drop_ppa_revocations = FALSE,
                               format = c("long", "wide"),
                               out_dir = NULL) {
 
@@ -84,7 +96,6 @@ npc_build_metrics <- function(years,
   resources <- match.arg(resources, c("TOTREV", "TOTEXP", "NETASS", "TOTASS"),
                          several.ok = TRUE)
   ids <- resolve_metrics(metrics, universe)
-  check_planned(universe, source)
   window <- as.integer(window)
   if (length(window) != 1 || is.na(window) || window < 1)
     stop("`window` must be a whole number of years, 1 or more.", call. = FALSE)
@@ -92,6 +103,11 @@ npc_build_metrics <- function(years,
   reg <- metric_registry()
   by_res <- any(reg$by_resource[reg$id %in% ids])
   if (!by_res) resources <- resources[1]
+  dyn <- any(reg$family[reg$id %in% ids] == "dynamics")
+  if (is.null(absent_years)) absent_years <- if (universe == "filers") 2L else 1L
+  if (dyn && window > 1)
+    stop("Dynamics metrics follow organizations year to year; use window = 1.",
+         call. = FALSE)
 
   # --- Years ---------------------------------------------------------------
   years <- sort(unique(as.integer(years)))
@@ -116,10 +132,34 @@ npc_build_metrics <- function(years,
   if (length(years) == 0) stop("No usable years left to build.", call. = FALSE)
   read_years <- sort(unique(unlist(lapply(years, span))))
 
+  # Dynamics look back absent_years years (to fill short gaps before the
+  # first reported year) and ahead absent_years - 1 years (to confirm exits).
+  observed <- NULL
+  if (dyn) {
+    want <- seq(min(years) - absent_years, max(years) + absent_years - 1L)
+    if (source == "nccs")
+      for (y in setdiff(want[want >= 2010], yc$YEAR))
+        tryCatch(ensure_nccs_years(y, dir), error = function(e) NULL)
+    info <- npc_archive_info(dir)
+    yc <- info$year_counts
+    ok <- yc$YEAR[!(drop_incomplete_years & yc$INCOMPLETE)]
+    lo <- min(years)
+    while ((lo - 1L) %in% ok && lo - 1L >= min(want)) lo <- lo - 1L
+    hi <- max(years)
+    while ((hi + 1L) %in% ok && hi + 1L <= max(want)) hi <- hi + 1L
+    observed <- lo:hi
+    if (!all(observed %in% union(ok, years)))
+      stop("Dynamics metrics need consecutive years; missing: ",
+           paste(setdiff(observed, union(ok, years)), collapse = ", "), ".",
+           call. = FALSE)
+    read_years <- sort(unique(c(read_years, observed)))
+  }
+
   # --- Data ----------------------------------------------------------------
   message("Reading ", length(read_years), " year(s) from ", if (source == "nccs") "the NCCS build" else "the archive", " ...")
-  orgs <- npc_get_orgs(read_years, universe, source, dir, subsection,
-                       include_imputed, cbsa)
+  orgs <- npc_get_orgs(read_years, universe = universe, source = source, dir = dir,
+                       subsection = subsection, include_imputed = include_imputed,
+                       exclude_churches = exclude_churches, cbsa = cbsa)
   if (window > 1) orgs <- window_collapse(orgs, years, window)
   us_pop <- stats::aggregate(POP ~ YEAR, data = npcompete::pop_county, FUN = sum)
   us_pop <- window_population(us_pop, years, window)
@@ -136,7 +176,8 @@ npc_build_metrics <- function(years,
         orgs, geography = geo_col[[g]], subsector = "NTEEV2", year = "YEAR",
         resource = r, pop_table = pop, metrics = ids, universe = universe,
         density_model = density_model, small_max = small_max,
-        large_min = large_min))
+        large_min = large_min, years = years, observed_years = observed,
+        absent_years = absent_years, drop_ppa_revocations = drop_ppa_revocations))
       nat <- m$GEO == "ALL"
       m$POP[nat] <- us_pop$POP[match(m$YEAR[nat], us_pop$YEAR)]
       if ("DENSITY_PER_100K" %in% names(m))
@@ -155,9 +196,11 @@ npc_build_metrics <- function(years,
     resources = if (by_res) paste(resources, collapse = ",") else "",
     metrics = paste(ids, collapse = ","),
     subsection = paste(subsection, collapse = ","),
-    include_imputed = include_imputed, cbsa = cbsa,
+    include_imputed = include_imputed, exclude_churches = exclude_churches, cbsa = cbsa,
     cbsa_delineation = 2023, density_model = density_model,
     small_max = small_max, large_min = large_min,
+    absent_years = if (dyn) absent_years else "",
+    drop_ppa_revocations = if (dyn) drop_ppa_revocations else "",
     npcompete_version = as.character(utils::packageVersion("npcompete")),
     built = format(Sys.time(), "%Y-%m-%d %H:%M:%S"))
   names(manifest)[1:2] <- c("data_source_file", "data_built")
@@ -211,7 +254,9 @@ window_population <- function(pop, years, window) {
 # Stack wide metric tables into one long table.
 metrics_to_long <- function(tables, universe, by_res = TRUE) {
   reg <- metric_registry()
-  indep <- c("N", "POP", "N_AGE", "N_COMM", "N_FEE",
+  indep <- c("N", "POP", "N_AGE", "N_COMM", "N_FEE", "N_GRASSROOTS",
+             "N_PREV", "ENTRIES", "EXITS", "EXITS_PPA", "N_PREV_GRASSROOTS",
+             "GRADUATIONS", "N_PREV_FILERS", "DOWNGRADES",
              reg$id[!reg$by_resource])
   parts <- lapply(seq_along(tables), function(i) {
     nm <- names(tables)[i]

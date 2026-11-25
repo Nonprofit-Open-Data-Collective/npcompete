@@ -44,7 +44,12 @@ soi_panel_cols <- c(
 #'
 #' For `"nccs_core"`, the tax year is the year the fiscal period began (a
 #' December year end in `Y` is tax year `Y`, any other year end is `Y - 1`),
-#' matching the SOI panel. Duplicate filings for an EIN and tax year are
+#' matching the SOI panel. The CORE files for 2010 and 2011 come from NCCS's
+#' legacy pipeline: they record no form type, so `FILER_TYPE` is inferred
+#' from the 990-EZ limits (revenue under $200,000 and assets under
+#' $500,000; right for 89% of 2012-2013 returns), and they hold fewer
+#' returns than later years.
+#' Duplicate filings for an EIN and tax year are
 #' reduced to one: the latest extract, then the latest period end. For
 #' 990-EZ filers `NETASS` is total assets less total liabilities, as in the
 #' SOI panel, since the reported Part I figure often disagrees. CORE
@@ -294,8 +299,19 @@ npc_archive_info <- function(dir = npc_archive_dir()) {
 #' [npc_standardize()] are deduplicated the same way when read.
 #'
 #' @param years Integer vector of tax years.
-#' @param universe Which organizations: `"filers"` (Form 990 and 990-EZ
-#'   filers). The registered and grassroots universes are planned.
+#' @param universe Which organizations:
+#'   \describe{
+#'     \item{`"filers"`}{Form 990 and 990-EZ filers, with financial data.}
+#'     \item{`"registered"`}{Every organization on the IRS registry that
+#'       year, with `FILER_TYPE` `"990"`, `"990EZ"`, `"990PF"`, `"990N"` or
+#'       `"NONFILER"` (see [npc_build_registered()]). Financial columns are
+#'       filled for filers only.}
+#'     \item{`"grassroots"`}{Registered organizations that did not file a
+#'       990 or 990-EZ: `FILER_TYPE` `"990N"` or `"NONFILER"`.}
+#'   }
+#'   The registered and grassroots universes add `FILING_REQ_CODE`, `FOUNDATION` and
+#'   `CHURCH`, and are built on first use under [npc_cache_dir()], with the
+#'   filers taken from `source`.
 #' @param source `"archive"` reads the local Parquet archive built from the
 #'   SOI panel. `"nccs"` reads a live build from NCCS downloads (see
 #'   [npc_build_nccs()]), downloading and building any missing years first.
@@ -305,17 +321,20 @@ npc_archive_info <- function(dir = npc_archive_dir()) {
 #' @param subsection 501(c) subsections to keep, or `NULL` for all.
 #' @param include_imputed Keep rows that fill gap years between filings.
 #'   They have no financial data but mark years when the organization
-#'   existed.
+#'   existed. Filers universe only.
+#' @param exclude_churches Drop churches that are not required to file (BMF
+#'   filing requirement code 6). Registered and grassroots universes only.
 #' @param cbsa How to assign CBSAs: `"crosswalk"` (default) maps each county
 #'   to its CBSA under the 2023 delineation ([cbsa_county_xwalk]), matching
 #'   the population data; `"geocode"` uses the CBSA assigned when the
-#'   address was geocoded (archive only).
+#'   address was geocoded (archive filers only).
 #' @param columns Optional character vector of columns to return.
 #'
 #' @return A data frame of organization-years.
 #' @examples
 #' \dontrun{
 #' orgs <- npc_get_orgs( 2018:2020 )
+#' grassroots <- npc_get_orgs( 2019, universe = "grassroots", source = "nccs" )
 #' }
 #' @export
 npc_get_orgs <- function(years,
@@ -324,17 +343,17 @@ npc_get_orgs <- function(years,
                          dir = NULL,
                          subsection = 3,
                          include_imputed = TRUE,
+                         exclude_churches = FALSE,
                          cbsa = c("crosswalk", "geocode"),
                          columns = NULL) {
 
   universe <- match.arg(universe)
   source   <- match.arg(source)
   cbsa     <- match.arg(cbsa)
-  check_planned(universe, source)
   need_pkg("arrow", "read the Parquet archive")
   dir <- resolve_data_dir(source, dir)
-  if (source == "nccs" && cbsa == "geocode")
-    stop("NCCS live builds have no geocoded CBSA; use cbsa = \"crosswalk\".",
+  if ((source == "nccs" || universe != "filers") && cbsa == "geocode")
+    stop("Only archive filers have a geocoded CBSA; use cbsa = \"crosswalk\".",
          call. = FALSE)
 
   years <- as.integer(years)
@@ -346,16 +365,35 @@ npc_get_orgs <- function(years,
          ". Available: ", paste(range(info$year_counts$YEAR), collapse = "-"),
          ".", call. = FALSE)
 
-  ds <- arrow::open_dataset(file.path(dir, "filers"))
+  if (universe == "filers") {
+    path <- file.path(dir, "filers")
+  } else {
+    cache <- if (source == "nccs") dir else npc_cache_dir()
+    path <- registered_dir(cache, source)
+    yc <- file.path(path, "year-counts.csv")
+    have <- if (file.exists(yc)) utils::read.csv(yc)$YEAR else integer()
+    todo <- setdiff(years, have)
+    if (length(todo) > 0) {
+      message("Building the registered universe for ", paste(todo, collapse = ", "),
+              " into ", path, " ...")
+      npc_build_registered(todo, filer_source = source, dir = cache, filer_dir = dir)
+    }
+  }
+
+  ds <- arrow::open_dataset(if (universe == "filers") path else file.path(path, "orgs"))
   q <- dplyr::filter(ds, YEAR %in% years)
   if (!is.null(subsection)) {
     subs <- as.integer(subsection)
     q <- dplyr::filter(q, SUBSECTION %in% subs)
   }
-  if (!include_imputed) q <- dplyr::filter(q, !IMPUTED)
+  if (universe == "filers" && !include_imputed) q <- dplyr::filter(q, !IMPUTED)
+  if (universe == "grassroots") q <- dplyr::filter(q, FILER_TYPE %in% grassroots_types)
+  if (universe != "filers" && exclude_churches) q <- dplyr::filter(q, !CHURCH)
   dat <- as.data.frame(dplyr::collect(q))
   dat$YEAR <- as.integer(dat$YEAR)
-  dat <- dedupe_org_years(dat[intersect(canonical_cols, names(dat))])   # archives built before deduplication
+  extra <- if (universe == "filers") character() else c("FILING_REQ_CODE", "CHURCH", "FOUNDATION")
+  dat <- dat[intersect(c(canonical_cols, extra), names(dat))]
+  if (universe == "filers") dat <- dedupe_org_years(dat)   # archives built before deduplication
 
   xw <- npcompete::cbsa_county_xwalk
   dat$CBSA_FIPS <- if (cbsa == "crosswalk") {
@@ -365,7 +403,7 @@ npc_get_orgs <- function(years,
   }
 
   cols <- c(setdiff(canonical_cols, "CBSA_FIPS_GEOCODE")[1:3], "CBSA_FIPS",
-            setdiff(canonical_cols, c("EIN2", "YEAR", "COUNTY_FIPS")))
+            setdiff(canonical_cols, c("EIN2", "YEAR", "COUNTY_FIPS")), extra)
   dat <- dat[cols]
   dat <- dat[order(dat$EIN2, dat$YEAR), ]
   rownames(dat) <- NULL
@@ -426,10 +464,3 @@ ensure_nccs_years <- function(years, dir) {
   invisible(dir)
 }
 
-# Universes that are planned but not yet built.
-check_planned <- function(universe, source) {
-  if (universe != "filers")
-    stop("universe = \"", universe, "\" is not available yet; the registered ",
-         "and grassroots universes are planned for Phase 5 of DEV-PLAN.md.",
-         call. = FALSE)
-}

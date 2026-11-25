@@ -34,6 +34,9 @@ up in the same layout."></head><body>
     <li><a class="dropdown-item" href="../articles/build-from-archive.html">Building metrics from an archived panel</a></li>
     <li><a class="dropdown-item" href="../articles/build-from-nccs.html">Building metrics from fresh NCCS downloads</a></li>
     <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Universes and dynamics</h6></li>
+    <li><a class="dropdown-item" href="../articles/dynamics.html">Universes, entries and exits</a></li>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Comparing metrics</h6></li>
     <li><a class="dropdown-item" href="../articles/metric-correlations.html">How the metrics relate: correlation, PCA and factor analysis</a></li>
   </ul></li>
@@ -157,7 +160,12 @@ gap row, then the one from the latest source file (<code>SOURCE</code>), then th
 latest period end. This is the filing the NCCS CORE files keep.</p>
 <p>For <code>"nccs_core"</code>, the tax year is the year the fiscal period began (a
 December year end in <code>Y</code> is tax year <code>Y</code>, any other year end is <code>Y - 1</code>),
-matching the SOI panel. Duplicate filings for an EIN and tax year are
+matching the SOI panel. The CORE files for 2010 and 2011 come from NCCS's
+legacy pipeline: they record no form type, so <code>FILER_TYPE</code> is inferred
+from the 990-EZ limits (revenue under $200,000 and assets under
+$500,000; right for 89% of 2012-2013 returns), and they hold fewer
+returns than later years.
+Duplicate filings for an EIN and tax year are
 reduced to one: the latest extract, then the latest period end. For
 990-EZ filers <code>NETASS</code> is total assets less total liabilities, as in the
 SOI panel, since the reported Part I figure often disagrees. CORE

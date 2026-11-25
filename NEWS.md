@@ -1,5 +1,38 @@
 # npcompete (development version)
 
+## Registered and grassroots universes (Phase 5, in progress)
+
+* `npc_get_orgs()` and `npc_build_metrics()` accept `universe =
+  "registered"` (every organization on the IRS registry that year) and
+  `"grassroots"` (registered organizations that file a 990-N or do not
+  file). `npc_build_registered()` builds them from the unified BMF, the IRS
+  automatic revocation list and the 990-N e-postcard file, with filers from
+  the archive or a live NCCS build. `npc_registry_spans()` gives each
+  organization's registration years.
+* Each registered organization-year has a `FILER_TYPE`: `"990"`, `"990EZ"`,
+  `"990PF"` (private foundations), `"990N"` (an e-postcard for that year,
+  or a BMF filing requirement that allows the 990-N) or `"NONFILER"`. New
+  `CHURCH`, `FOUNDATION` and `FILING_REQ_CODE` columns; churches are kept
+  unless `exclude_churches = TRUE`.
+* New metric `GRASSROOTS_SHARE` (`get_grassroots_share()`), for the
+  registered universe.
+* Dynamics: `get_dynamics()` and the metrics `ENTRY_RATE`, `EXIT_RATE`,
+  `NET_GROWTH`, `CHURN_RATE` (every universe) and `GRADUATION_RATE`,
+  `DOWNGRADE_RATE` (registered). Rates use the stock in *t* - 1; absences
+  shorter than `absent_years` (2 for filers, 1 for registered) are filled;
+  exits that cannot be confirmed yet are `NA`. Exits in 2010-2012 that
+  coincide with an automatic revocation are counted in `EXITS_PPA` and can
+  be dropped with `drop_ppa_revocations = TRUE`. `npc_build_metrics()`
+  reads the extra years these need. Dynamics metrics are not part of
+  `metrics = "default"`; use `"all"` or name them.
+* `npc_metrics()` gains a `default` column.
+* New article "Universes, entries and exits": how the universes and
+  dynamics are built, and national, subsector and metro patterns of entry,
+  exit and graduation for 501(c)(3)s.
+* Live builds read the legacy NCCS CORE files for tax years 2010-2011,
+  which have no form type: `FILER_TYPE` is inferred from the 990-EZ limits
+  there, and a message notes their lower coverage.
+
 ## Documentation
 
 * New README with a metrics overview, quick start, market definitions and

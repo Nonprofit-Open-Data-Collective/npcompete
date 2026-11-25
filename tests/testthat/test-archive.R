@@ -68,9 +68,9 @@ test_that("CBSA comes from the crosswalk or the geocode", {
 })
 
 test_that("planned universes and sources give clear errors", {
-  expect_error(npc_get_orgs(2019, universe = "registered", dir = "."), "Phase 5")
+
   expect_error(npc_get_orgs(2019, source = "nccs", cbsa = "geocode", dir = "."),
-               "no geocoded CBSA")
+               "geocoded CBSA")
 })
 
 test_that("npc_get_population returns GEO / YEAR / POP", {

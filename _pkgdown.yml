@@ -28,6 +28,10 @@ articles:
   contents:
   - build-from-archive
   - build-from-nccs
+- title: Universes and dynamics
+  navbar: Universes and dynamics
+  contents:
+  - dynamics
 - title: Comparing metrics
   navbar: Comparing metrics
   contents:
@@ -58,6 +62,16 @@ reference:
   - npc_nccs_download
   - npc_match_county
   - npc_compare_sources
+- title: Registered and grassroots universes
+  desc: Every organization on the IRS registry, including 990-N filers and non-filers.
+  contents:
+  - npc_build_registered
+  - npc_registry_spans
+  - get_grassroots_share
+- title: Dynamics
+  desc: Entry, exit, churn, graduation and downgrade rates by market.
+  contents:
+  - get_dynamics
 - title: Concentration
   desc: How resources are shared among the organizations in a market.
   contents:

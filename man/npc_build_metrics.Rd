@@ -14,12 +14,15 @@ npc_build_metrics(
   dir = NULL,
   subsection = 3,
   include_imputed = TRUE,
+  exclude_churches = FALSE,
   cbsa = c("crosswalk", "geocode"),
   window = 1,
   density_model = c("negbin", "poisson", "loglinear"),
   small_max = 1e+05,
   large_min = 1e+07,
   drop_incomplete_years = TRUE,
+  absent_years = NULL,
+  drop_ppa_revocations = FALSE,
   format = c("long", "wide"),
   out_dir = NULL
 )
@@ -35,8 +38,19 @@ npc_build_metrics(
 \item{metrics}{Metric ids from \code{\link[=npc_metrics]{npc_metrics()}}, or \code{"default"} for every
 metric valid for \code{universe}.}
 
-\item{universe}{Which organizations: \code{"filers"} (Form 990 and 990-EZ
-filers). The registered and grassroots universes are planned.}
+\item{universe}{Which organizations:
+\describe{
+\item{\code{"filers"}}{Form 990 and 990-EZ filers, with financial data.}
+\item{\code{"registered"}}{Every organization on the IRS registry that
+year, with \code{FILER_TYPE} \code{"990"}, \code{"990EZ"}, \code{"990PF"}, \code{"990N"} or
+\code{"NONFILER"} (see \code{\link[=npc_build_registered]{npc_build_registered()}}). Financial columns are
+filled for filers only.}
+\item{\code{"grassroots"}}{Registered organizations that did not file a
+990 or 990-EZ: \code{FILER_TYPE} \code{"990N"} or \code{"NONFILER"}.}
+}
+The registered and grassroots universes add \code{FILING_REQ_CODE}, \code{FOUNDATION} and
+\code{CHURCH}, and are built on first use under \code{\link[=npc_cache_dir]{npc_cache_dir()}}, with the
+filers taken from \code{source}.}
 
 \item{source}{\code{"archive"} reads the local Parquet archive built from the
 SOI panel. \code{"nccs"} reads a live build from NCCS downloads (see
@@ -50,12 +64,15 @@ SOI panel. \code{"nccs"} reads a live build from NCCS downloads (see
 
 \item{include_imputed}{Keep rows that fill gap years between filings.
 They have no financial data but mark years when the organization
-existed.}
+existed. Filers universe only.}
+
+\item{exclude_churches}{Drop churches that are not required to file (BMF
+filing requirement code 6). Registered and grassroots universes only.}
 
 \item{cbsa}{How to assign CBSAs: \code{"crosswalk"} (default) maps each county
 to its CBSA under the 2023 delineation (\link{cbsa_county_xwalk}), matching
 the population data; \code{"geocode"} uses the CBSA assigned when the
-address was geocoded (archive only).}
+address was geocoded (archive filers only).}
 
 \item{window}{Number of years pooled for each reported year. With
 \code{window = 3}, the value for 2020 uses 2018-2020: each organization's
@@ -76,6 +93,17 @@ passed to \code{\link[=get_scale_free_density]{get_scale_free_density()}} as \co
 \item{drop_incomplete_years}{Drop reported years whose data (including
 the earlier years of a window) hold a partial panel, judged against the
 year counts of the whole archive or live build (see \code{\link[=npc_archive_info]{npc_archive_info()}}).}
+
+\item{absent_years}{For the dynamics metrics (\code{ENTRY_RATE}, \code{EXIT_RATE},
+\code{NET_GROWTH}, \code{CHURN_RATE}, \code{GRADUATION_RATE}, \code{DOWNGRADE_RATE}; see
+\code{\link[=get_dynamics]{get_dynamics()}}): years of absence that confirm an exit. Defaults to 2
+for filers and 1 for the registered and grassroots universes. Dynamics
+read \code{absent_years} years before the first reported year and \code{absent_years - 1}
+years after the last, when available, and are not part of
+\code{metrics = "default"}.}
+
+\item{drop_ppa_revocations}{Leave the mass revocations of 2010-2012 out of
+exits; see \code{\link[=get_dynamics]{get_dynamics()}}.}
 
 \item{format}{\code{"long"} (one row per market, metric and resource) or
 \code{"wide"} (a named list of tables, one per geography and resource).}

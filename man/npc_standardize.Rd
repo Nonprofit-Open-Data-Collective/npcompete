@@ -57,7 +57,12 @@ latest period end. This is the filing the NCCS CORE files keep.
 
 For \code{"nccs_core"}, the tax year is the year the fiscal period began (a
 December year end in \code{Y} is tax year \code{Y}, any other year end is \code{Y - 1}),
-matching the SOI panel. Duplicate filings for an EIN and tax year are
+matching the SOI panel. The CORE files for 2010 and 2011 come from NCCS's
+legacy pipeline: they record no form type, so \code{FILER_TYPE} is inferred
+from the 990-EZ limits (revenue under $200,000 and assets under
+$500,000; right for 89\% of 2012-2013 returns), and they hold fewer
+returns than later years.
+Duplicate filings for an EIN and tax year are
 reduced to one: the latest extract, then the latest period end. For
 990-EZ filers \code{NETASS} is total assets less total liabilities, as in the
 SOI panel, since the reported Part I figure often disagrees. CORE

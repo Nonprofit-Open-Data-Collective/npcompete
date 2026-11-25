@@ -277,6 +277,31 @@ Output is long by default, with columns `GEO, GEO_LEVEL, SUB, YEAR, UNIVERSE, RE
 - `R/dynamics.R`: entry, exit, churn and graduation, with censoring and the 2010–2012 auto-revocation flag.
 - Optional: publish versioned output tables as GitHub release assets (not committed to the repo). `npc_load_metrics()` fetches them, which replaces the 1990–2019 `data-share/np-compete.csv`.
 
+**Status (2026-11-24): registered universe done; dynamics next.** `R/source-registered.R`.
+
+Decisions (answers to open questions 2 and 3):
+- **Registry source:** the unified BMF's first/last vintage per EIN, not yearly snapshots (about 1 GB each, some Decembers missing). Registered from ruling year (or first vintage, if earlier) through the last vintage. Revocation dates cut spans; revocation–reinstatement gaps are dropped. Exits in 2016–2022 without a revocation date are dated to the last vintage seen (NCCS kept only 2018-12, 2019-08 and 2020-04 there).
+- **990-N in past years:** inferred. An org-year is `990N` if the latest e-postcard is for that year or the BMF filing requirement code is 2; otherwise `NONFILER`.
+- **Churches** (filing requirement 6) are **included** by default; `exclude_churches = TRUE` drops them.
+- Added during the build: **private foundations** (PF filing requirement 1 or foundation code 2–4) get `FILER_TYPE = "990PF"` and are excluded from grassroots. Without this, about 110k foundations a year were counted as non-filers.
+- Filer classification uses the exact tax year (no ±1 slippage); archive imputed gap rows count as non-filings.
+- All registered rows take county, NTEEV2 and subsection from the BMF (from the filer panel only when the BMF lacks the EIN).
+
+Result, TY2019, 501(c)(3), filers from NCCS: 1.43M registered; 400k 990/990-EZ, 111k 990-PF, 575k 990-N, 341k non-filers (260k churches). Grassroots share 64% nationally. New metric `GRASSROOTS_SHARE` (registered universe).
+
+**Dynamics done (2026-11-25).** `R/dynamics.R`, `get_dynamics()`.
+
+- Presence-based for every universe. Entries in *t*: present in *t*, absent in *t*−1. Exits in *t*: present in *t*−1, then absent ≥ `absent_years` (default 2 for filers, 1 for registered). Shorter gaps are filled with the prior year's attributes, so they produce neither an exit nor a re-entry. Rates divide by the *t*−1 stock (gaps filled). Movers between markets count as neither entry nor exit; `NET_GROWTH` includes them.
+- Censoring: exits in the last `absent_years − 1` observed years are `NA`. `npc_build_metrics()` reads `absent_years` years before and `absent_years − 1` after the requested years when available (complete years only), so short gaps at the start are filled.
+- PPA: exits in 2010–2012 that coincide with a revocation year count in `EXITS_PPA`; `drop_ppa_revocations = TRUE` removes them from `EXITS`.
+- Graduation / downgrade: grassroots (990N, NONFILER) in *t*−1 → 990/990EZ in *t*, and the reverse; foundations count in neither. Registered universe only.
+- Dynamics metrics are not in `metrics = "default"` (they read extra years) and need `window = 1`.
+- **Found:** the NCCS 990combined files for 2010 and 2011 are from the legacy pipeline. They have no `source_form`, so the form is now inferred from the 990-EZ limits (right for 89% of 2012–2013 returns). They also hold fewer returns: 419k (TY2010) and 469k (TY2011) against 508k (TY2012); the archive has 518k for TY2011. Counts and transitions across 2011–2012 from live builds are affected, and `npc_build_nccs()` says so.
+
+Real data, 501(c)(3), live NCCS: filers enter at 6.0–6.7% and exit (from filing) at 5.7–6.4% a year in 2018–2020, churn 12%. Registered: exits 5.4% in 2011 (38k PPA revocations), 2.9% in 2012 (24k), 4.0% in 2013; graduation 2.3% and downgrade 6.9% in 2013.
+
+Remaining: small-org density for the registered universe; the optional versioned output tables; vignette on universes (Phase 6).
+
 ### Phase 6: Docs and dashboard (1–2 days)
 
 - Write a vignette on universes, explaining which metrics are valid where and why exits from filing are not deaths.

@@ -48,6 +48,9 @@
     <li><a class="dropdown-item" href="../articles/build-from-archive.html">Building metrics from an archived panel</a></li>
     <li><a class="dropdown-item" href="../articles/build-from-nccs.html">Building metrics from fresh NCCS downloads</a></li>
     <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Universes and dynamics</h6></li>
+    <li><a class="dropdown-item" href="../articles/dynamics.html">Universes, entries and exits</a></li>
+    <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Comparing metrics</h6></li>
     <li><a class="dropdown-item" href="../articles/metric-correlations.html">How the metrics relate: correlation, PCA and factor analysis</a></li>
   </ul>
@@ -147,7 +150,7 @@ this example we add them before writing the CSV.</p>
 <span><span class="fu"><a href="../reference/npc_build_archive.html">npc_build_archive</a></span><span class="op">(</span> <span class="va">csv</span>, overwrite <span class="op">=</span> <span class="cn">TRUE</span> <span class="op">)</span></span>
 <span><span class="co">#&gt; Reading soi-panel-vermont.csv ...</span></span>
 <span><span class="co">#&gt; Standardizing 9,165 rows ...</span></span>
-<span><span class="co">#&gt; Writing Parquet dataset to C:\Users\jlecy\AppData\Local\Temp\RtmpKECyeI/npcompete-archive/filers ...</span></span>
+<span><span class="co">#&gt; Writing Parquet dataset to C:\Users\jlecy\AppData\Local\Temp\RtmpOcTw4M/npcompete-archive/filers ...</span></span>
 <span><span class="co">#&gt; Done: 9,133 rows, years 2015-2019.</span></span></code></pre></div>
 <p>The archive records what it holds. <code><a href="../reference/npc_archive_info.html">npc_archive_info()</a></code>
 returns the build manifest and the rows per tax year, with a flag for
@@ -210,27 +213,34 @@ subsector (NTEE major group) and year. It also reports
 <span><span class="co">#&gt; 1        DENSITY_PER_100K       count       FALSE</span></span>
 <span><span class="co">#&gt; 2          DENSITY_PCTL_N       scale       FALSE</span></span>
 <span><span class="co">#&gt; 3              MEDIAN_AGE         age       FALSE</span></span>
-<span><span class="co">#&gt; 4  SMALL_DENSITY_PER_100K        size        TRUE</span></span>
-<span><span class="co">#&gt; 5  LARGE_DENSITY_PER_100K        size        TRUE</span></span>
-<span><span class="co">#&gt; 6             SMALL_SHARE        size        TRUE</span></span>
-<span><span class="co">#&gt; 7             LARGE_SHARE        size        TRUE</span></span>
-<span><span class="co">#&gt; 8          DENSITY_PCTL_R       scale        TRUE</span></span>
-<span><span class="co">#&gt; 9                     HHI         hhi        TRUE</span></span>
-<span><span class="co">#&gt; 10                   NHHI         hhi        TRUE</span></span>
-<span><span class="co">#&gt; 11                    CR1          cr        TRUE</span></span>
-<span><span class="co">#&gt; 12                    CR2          cr        TRUE</span></span>
-<span><span class="co">#&gt; 13                    CR3          cr        TRUE</span></span>
-<span><span class="co">#&gt; 14                    CR4          cr        TRUE</span></span>
-<span><span class="co">#&gt; 15                    CR5          cr        TRUE</span></span>
-<span><span class="co">#&gt; 16                    CR6          cr        TRUE</span></span>
-<span><span class="co">#&gt; 17                    CR7          cr        TRUE</span></span>
-<span><span class="co">#&gt; 18                    CR8          cr        TRUE</span></span>
-<span><span class="co">#&gt; 19                  KWOKA       kwoka        TRUE</span></span>
-<span><span class="co">#&gt; 20                   GINI        gini        TRUE</span></span>
-<span><span class="co">#&gt; 21       COMMERCIAL_SHARE  commercial       FALSE</span></span>
-<span><span class="co">#&gt; 22  PROGRAM_REVENUE_SHARE  commercial       FALSE</span></span>
-<span><span class="co">#&gt; 23       FUNDRAISER_SHARE fundraising       FALSE</span></span>
-<span><span class="co">#&gt; 24      FUNDRAISING_RATIO fundraising       FALSE</span></span></code></pre></div>
+<span><span class="co">#&gt; 4        GRASSROOTS_SHARE  grassroots       FALSE</span></span>
+<span><span class="co">#&gt; 5  SMALL_DENSITY_PER_100K        size        TRUE</span></span>
+<span><span class="co">#&gt; 6  LARGE_DENSITY_PER_100K        size        TRUE</span></span>
+<span><span class="co">#&gt; 7             SMALL_SHARE        size        TRUE</span></span>
+<span><span class="co">#&gt; 8             LARGE_SHARE        size        TRUE</span></span>
+<span><span class="co">#&gt; 9          DENSITY_PCTL_R       scale        TRUE</span></span>
+<span><span class="co">#&gt; 10                    HHI         hhi        TRUE</span></span>
+<span><span class="co">#&gt; 11                   NHHI         hhi        TRUE</span></span>
+<span><span class="co">#&gt; 12                    CR1          cr        TRUE</span></span>
+<span><span class="co">#&gt; 13                    CR2          cr        TRUE</span></span>
+<span><span class="co">#&gt; 14                    CR3          cr        TRUE</span></span>
+<span><span class="co">#&gt; 15                    CR4          cr        TRUE</span></span>
+<span><span class="co">#&gt; 16                    CR5          cr        TRUE</span></span>
+<span><span class="co">#&gt; 17                    CR6          cr        TRUE</span></span>
+<span><span class="co">#&gt; 18                    CR7          cr        TRUE</span></span>
+<span><span class="co">#&gt; 19                    CR8          cr        TRUE</span></span>
+<span><span class="co">#&gt; 20                  KWOKA       kwoka        TRUE</span></span>
+<span><span class="co">#&gt; 21                   GINI        gini        TRUE</span></span>
+<span><span class="co">#&gt; 22       COMMERCIAL_SHARE  commercial       FALSE</span></span>
+<span><span class="co">#&gt; 23  PROGRAM_REVENUE_SHARE  commercial       FALSE</span></span>
+<span><span class="co">#&gt; 24       FUNDRAISER_SHARE fundraising       FALSE</span></span>
+<span><span class="co">#&gt; 25      FUNDRAISING_RATIO fundraising       FALSE</span></span>
+<span><span class="co">#&gt; 26             ENTRY_RATE    dynamics       FALSE</span></span>
+<span><span class="co">#&gt; 27              EXIT_RATE    dynamics       FALSE</span></span>
+<span><span class="co">#&gt; 28             NET_GROWTH    dynamics       FALSE</span></span>
+<span><span class="co">#&gt; 29             CHURN_RATE    dynamics       FALSE</span></span>
+<span><span class="co">#&gt; 30        GRADUATION_RATE    dynamics       FALSE</span></span>
+<span><span class="co">#&gt; 31         DOWNGRADE_RATE    dynamics       FALSE</span></span></code></pre></div>
 <p>The default output is one long table, with one row per market,
 subsector, year, resource and metric:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
@@ -354,7 +364,7 @@ reproduced or compared with a later one.</p>
 <span>                          out_dir <span class="op">=</span> <span class="va">out</span> <span class="op">)</span></span>
 <span><span class="co">#&gt; Reading 2 year(s) from the archive ...</span></span>
 <span><span class="co">#&gt; Building cbsa metrics for TOTREV ...</span></span>
-<span><span class="co">#&gt; Wrote results to C:\Users\jlecy\AppData\Local\Temp\RtmpKECyeI/metrics</span></span>
+<span><span class="co">#&gt; Wrote results to C:\Users\jlecy\AppData\Local\Temp\RtmpOcTw4M/metrics</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span> <span class="va">out</span> <span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "manifest.csv"                        </span></span>
 <span><span class="co">#&gt; [2] "NPCOMPETE-METRICS-BY-CBSA-TOTREV.CSV"</span></span>
@@ -371,10 +381,10 @@ reproduced or compared with a later one.</p>
 <span><span class="co">#&gt; 9           metrics</span></span>
 <span><span class="co">#&gt; 10       subsection</span></span>
 <span><span class="co">#&gt; 11  include_imputed</span></span>
-<span><span class="co">#&gt; 12             cbsa</span></span>
+<span><span class="co">#&gt; 12 exclude_churches</span></span>
 <span><span class="co">#&gt;                                                                 value</span></span>
-<span><span class="co">#&gt; 1  C:/Users/jlecy/AppData/Local/Temp/RtmpKECyeI/soi-panel-vermont.csv</span></span>
-<span><span class="co">#&gt; 2                                                 2026-11-24 23:11:28</span></span>
+<span><span class="co">#&gt; 1  C:/Users/jlecy/AppData/Local/Temp/RtmpOcTw4M/soi-panel-vermont.csv</span></span>
+<span><span class="co">#&gt; 2                                                 2026-11-25 00:41:16</span></span>
 <span><span class="co">#&gt; 3                                                              filers</span></span>
 <span><span class="co">#&gt; 4                                                             archive</span></span>
 <span><span class="co">#&gt; 5                                                           2018,2019</span></span>
@@ -384,7 +394,7 @@ reproduced or compared with a later one.</p>
 <span><span class="co">#&gt; 9                                                            HHI,GINI</span></span>
 <span><span class="co">#&gt; 10                                                                  3</span></span>
 <span><span class="co">#&gt; 11                                                               TRUE</span></span>
-<span><span class="co">#&gt; 12                                                          crosswalk</span></span></code></pre></div>
+<span><span class="co">#&gt; 12                                                              FALSE</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
