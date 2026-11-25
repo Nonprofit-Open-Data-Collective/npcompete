@@ -119,6 +119,10 @@ resolve_metrics <- function(metrics, universe = "filers") {
 #'   metric valid for `universe`.
 #' @param universe Universe the data represent; used to check that the
 #'   requested metrics are valid for it.
+#' @param cr_n Not used; concentration ratios are chosen through `metrics`
+#'   (`"CR1"` to `"CR8"`). Kept for compatibility with [get_all_metrics()].
+#' @param density_model Model for `DENSITY_PCTL_N` and `DENSITY_PCTL_R`;
+#'   passed to [get_scale_free_density()] as `model`.
 #' @param ruling,program,contributions,fees Columns for the ruling year,
 #'   program service revenue, contributions and professional fundraising
 #'   fees.

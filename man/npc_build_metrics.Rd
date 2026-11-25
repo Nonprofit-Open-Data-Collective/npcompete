@@ -61,6 +61,9 @@ and subsector come from its latest year, and population is the
 three-year average. Counts are then organizations active at any point
 in the window. Use it to steady metrics for small markets.}
 
+\item{density_model}{Model for \code{DENSITY_PCTL_N} and \code{DENSITY_PCTL_R};
+passed to \code{\link[=get_scale_free_density]{get_scale_free_density()}} as \code{model}.}
+
 \item{small_max}{Organizations with a resource value below this are
 "small". The default is $100,000.}
 

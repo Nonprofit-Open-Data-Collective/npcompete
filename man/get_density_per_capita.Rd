@@ -48,7 +48,9 @@ A tibble with \code{GEO}, \code{SUB}, \code{YEAR}, \code{POP}, \code{N} and
 with a non-missing value), \code{N_SMALL}, \code{N_LARGE}, \code{SMALL_DENSITY_PER_100K},
 \code{LARGE_DENSITY_PER_100K}, \code{SMALL_SHARE} and \code{LARGE_SHARE} (shares of
 \code{N_RES}). Rows with \code{GEO = "ALL"} are national; their \code{POP} is the
-summed population of the markets in \code{pop_table}.
+summed population of the markets in \code{pop_table}. Markets that have
+organizations but are missing from \code{pop_table} are kept with
+\code{POP = NA}.
 }
 \description{
 Counts organizations in each market and divides by population. When a

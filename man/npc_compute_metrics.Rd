@@ -48,6 +48,12 @@ metric valid for \code{universe}.}
 \item{universe}{Universe the data represent; used to check that the
 requested metrics are valid for it.}
 
+\item{cr_n}{Not used; concentration ratios are chosen through \code{metrics}
+(\code{"CR1"} to \code{"CR8"}). Kept for compatibility with \code{\link[=get_all_metrics]{get_all_metrics()}}.}
+
+\item{density_model}{Model for \code{DENSITY_PCTL_N} and \code{DENSITY_PCTL_R};
+passed to \code{\link[=get_scale_free_density]{get_scale_free_density()}} as \code{model}.}
+
 \item{small_max}{Organizations with a resource value below this are
 "small". The default is $100,000.}
 
