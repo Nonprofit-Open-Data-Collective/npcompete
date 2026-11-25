@@ -66,6 +66,13 @@ Entry, exit, churn, graduation and downgrade rates by market.
 - [`get_dynamics()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/get_dynamics.md)
   : Entry, exit and churn rates by market
 
+## Dashboard
+
+Browse metric output in an interactive Shiny app.
+
+- [`npc_dashboard()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/npc_dashboard.md)
+  : Explore metrics in an interactive dashboard
+
 ## Concentration
 
 How resources are shared among the organizations in a market.

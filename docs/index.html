@@ -526,21 +526,30 @@
 </div>
 </div>
 <div class="section level2">
-<h2 id="status-and-roadmap">Status and roadmap<a class="anchor" aria-label="anchor" href="#status-and-roadmap"></a>
+<h2 id="universes-and-dynamics">Universes and dynamics<a class="anchor" aria-label="anchor" href="#universes-and-dynamics"></a>
 </h2>
-<p>The metric functions, the archive builder and the live NCCS source are stable and tested.</p>
-<p><strong>In development:</strong></p>
-<ul>
-<li>
-<strong>Registered and grassroots universes</strong> (<code>universe = "registered"</code> or <code>"grassroots"</code>): every organization on the IRS registry, including those that file a 990-N or file nothing, with the <code>GRASSROOTS_SHARE</code> metric. Financial metrics stay limited to filers.</li>
-<li>
-<strong>Dynamics</strong>: entry, exit, net growth and churn rates by market for any universe, and graduation and downgrade rates between grassroots and filer status for the registered universe (<code><a href="reference/get_dynamics.html">get_dynamics()</a></code>).</li>
-</ul>
+<p>Beyond Form 990 filers, <code>universe = "registered"</code> counts every organization on the IRS registry, including those that file a 990-N or file nothing, and <code>"grassroots"</code> counts only those. Count, density and age metrics work for every universe; financial metrics stay limited to filers. Dynamics metrics give entry, exit, net growth and churn rates by market, and, for the registered universe, graduation and downgrade rates between grassroots and filer status.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/npc_build_metrics.html">npc_build_metrics</a></span><span class="op">(</span> <span class="fl">2019</span>, geo <span class="op">=</span> <span class="st">"cbsa"</span>, universe <span class="op">=</span> <span class="st">"registered"</span>, source <span class="op">=</span> <span class="st">"nccs"</span>,</span>
+<code class="sourceCode R"><span><span class="fu"><a href="reference/npc_build_metrics.html">npc_build_metrics</a></span><span class="op">(</span> <span class="fl">2015</span><span class="op">:</span><span class="fl">2021</span>, geo <span class="op">=</span> <span class="st">"cbsa"</span>, universe <span class="op">=</span> <span class="st">"registered"</span>, source <span class="op">=</span> <span class="st">"nccs"</span>,</span>
 <span>                   metrics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span> <span class="st">"DENSITY_PER_100K"</span>, <span class="st">"GRASSROOTS_SHARE"</span>,</span>
 <span>                                <span class="st">"ENTRY_RATE"</span>, <span class="st">"EXIT_RATE"</span>, <span class="st">"GRADUATION_RATE"</span> <span class="op">)</span> <span class="op">)</span></span></code></pre></div>
-<p>See <a href="dev/DEV-PLAN.html"><code>dev/DEV-PLAN.md</code></a> for definitions and what is next.</p>
+<p>The article <a href="https://nonprofit-open-data-collective.github.io/npcompete/articles/dynamics.html">Universes, entries and exits</a> explains the methods and shows national and metro patterns.</p>
+</div>
+<div class="section level2">
+<h2 id="dashboard">Dashboard<a class="anchor" aria-label="anchor" href="#dashboard"></a>
+</h2>
+<p><code><a href="reference/npc_dashboard.html">npc_dashboard()</a></code> opens an interactive app on any <code><a href="reference/npc_build_metrics.html">npc_build_metrics()</a></code> output. Choose a universe, geography, metric, subsector, year and market, then compare the market with all others, over time and across subsectors, and download the table. It needs the <strong>shiny</strong> and <strong>bslib</strong> packages.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/npc_dashboard.html">npc_dashboard</a></span><span class="op">(</span><span class="op">)</span>                       <span class="co"># bundled 2019 CBSA metrics</span></span>
+<span></span>
+<span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/npc_build_metrics.html">npc_build_metrics</a></span><span class="op">(</span> <span class="fl">2015</span><span class="op">:</span><span class="fl">2021</span>, source <span class="op">=</span> <span class="st">"nccs"</span>, metrics <span class="op">=</span> <span class="st">"all"</span>, resources <span class="op">=</span> <span class="st">"TOTREV"</span> <span class="op">)</span></span>
+<span><span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/npc_build_metrics.html">npc_build_metrics</a></span><span class="op">(</span> <span class="fl">2015</span><span class="op">:</span><span class="fl">2021</span>, source <span class="op">=</span> <span class="st">"nccs"</span>, metrics <span class="op">=</span> <span class="st">"all"</span>, universe <span class="op">=</span> <span class="st">"registered"</span> <span class="op">)</span></span>
+<span><span class="fu"><a href="reference/npc_dashboard.html">npc_dashboard</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span> <span class="va">f</span>, <span class="va">r</span> <span class="op">)</span> <span class="op">)</span>        <span class="co"># with a universe toggle</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="status">Status<a class="anchor" aria-label="anchor" href="#status"></a>
+</h2>
+<p>The metric functions, archive and live NCCS sources, universes, dynamics and dashboard are tested. Remaining plans are in <a href="dev/DEV-PLAN.html"><code>dev/DEV-PLAN.md</code></a>.</p>
 <div class="section level3">
 <h3 id="legacy-functions">Legacy functions<a class="anchor" aria-label="anchor" href="#legacy-functions"></a>
 </h3>

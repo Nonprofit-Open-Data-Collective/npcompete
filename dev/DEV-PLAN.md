@@ -309,6 +309,14 @@ Remaining: small-org density for the registered universe; the optional versioned
 - Point the Shiny app at `npc_build_metrics()` output and add a universe toggle.
 - Rewrite the README: install, the quick start, and the bug in the current README example (a comma is missing after `resource='TOTREV'`).
 
+**Status (2026-11-25):**
+
+- Universes vignette: done as part of Phase 5, in `vignettes/dynamics.Rmd` ("Universes, entries and exits").
+- Archive vs live builds and manifests: done in Phase 4, in `vignettes/build-from-archive.Rmd` and `vignettes/build-from-nccs.Rmd`.
+- README: rewritten in the update-readme PR; sections for universes, dynamics and the dashboard added.
+- Dashboard: `npc_dashboard()` in `R/dashboard.R` replaces the old `data-raw/shiny-dashboard/` app, now deleted (its data files duplicated `data-raw/competition-dataset.*`; the app stays in git history). It reads any `npc_build_metrics()` output (long, wide, an `out_dir` folder, or several universes combined) and has toggles for universe, geography, metric, resource, subsector, year and market. Tabs: distribution, over time, compare, subsectors, table with CSV download, about. Built on shiny + bslib + ggplot2 (the old app needed plotly, DT and shinydashboard). Defaults to the bundled `cbsa_metrics`.
+- Not done: deploying a hosted copy (shinyapps.io or Posit Connect) with a precomputed national build.
+
 ---
 
 ## 4. Open questions (need answers before Phases 4–5)

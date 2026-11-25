@@ -1,5 +1,17 @@
 # npcompete (development version)
 
+## Dashboard (Phase 6)
+
+* `npc_dashboard()` opens a Shiny app on any output of
+  `npc_build_metrics()` (long, wide, a folder written with `out_dir`, or
+  several universes combined). It has toggles for universe, geography,
+  metric, resource, subsector, year and market, and tabs for the
+  distribution across markets, change over time, a two-metric comparison,
+  subsectors, and a downloadable table. With no data it shows the bundled
+  2019 `cbsa_metrics`. Needs the shiny, bslib and ggplot2 packages. It
+  replaces the 2023 app formerly in `data-raw/shiny-dashboard/` (removed;
+  it read the old 1990-2019 dataset, still in `data-share/np-compete.csv`).
+
 ## Registered and grassroots universes (Phase 5, in progress)
 
 * `npc_get_orgs()` and `npc_build_metrics()` accept `universe =

@@ -48,3 +48,6 @@ Test_Data/
 # testthat failure snapshots
 tests/testthat/_problems/
 tests/testthat/testthat-problems.rds
+
+# Local Claude Code preview settings
+.claude/

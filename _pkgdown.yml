@@ -72,6 +72,10 @@ reference:
   desc: Entry, exit, churn, graduation and downgrade rates by market.
   contents:
   - get_dynamics
+- title: Dashboard
+  desc: Browse metric output in an interactive Shiny app.
+  contents:
+  - npc_dashboard
 - title: Concentration
   desc: How resources are shared among the organizations in a market.
   contents:

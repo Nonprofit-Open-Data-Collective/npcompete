@@ -69,7 +69,7 @@ data.table::fwrite( soi, csv )
 npc_build_archive( csv, overwrite = TRUE )
 #> Reading soi-panel-vermont.csv ...
 #> Standardizing 9,165 rows ...
-#> Writing Parquet dataset to C:\Users\jlecy\AppData\Local\Temp\RtmpOcTw4M/npcompete-archive/filers ...
+#> Writing Parquet dataset to C:\Users\jlecy\AppData\Local\Temp\Rtmpu4bcuV/npcompete-archive/filers ...
 #> Done: 9,133 rows, years 2015-2019.
 ```
 
@@ -305,7 +305,7 @@ res <- npc_build_metrics( 2018:2019, geo = "cbsa", resources = "TOTREV",
                           out_dir = out )
 #> Reading 2 year(s) from the archive ...
 #> Building cbsa metrics for TOTREV ...
-#> Wrote results to C:\Users\jlecy\AppData\Local\Temp\RtmpOcTw4M/metrics
+#> Wrote results to C:\Users\jlecy\AppData\Local\Temp\Rtmpu4bcuV/metrics
 list.files( out )
 #> [1] "manifest.csv"                        
 #> [2] "NPCOMPETE-METRICS-BY-CBSA-TOTREV.CSV"
@@ -324,8 +324,8 @@ head( attr( res, "manifest" ), 12 )
 #> 11  include_imputed
 #> 12 exclude_churches
 #>                                                                 value
-#> 1  C:/Users/jlecy/AppData/Local/Temp/RtmpOcTw4M/soi-panel-vermont.csv
-#> 2                                                 2026-11-25 00:41:16
+#> 1  C:/Users/jlecy/AppData/Local/Temp/Rtmpu4bcuV/soi-panel-vermont.csv
+#> 2                                                 2026-11-25 01:18:07
 #> 3                                                              filers
 #> 4                                                             archive
 #> 5                                                           2018,2019
