@@ -51,10 +51,15 @@ ratio indicates greater fundraising competition in a market.Fundraising
 efficiency be calculated as follows: Private donations divided by
 fundraising expenses
 
+## Deprecated
+
+This function uses the legacy NCCS core-file layout and is deprecated.
+
 ## Examples
 
 ``` r
-data(nonprofit_sample)
-dat.fe <- get_density_commercial( df=nonprofit_sample,'MSA_NECH','NTMAJ12', 'CONT', c('FUNDFEES', 'SOLICIT'))
-head( dat.fe)
+if (FALSE) { # \dontrun{
+get_fundraising_efficiency( nonprofit_sample, 'MSA_NECH', 'NTMAJ12',
+                            'CONT', c( 'FUNDFEES', 'SOLICIT' ) )
+} # }
 ```

@@ -16,6 +16,20 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Metrics</h6></li>
+    <li><a class="dropdown-item" href="../articles/hhi.html">Herfindahl-Hirschman Index</a></li>
+    <li><a class="dropdown-item" href="../articles/concentration-ratios.html">Concentration ratios</a></li>
+    <li><a class="dropdown-item" href="../articles/kwoka.html">Kwoka dominance index</a></li>
+    <li><a class="dropdown-item" href="../articles/gini.html">Gini coefficient</a></li>
+    <li><a class="dropdown-item" href="../articles/density.html">Scale-free nonprofit density</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Comparing metrics</h6></li>
+    <li><a class="dropdown-item" href="../articles/metric-correlations.html">How the metrics relate: correlation, PCA and factor analysis</a></li>
+  </ul></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
 <li class="nav-item dropdown">
@@ -51,7 +65,65 @@
           <code><a href="get_all_metrics.html">get_all_metrics()</a></code>
 
         </dt>
-        <dd>Get all metrics</dd>
+        <dd>Compute all competition metrics in one table</dd>
+      </dl></div><div class="section level2">
+      <h2 id="building-from-the-local-archive">Building from the local archive<a class="anchor" aria-label="anchor" href="#building-from-the-local-archive"></a></h2>
+
+      <div class="section-desc"><p>Convert the SOI panel to a Parquet archive and build metrics for any set of years.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="npc_build_metrics.html">npc_build_metrics()</a></code>
+
+        </dt>
+        <dd>Build competition and density metrics for any set of years</dd>
+
+        <dt>
+
+          <code><a href="npc_build_archive.html">npc_build_archive()</a></code>
+
+        </dt>
+        <dd>Build the local Parquet archive from the SOI panel CSV</dd>
+
+        <dt>
+
+          <code><a href="npc_archive_dir.html">npc_archive_dir()</a></code>
+
+        </dt>
+        <dd>Location of the local data archive</dd>
+
+        <dt>
+
+          <code><a href="npc_archive_info.html">npc_archive_info()</a></code>
+
+        </dt>
+        <dd>Describe the local archive</dd>
+
+        <dt>
+
+          <code><a href="npc_get_orgs.html">npc_get_orgs()</a></code>
+
+        </dt>
+        <dd>Read organization-years for a set of years</dd>
+
+        <dt>
+
+          <code><a href="npc_get_population.html">npc_get_population()</a></code>
+
+        </dt>
+        <dd>Market populations for a geography level</dd>
+
+        <dt>
+
+          <code><a href="npc_standardize.html">npc_standardize()</a></code>
+
+        </dt>
+        <dd>Convert an organization panel to the canonical npcompete schema</dd>
       </dl></div><div class="section level2">
       <h2 id="concentration">Concentration<a class="anchor" aria-label="anchor" href="#concentration"></a></h2>
 
@@ -81,21 +153,28 @@
           <code><a href="get_cr.html">get_cr()</a></code>
 
         </dt>
-        <dd>Concentration Ratio</dd>
+        <dd>Concentration ratio (CRk)</dd>
 
         <dt>
 
-          <code><a href="get_kwoka_index.html">get_kwoka_index()</a></code>
+          <code><a href="get_cr_all.html">get_cr_all()</a></code>
 
         </dt>
-        <dd>Kwoka Index</dd>
+        <dd>Concentration ratios CR1 to CRk</dd>
+
+        <dt>
+
+          <code><a href="get_kwoka.html">get_kwoka()</a></code>
+
+        </dt>
+        <dd>Kwoka dominance index</dd>
 
         <dt>
 
           <code><a href="get_gini.html">get_gini()</a></code>
 
         </dt>
-        <dd>Gini Coefficient</dd>
+        <dd>Gini coefficient</dd>
       </dl></div><div class="section level2">
       <h2 id="density">Density<a class="anchor" aria-label="anchor" href="#density"></a></h2>
 
@@ -107,6 +186,13 @@
 
 
       <dl><dt>
+
+          <code><a href="get_scale_free_density.html">get_scale_free_density()</a></code>
+
+        </dt>
+        <dd>Scale-free nonprofit density</dd>
+
+        <dt>
 
           <code><a href="get_density.html">get_density()</a></code>
 
@@ -150,6 +236,22 @@
         </dt>
         <dd>Fundraising efficiency</dd>
       </dl></div><div class="section level2">
+      <h2 id="utilities">Utilities<a class="anchor" aria-label="anchor" href="#utilities"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="check_year_completeness.html">check_year_completeness()</a></code>
+
+        </dt>
+        <dd>Flag years with incomplete data</dd>
+      </dl></div><div class="section level2">
       <h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a></h2>
 
       <div class="section-desc"><p>Sample organizations and population counts used by the examples.</p></div>
@@ -160,6 +262,20 @@
 
 
       <dl><dt>
+
+          <code><a href="npo_panel_sample.html">npo_panel_sample</a></code>
+
+        </dt>
+        <dd>Sample of the SOI panel sample frame (Vermont, 2015-2019)</dd>
+
+        <dt>
+
+          <code><a href="cbsa_metrics.html">cbsa_metrics</a></code>
+
+        </dt>
+        <dd>Competition metrics for every US metro and micro area, 2019</dd>
+
+        <dt>
 
           <code><a href="nonprofit_sample.html">nonprofit_sample</a></code>
 
@@ -172,13 +288,34 @@
 
         </dt>
         <dd>County wise population with FIPS</dd>
+
+        <dt>
+
+          <code><a href="pop_county.html">pop_county</a></code>
+
+        </dt>
+        <dd>County population, 2000-2025</dd>
+
+        <dt>
+
+          <code><a href="pop_cbsa.html">pop_cbsa</a></code>
+
+        </dt>
+        <dd>CBSA population, 2000-2025</dd>
+
+        <dt>
+
+          <code><a href="cbsa_county_xwalk.html">cbsa_county_xwalk</a></code>
+
+        </dt>
+        <dd>County to CBSA crosswalk (2023 delineation)</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by First Last.</p>
+  <p>Developed by Jesse Lecy.</p>
 </div>
 
 <div class="pkgdown-footer-right">

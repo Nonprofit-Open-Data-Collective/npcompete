@@ -1,60 +1,67 @@
-# Concentration Ratio
+# Concentration ratio (CRk)
 
-Calculate the Concentration Ratio (CR) of top n(number) largest
-organizations and return a dataframe.
+Convenience wrapper around
+[`get_cr_all()`](https://nonprofit-open-data-collective.github.io/npcompete/reference/get_cr_all.md)
+for a single CR level.
 
 ## Usage
 
 ``` r
-get_cr(df, geo, subsector, resource, number)
+get_cr(
+  df,
+  geography = "CENSUS_CBSA_FIPS",
+  subsector = "NTEEV2",
+  resource = "TOTREV",
+  year = "TAXYEAR",
+  number = 4
+)
 ```
 
 ## Arguments
 
 - df:
 
-  A dataframe containing the required fields for computing the
-  metric(concentration ratio) grouped by geographical level and sub
-  sector.
+  A data frame with one row per organization-year.
 
-- geo:
+- geography:
 
-  A character string indicating the column name for geographical area
-  unique code.
+  Name of the column that identifies the market's geography, such as
+  `"CENSUS_CBSA_FIPS"` or `"COUNTY_FIPS"`.
 
 - subsector:
 
-  A character string indicating the column name for sub sectors.
+  Name of the column that identifies the subsector. When it is
+  `"NTEEV2"`, the first three characters (the major group) are used.
 
 - resource:
 
-  A character string indicating the column name for resource based on
-  which cr is calculated. Example: Revenue, assets etc.
+  Name of the numeric column that measures organization size, such as
+  `"TOTREV"`, `"TOTEXP"` or `"NETASS"`. Negative values are set to zero.
+
+- year:
+
+  Name of the column that identifies the year, such as `"TAXYEAR"`.
 
 - number:
 
-  A numeric value that is used to calculate concentration ratio for top
-  that number of firms. Value ranges from 1-8. Example, 4 if
-  concentration ratio for top 4 firms.
+  Number of top organizations to include, for example `4` for CR4.
 
 ## Value
 
-A new dataframe with the Concentration Ratio of n(number) largest
-organizations ('cr'), grouped by geographical level and sub sectors
-\*Note: For the markets where total number of firms is less than
-n(umber), the concentration ratio is assigned 100%.
-
-## Details
-
-Concentration Ratio is defined as the summation of the market shares of
-the largest n firms. It is calculated using the summation of revenue of
-the largest n nonprofits divided by the summation of revenue of all
-nonprofits in a market. The formula is \\\frac{\sigma{revnue of top-n
-firms}}{Total resource of that subsector}\\
+A tibble with `GEO`, `SUB`, `YEAR`, `N`, the summed resource and
+`CR<number>`.
 
 ## Examples
 
 ``` r
-data(nonprofit_sample)
-head( dat.cr )
+toy <- data.frame( GEO = "A", SUB = "ART", YEAR = 2020,
+                   TOTREV = c( 50, 30, 10, 10 ) )
+get_cr( toy, geography = "GEO", subsector = "SUB", year = "YEAR", number = 2 )
+#> # A tibble: 4 × 6
+#>   GEO   SUB    YEAR     N TOTREV   CR2
+#>   <chr> <chr> <dbl> <int>  <dbl> <dbl>
+#> 1 A     ALL    2020     4    100   0.8
+#> 2 A     ART    2020     4    100   0.8
+#> 3 ALL   ALL    2020     4    100   0.8
+#> 4 ALL   ART    2020     4    100   0.8
 ```
